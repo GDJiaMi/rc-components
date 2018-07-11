@@ -1,0 +1,61 @@
+{
+  "name": "@gdjiami/rc-components",
+  "version": "0.1.0",
+  "description": "Jiami React Components",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prebuild": "rimraf lib es",
+    "build:es6": "tsc -d --outDir ./lib --module CommonJS",
+    "build:es6module": "tsc -d --outDir ./es",
+    "build": "npm run build:es6 && npm run build:es6module",
+    "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
+    "prettier": "prettier --config .prettierrc --write \"components/**/*.ts?(x)\"",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.ts?(x)": [
+      "npm run prettier",
+      "npm run lint",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@code.ejiahe.com:25522/WEB/jm-rc-components.git"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "es",
+    "README.md",
+    "LICENSE",
+    "yarn.lock"
+  ],
+  "keywords": [
+    "react",
+    "react components"
+  ],
+  "author": "ivan",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.3.0",
+    "react-dom": ">=16.3.0",
+    "tslib": ">=1.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6",
+    "husky": "^0.14.3",
+    "jh-tslint": "^1.0.0",
+    "lint-staged": "^7.2.0",
+    "prettier": "^1.13.7",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.10.0",
+    "tslint-eslint-rules": "4.1.1",
+    "tslint-react": "3.2.0",
+    "typescript": "^2.9.2"
+  }
+}
