@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -8,7 +8,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "rimraf lib es",
-    "build:es6": "tsc -d --outDir ./lib --module CommonJS",
+    "build:es6": "tsc -d --outDir ./lib --module CommonJS ",
+    "postbuild:es6": "cpx \"components/**/*.css\" ./lib",
+    "postbuild:es6module": "cpx \"components/**/*.css\" ./es",
     "build:es6module": "tsc -d --outDir ./es",
     "build": "npm run build:es6 && npm run build:es6module",
     "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
@@ -41,13 +43,18 @@
   "author": "ivan",
   "license": "MIT",
   "peerDependencies": {
+    "antd": "^3.6.6",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0",
     "tslib": ">=1.7.0"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.4",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
+    "@types/react-router-dom": "^4.2.7",
+    "antd": "^3.6.6",
+    "cpx": "^1.5.0",
     "husky": "^0.14.3",
     "jh-tslint": "^1.0.0",
     "lint-staged": "^7.2.0",
@@ -57,5 +64,8 @@
     "tslint-eslint-rules": "4.1.1",
     "tslint-react": "3.2.0",
     "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "classnames": "^2.2.6"
   }
 }
