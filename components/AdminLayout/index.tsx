@@ -9,10 +9,11 @@ import Icon from 'antd/lib/icon'
 import Dropdown from 'antd/lib/dropdown'
 
 export type LinkComponent = typeof _Link
-export interface MenuConfig {
-  path: string
+export type MenuConfig = {
+  path?: string
   icon: string
   title: string
+  children?: MenuConfig[]
 }
 
 export interface AdminLayoutProps {
@@ -92,16 +93,7 @@ export default class AdminLayout extends React.Component<
             mode="inline"
             selectedKeys={path != null ? [path] : undefined}
           >
-            {!!menus &&
-              !!menus.length &&
-              menus.map(menu => (
-                <Menu.Item key={menu.path}>
-                  <Link to={menu.path}>
-                    <Icon type={menu.icon} />
-                    <span>{menu.title}</span>
-                  </Link>
-                </Menu.Item>
-              ))}
+            {!!menus && !!menus.length && this.renderMenu(menus)}
           </Menu>
         </nav>
         <main className="jm-layout__body">
@@ -127,6 +119,38 @@ export default class AdminLayout extends React.Component<
         </main>
       </div>
     )
+  }
+
+  private renderMenu = (menus: MenuConfig[]): React.ReactNode[] => {
+    return menus.map(
+      menu =>
+        menu.children && menu.children.length ? (
+          <Menu.SubMenu key={menu.path} title={this.renderMenuLink(menu)}>
+            {this.renderMenu(menu.children)}
+          </Menu.SubMenu>
+        ) : (
+          <Menu.Item key={menu.path}>{this.renderMenuLink(menu)}</Menu.Item>
+        ),
+    )
+  }
+
+  private renderMenuLink = (menu: MenuConfig) => {
+    const { Link } = this.props
+    if (menu.path == null) {
+      return (
+        <span>
+          <Icon type={menu.icon} />
+          <span>{menu.title}</span>
+        </span>
+      )
+    } else {
+      return (
+        <Link to={menu.path}>
+          <Icon type={menu.icon} />
+          <span>{menu.title}</span>
+        </Link>
+      )
+    }
   }
 
   private toggleCollaspsed = () => {

@@ -23,6 +23,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: #f2f2f2;
 }
 
 .jm-layout__header {
@@ -118,4 +119,18 @@
   background-color: white;
   border-radius: 5px;
   padding: 20px 25px;
+}
+
+.ant-menu-submenu-title>a,
+.ant-menu-submenu-title>a:hover,
+.ant-menu-submenu-title>a:active,
+.ant-menu-submenu-title>a:focus {
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+}
+
+/* extends antd */
+
+.ant-menu-submenu-selected>.ant-menu-submenu-title>a {
+  color: #fff;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -15,12 +15,12 @@
     "build": "npm run build:es6 && npm run build:es6module",
     "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
     "prettier": "prettier --config .prettierrc --write \"components/**/*.ts?(x)\"",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "parcel": "parcel"
   },
   "lint-staged": {
     "*.ts?(x)": [
       "npm run prettier",
-      "npm run lint",
       "git add"
     ]
   },
@@ -29,12 +29,10 @@
     "url": "ssh://git@code.ejiahe.com:25522/WEB/jm-rc-components.git"
   },
   "files": [
-    "dist",
     "lib",
     "es",
     "README.md",
-    "LICENSE",
-    "yarn.lock"
+    "LICENSE"
   ],
   "keywords": [
     "react",
@@ -46,7 +44,7 @@
     "antd": "^3.6.6",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0",
-    "tslib": ">=1.7.0"
+    "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.4",
@@ -58,12 +56,15 @@
     "husky": "^0.14.3",
     "jh-tslint": "^1.0.0",
     "lint-staged": "^7.2.0",
+    "parcel-bundler": "^1.9.7",
     "prettier": "^1.13.7",
     "rimraf": "^2.6.2",
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "4.1.1",
     "tslint-react": "3.2.0",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "react": "^16.0.0",
+    "react-dom": "^16.4.1"
   },
   "dependencies": {
     "classnames": "^2.2.6"
