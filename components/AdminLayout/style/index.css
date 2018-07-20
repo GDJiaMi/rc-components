@@ -1,6 +1,29 @@
 .jm-layout {
   display: flex;
+  flex-direction: column;
   height: 100%;
+}
+
+.jm-layout__main {
+  position: relative;
+  height: 100%;
+  flex: 1;
+  display: flex;
+}
+
+.jm-layout__main.freeze {
+  filter: grayscale(65%) brightness(0.9);
+}
+
+.jm-layout__main.freeze::before {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
 }
 
 .jm-layout__nav {

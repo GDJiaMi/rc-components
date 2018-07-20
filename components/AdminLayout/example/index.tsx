@@ -40,7 +40,10 @@ const menu = [
       {
         path: '/stat/a',
         title: '订单',
-        icon: 'file',
+      },
+      {
+        path: '/stat/b',
+        title: '用户',
       },
     ],
   },
@@ -49,8 +52,10 @@ const menu = [
 class App extends React.Component {
   public state: {
     path: string
+    showError?: boolean
   } = {
     path: '/',
+    showError: true,
   }
   public render() {
     const Link = this.Link
@@ -60,6 +65,10 @@ class App extends React.Component {
         siteName="exmaple"
         title="hello world"
         logo={require('./icon.png')}
+        freeze
+        error={
+          this.state.showError ? new Error('会话失效, 请重新登录') : undefined
+        }
         menus={menu}
         dropdown={<div>dropdown</div>}
         path={this.state.path}
@@ -68,10 +77,19 @@ class App extends React.Component {
           <AdminLayout.HeaderBar>HeaderBar</AdminLayout.HeaderBar>
           <AdminLayout.Body>
             <h1>{this.state.path}</h1>
+            <p>
+              <button onClick={this.toggleShowError}>显示错误信息</button>
+            </p>
           </AdminLayout.Body>
         </AdminLayout.View>
       </AdminLayout>
     )
+  }
+
+  private toggleShowError = () => {
+    this.setState({
+      showError: !this.state.showError,
+    })
   }
 
   private Link = (props: {
