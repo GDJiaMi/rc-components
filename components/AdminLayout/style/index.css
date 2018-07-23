@@ -12,7 +12,7 @@
 }
 
 .jm-layout__main.freeze {
-  filter: grayscale(65%) brightness(0.9);
+  filter: blur(0.8px) grayscale(65%) brightness(0.9);
 }
 
 .jm-layout__main.freeze::before {

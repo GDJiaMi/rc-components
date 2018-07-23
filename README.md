@@ -1,6 +1,6 @@
 # React Components
 
-React 组件库， 收集了工作宝 Web 应用，以及管理后台常用的组件或套件
+React 组件库， 收集了工作宝 Web 应用，以及管理后台常用的组件或套件. 致力于减少应用开发的代码重复，提高维护效率
 
 ## Installation
 
@@ -27,6 +27,8 @@ export default () => {
 ## Doc
 
 TODO
+
+* [工作宝web应用开发规范](style-guide.md)
 
 ## License
 

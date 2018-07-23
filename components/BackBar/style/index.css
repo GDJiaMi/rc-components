@@ -1,0 +1,18 @@
+.jm-back {
+  min-height: 40px;
+}
+
+.jm-back__button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.jm-back__icon {
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  transform: rotate(-45deg);
+}
