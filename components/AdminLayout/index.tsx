@@ -7,7 +7,6 @@ import classnames from 'classnames'
 import Alert from 'antd/lib/alert'
 import Menu from 'antd/lib/menu'
 import Icon from 'antd/lib/icon'
-import Dropdown from 'antd/lib/dropdown'
 
 export type LinkComponent = typeof _Link
 export type MenuConfig = {
@@ -24,59 +23,57 @@ export interface AdminLayoutProps {
   // 冻结主页面
   freeze?: boolean
   siteName?: string
-  title?: string
+  title?: React.ReactNode
   indexLink?: string
   menus?: MenuConfig[]
   path?: string
-  avatar?: string
-  userName?: string
-  Link: LinkComponent
-  dropdown?: React.ReactNode
+  Link?: LinkComponent
+  after?: React.ReactNode
 }
 
 export interface State {
   collapsed: boolean
 }
 
-// TODO: createComponent
-function HeaderBar(props: HTMLAttributes<HTMLDivElement>) {
-  const { className, ...other } = props
-  return <div className={`jm-header-bar ${className || ''}`} {...other} />
-}
-
-function View(props: HTMLAttributes<HTMLDivElement>) {
-  const { className, ...other } = props
-  return <div className={`jm-scroll-view ${className || ''}`} {...other} />
-}
-
-function Body(props: HTMLAttributes<HTMLDivElement>) {
-  const { className, ...other } = props
-  return <div className={`jm-body ${className || ''}`} {...other} />
+function createComponent<T = HTMLAttributes<HTMLDivElement>>(
+  cls: string,
+  elm: string = 'div',
+) {
+  return function(props: T) {
+    const { className, ...other } = props as any
+    return React.createElement(elm, {
+      className: `${cls} ${className || ''}`,
+      ...other,
+    })
+  }
 }
 
 export default class AdminLayout extends React.Component<
   AdminLayoutProps,
   State
 > {
-  public static HeaderBar = HeaderBar
-  public static View = View
-  public static Body = Body
+  public static HeaderBar = createComponent('jm-header-bar')
+  public static View = createComponent('jm-scroll-view')
+  public static Body = createComponent('jm-body')
+  public static Action = createComponent('jm-layout__action')
+  public static Avatar = createComponent<
+    React.ImgHTMLAttributes<HTMLImageElement>
+  >('jm-layout__avatar', 'img')
+
   public state: State = {
     collapsed: false,
   }
   public render() {
     const {
-      Link,
+      Link = _Link,
       logo,
       siteName = '工作宝',
       title,
       indexLink = '/',
       menus,
-      avatar,
       path,
       error,
-      userName,
-      dropdown,
+      after,
       freeze,
       children,
     } = this.props
@@ -122,14 +119,7 @@ export default class AdminLayout extends React.Component<
                 />
                 <span className="jm-layout__title">{title}</span>
               </div>
-              {!!dropdown && (
-                <Dropdown overlay={dropdown}>
-                  <a className="jm-layout__actions">
-                    <img className="jm-layout__avatar" src={avatar || logo} />
-                    {userName || 'admin'}
-                  </a>
-                </Dropdown>
-              )}
+              <div className="jm-layout__right">{after}</div>
             </header>
             <div className="jm-layout__body">{children}</div>
           </main>
@@ -152,7 +142,7 @@ export default class AdminLayout extends React.Component<
   }
 
   private renderMenuLink = (menu: MenuConfig) => {
-    const { Link } = this.props
+    const { Link = _Link } = this.props
     if (menu.path == null) {
       return (
         <span>

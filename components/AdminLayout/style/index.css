@@ -32,6 +32,8 @@
   display: flex;
   flex-direction: column;
   transition: width 0.2s;
+  box-shadow: 2px 0 6px rgba(0, 21, 41, .35);
+  z-index: 10;
 }
 
 .jm-layout__nav.collapsed {
@@ -40,6 +42,10 @@
 
 .jm-layout__nav-menu {
   flex: 1;
+}
+
+.jm-layout__right {
+  margin-right: 1em;
 }
 
 .jm-layout__body {
@@ -58,23 +64,17 @@
   border-bottom: 1px solid #f0f2f5;
   justify-content: space-between;
   flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  z-index: 9;
 }
 
-.jm-layout__actions .jm-layout__actions:hover,
-.jm-layout__actions:active {
-  color: inherit;
-}
-
-.jm-layout__actions {
-  margin: 0 24px;
-}
-
-.jm-layout-avatar {
+.jm-layout__avatar {
   width: 25px;
   height: 25px;
   border-radius: 25px;
   margin-right: 0.5em;
 }
+
 
 .jm-layout__logo {
   background-color: #00284d;
@@ -104,13 +104,28 @@
 .jm-layout__trigger,
 .jm-layout__title {
   height: 100%;
-  line-height: 65px;
+  line-height: 65px !important;
 }
 
 .jm-layout__trigger {
-  font-size: 18px;
+  font-size: 19px;
   padding: 0 24px;
   cursor: pointer;
+}
+
+.jm-layout__title {
+  margin-left: 0.5em;
+}
+
+.jm-layout__action {
+  padding: 0 12px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.jm-layout__trigger:hover,
+.jm-layout__action:hover {
+  background-color: #e6f7ff;
 }
 
 .jm-layout__avatar {
@@ -135,6 +150,8 @@
   padding: 0 20px;
   border-bottom: 1px solid #e9e9e9;
   background-color: white;
+  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  z-index: 9;
 }
 
 .jm-body {

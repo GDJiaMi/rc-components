@@ -1,44 +1,45 @@
 /**
  * 二级页面返回
  */
-import React from 'react'
-import { History } from 'history'
+import React, { CSSProperties } from 'react'
+import { withRouter, RouteComponentProps } from 'react-router'
 
-export interface BackBarProps {
+export interface BackBarProps extends RouteComponentProps<{}> {
   link?: string
   replace?: boolean
-  title?: string
   children?: React.ReactNode
+  style?: CSSProperties
+  className?: string
 }
 
-export default function createBackBar({ history }: { history: History }) {
-  return class BackBar extends React.Component<BackBarProps> {
-    public render() {
-      return (
-        <div className="jm-back jm-header-bar">
-          <div className="jm-back__button" onClick={this.handleClick}>
-            <span className="jm-back__icon" />
-            <span style={{ marginLeft: '0.5em' }}>返回</span>
-            {!!this.props.title && (
-              <span style={{ marginLeft: '1.5em' }}>{this.props.title}</span>
-            )}
-            {this.props.children}
-          </div>
+class BackBar extends React.Component<BackBarProps> {
+  public render() {
+    return (
+      <div
+        className={`jm-back jm-header-bar ${this.props.className || ''}`}
+        style={this.props.style}
+      >
+        <div className="jm-back__button" onClick={this.handleClick}>
+          <span className="jm-back__icon" />
+          <span>返回</span>
         </div>
-      )
-    }
+        {this.props.children}
+      </div>
+    )
+  }
 
-    public handleClick = () => {
-      const { link, replace } = this.props
-      if (link != null) {
-        if (replace) {
-          history.replace(link)
-        } else {
-          history.push(link)
-        }
+  private handleClick = () => {
+    const { link, replace, history } = this.props
+    if (link != null) {
+      if (replace) {
+        history.replace(link)
       } else {
-        history.go(-1)
+        history.push(link)
       }
+    } else {
+      history.go(-1)
     }
   }
 }
+
+export default withRouter(BackBar)

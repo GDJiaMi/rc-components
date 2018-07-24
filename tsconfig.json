@@ -30,5 +30,5 @@
       "*": ["*", "components/*"]
     }
   },
-  "exclude": ["node_modules", "lib", "es"]
+  "exclude": ["node_modules", "lib", "es", "**/example/"]
 }

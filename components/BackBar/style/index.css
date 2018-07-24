@@ -6,6 +6,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  margin-right: 2em;
 }
 
 .jm-back__icon {
@@ -15,4 +16,5 @@
   height: 10px;
   display: inline-block;
   transform: rotate(-45deg);
+  margin-right: 0.5em;
 }

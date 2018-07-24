@@ -6,6 +6,10 @@ import ReactDOM from 'react-dom'
 import AdminLayout from '../index'
 import '../style/css'
 import './style.css'
+import Icon from 'antd/lib/icon'
+import 'antd/lib/icon/style/css'
+import Dropdown from 'antd/lib/dropdown'
+import 'antd/lib/dropdown/style/css'
 
 /**
  * 定义菜单项，支持嵌套
@@ -65,13 +69,29 @@ class App extends React.Component {
         siteName="exmaple"
         title="hello world"
         logo={require('./icon.png')}
-        freeze
         error={
           this.state.showError ? new Error('会话失效, 请重新登录') : undefined
         }
         menus={menu}
-        dropdown={<div>dropdown</div>}
         path={this.state.path}
+        after={
+          <>
+            <AdminLayout.Action>
+              <Icon type="search" />
+            </AdminLayout.Action>
+            <AdminLayout.Action>
+              <Icon type="question" />
+            </AdminLayout.Action>
+            <Dropdown overlay={<div>dropdown</div>}>
+              <AdminLayout.Action>
+                <AdminLayout.Avatar
+                  src={require('../../AdminLayout/example/icon.png')}
+                />
+                管理员
+              </AdminLayout.Action>
+            </Dropdown>
+          </>
+        }
       >
         <AdminLayout.View>
           <AdminLayout.HeaderBar>HeaderBar</AdminLayout.HeaderBar>
