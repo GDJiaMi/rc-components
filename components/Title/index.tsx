@@ -2,6 +2,7 @@
  * title 设置和展示, 并且支持面包屑
  */
 import React from 'react'
+import ReactDOM from 'react-dom'
 import Breadcrumb, { BreadcrumbProps } from 'antd/lib/breadcrumb'
 import {
   Route as IRoute,
@@ -55,6 +56,7 @@ class Provider extends React.Component<ProviderProps, ContextValue> {
     }
     return null
   }
+  private el = document.createElement('div')
 
   public constructor(props: ProviderProps) {
     super(props)
@@ -68,36 +70,32 @@ class Provider extends React.Component<ProviderProps, ContextValue> {
   }
 
   public render() {
+    const titles = this.state.titles
+    const title = titles[titles.length - 1]
     return (
       <Context.Provider value={this.state}>
+        {ReactDOM.createPortal(title && title.content, this.el)}
         {this.props.children}
       </Context.Provider>
     )
   }
 
-  private titleFormatter = (titles: TitleDesc[]): string => {
-    const title = titles[titles.length - 1]
-    if (title) {
-      return ((Array.isArray(title.content)
-        ? title.content.join('')
-        : title.content) || '') as string
-    }
-    return ''
-  }
-
   private updateDocumentTitle = debounce(() => {
-    const formatter = this.props.titleFormatter || this.titleFormatter
-    const title = formatter(this.state.titles)
+    const formatter = this.props.titleFormatter
+    const title = formatter ? formatter(this.state.titles) : this.el.innerText
     document.title = title
-  }, 200)
+  }, 100)
 
+  /**
+   * 更新title内容
+   */
   private updateTitle = (t: TitleDesc) => {
     const titles = this.state.titles
     const index = titles.findIndex(i => i.id === t.id)
     if (index !== -1) {
       titles.splice(index, 1, t)
       if (this.props.debug) {
-        console.log('update', titles)
+        console.log('update', [...titles])
       }
       this.setState({ titles }, this.updateDocumentTitle)
     }
@@ -108,27 +106,9 @@ class Provider extends React.Component<ProviderProps, ContextValue> {
     const titles = this.state.titles
     const index = titles.findIndex(i => i.id === t.id)
     if (index !== -1) {
-      const current = titles[index]
-      if (!current.link || current.link === '/') {
-        titles.splice(index, 1)
-        if (this.props.debug) {
-          console.log('pop', titles)
-        }
-      } else {
-        let hasDependency = false
-        for (let i = index + 1; i < titles.length; i++) {
-          const next = titles[i]
-          if (next.link && next.link.startsWith(current.link)) {
-            hasDependency = true
-            break
-          }
-        }
-        if (!hasDependency) {
-          titles.splice(index, 1)
-          if (this.props.debug) {
-            console.log('pop', titles)
-          }
-        }
+      titles.splice(index, 1)
+      if (this.props.debug) {
+        console.log('pop', [...titles])
       }
       this.setState({ titles }, this.updateDocumentTitle)
     }
@@ -138,14 +118,15 @@ class Provider extends React.Component<ProviderProps, ContextValue> {
     const titles = this.state.titles
     const index = titles.findIndex(i => i.id === t.id)
     if (index !== -1) {
+      titles.splice(index, 1)
+      titles.push(t)
       if (this.props.debug) {
-        console.log('reuse', titles)
+        console.log('reuse', [...titles])
       }
-      titles.splice(index, 1, t)
     } else {
       titles.push(t)
       if (this.props.debug) {
-        console.log('push', titles)
+        console.log('push', [...titles])
       }
     }
     this.setState({ titles }, this.updateDocumentTitle)

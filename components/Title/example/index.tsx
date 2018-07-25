@@ -116,14 +116,17 @@ class Order extends React.Component<RouteComponentProps<{ id: string }>> {
     })
   }
   public render() {
+    const id = parseInt(this.props.match.params.id, 10)
     return (
       <>
         <BackBar>
           hello world <a>你好</a>
         </BackBar>
         <AdminLayout.Body>
-          <Title link=":id">订单详情-{this.state.name}</Title>
-          <h1>订单详情</h1>
+          <Title link=":id">
+            <span>订单详情-{this.state.name}</span>
+          </Title>
+          <h1>{this.state.name}</h1>
           <p>balbalaba</p>
         </AdminLayout.Body>
       </>

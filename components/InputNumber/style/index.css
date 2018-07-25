@@ -1,0 +1,19 @@
+.jm-inputnumber-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.jm-inputnumber-wrapper.inline {
+  width: 115px;
+  margin: 0 0.5em;
+ }
+
+.jm-inputnumber {
+  width: 100%;
+}
+
+.jm-inputnumber-wrapper > .placeholder {
+  position: absolute;
+  right: 0.5em;
+  color: #bbb;
+}
