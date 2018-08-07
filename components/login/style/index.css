@@ -1,0 +1,61 @@
+.jm-login__bg {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.jm-login__panel {
+  position: relative;
+  min-width: 550px;
+  background-color: rgba(216, 219, 222, 0.9294117647058824);
+  min-height: 400px;
+  border-radius: 10px;
+  padding: 20px 30px;
+}
+
+.jm-login__header {
+  display: flex;
+  align-items: center;
+}
+
+.jm-login__logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.jm-login__title {
+  margin: 0;
+  font-weight: 250;
+  font-size: 28px;
+}
+
+.jm-login__body {
+  padding: 4em 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.jm-login__footer {
+  position: absolute;
+  bottom: -22px;
+  left: 0;
+  color: white;
+}
+
+.jm-login__wrapper {
+  width: 275px;
+  position: relative;
+}
+
+.jm-login__alert {
+  position: absolute;
+  color: red;
+  width: 100%;
+  text-align: center;
+}

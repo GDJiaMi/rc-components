@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -52,6 +52,7 @@
   "devDependencies": {
     "@types/classnames": "^2.2.4",
     "@types/lodash": "^4.14.113",
+    "@types/qs": "^6.5.1",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
     "@types/react-router": "^4.0.29",
@@ -74,6 +75,7 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
-    "classnames": "^2.2.6"
+    "classnames": "^2.2.6",
+    "qs": "^6.5.2"
   }
 }

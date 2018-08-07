@@ -1,12 +1,13 @@
 /**
  * 工作宝管理后台顶层布局
  */
-import React, { HTMLAttributes } from 'react'
+import React from 'react'
 import { Link as _Link } from 'react-router-dom'
 import classnames from 'classnames'
 import Alert from 'antd/lib/alert'
 import Menu from 'antd/lib/menu'
 import Icon from 'antd/lib/icon'
+import { createComponent } from '../utils/common'
 
 export type LinkComponent = typeof _Link
 export type MenuConfig = {
@@ -33,19 +34,6 @@ export interface AdminLayoutProps {
 
 export interface State {
   collapsed: boolean
-}
-
-function createComponent<T = HTMLAttributes<HTMLDivElement>>(
-  cls: string,
-  elm: string = 'div',
-) {
-  return function(props: T) {
-    const { className, ...other } = props as any
-    return React.createElement(elm, {
-      className: `${cls} ${className || ''}`,
-      ...other,
-    })
-  }
 }
 
 export default class AdminLayout extends React.Component<
