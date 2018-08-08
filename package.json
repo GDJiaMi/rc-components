@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -9,8 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "rimraf lib es",
     "build:es6": "tsc -d --outDir ./lib --module CommonJS ",
-    "postbuild:es6": "cpx \"components/**/style/*.css\" ./lib",
-    "postbuild:es6module": "cpx \"components/**/style/*.css\" ./es",
+    "postbuild:es6": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png)\" ./lib",
+    "postbuild:es6module": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png)\" ./es",
     "build:es6module": "tsc -d --outDir ./es",
     "build": "npm run build:es6 && npm run build:es6module",
     "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
@@ -72,7 +72,7 @@
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "4.1.1",
     "tslint-react": "3.2.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.1"
   },
   "dependencies": {
     "classnames": "^2.2.6",

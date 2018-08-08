@@ -6,7 +6,6 @@
     "sourceMap": false,
     "allowJs": false,
     "jsx": "react",
-    // "jsxFactory": "h",
     "moduleResolution": "node",
     "rootDir": "components",
     "importHelpers": true,
@@ -24,7 +23,6 @@
     "noUnusedLocals": true,
     "downlevelIteration": true,
     "skipLibCheck": true,
-    "typeRoots": ["./typings", "./node_modules/@types"],
     "baseUrl": ".",
     "paths": {
       "*": ["*", "components/*"]

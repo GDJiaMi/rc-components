@@ -1,4 +1,4 @@
-import Login from './Login'
+import Instance from './Login'
 import Layout from './Layout'
 
-export { Login, Layout }
+export { Instance, Layout }
