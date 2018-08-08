@@ -38,7 +38,7 @@ export const Context = React.createContext<ContextValue>({
   location: {} as Location,
 })
 
-interface ProviderProps extends RouteComponentProps<{}> {
+export interface ProviderProps extends RouteComponentProps<{}> {
   titleFormatter?: (titles: TitleDesc[]) => string
   debug?: boolean
 }
@@ -46,7 +46,7 @@ interface ProviderProps extends RouteComponentProps<{}> {
 /**
  * Provider 保存title元数据
  */
-class Provider extends React.Component<ProviderProps, ContextValue> {
+class InnerProvider extends React.Component<ProviderProps, ContextValue> {
   public static getDerivedStateFromProps(
     props: ProviderProps,
     state: ContextValue,
@@ -133,9 +133,9 @@ class Provider extends React.Component<ProviderProps, ContextValue> {
   }
 }
 
-export const TitleProvider = withRouter(Provider)
+export const Provider = withRouter(InnerProvider)
 
-interface TitleInnerProps {
+interface InnerTitleProps {
   pushTitle: (t: TitleDesc) => void
   popTitle: (t: TitleDesc) => void
   updateTitle: (t: TitleDesc) => void
@@ -151,11 +151,11 @@ interface TitleInnerProps {
 let uid = 0
 // 保证同一个位置的Title始终重用一个uid
 const uidmap: { [key: string]: string } = {}
-class TitleInner extends React.Component<TitleInnerProps> {
+class InnerTitle extends React.Component<InnerTitleProps> {
   private key: string
   private link: string
 
-  public constructor(props: TitleInnerProps) {
+  public constructor(props: InnerTitleProps) {
     super(props)
     if (this.props.link && this.props.link !== '/') {
       if (this.props.link in uidmap) {
@@ -219,7 +219,7 @@ class TitleInner extends React.Component<TitleInnerProps> {
     })
   }
 
-  public componentWillReceiveProps(nextProps: TitleInnerProps) {
+  public componentWillReceiveProps(nextProps: InnerTitleProps) {
     if (this.props.children !== nextProps.children) {
       this.props.updateTitle({
         id: this.key,
@@ -229,7 +229,7 @@ class TitleInner extends React.Component<TitleInnerProps> {
     }
   }
 
-  public shouldComponentUpdate(nextProps: TitleInnerProps) {
+  public shouldComponentUpdate(nextProps: InnerTitleProps) {
     return this.props.children !== nextProps.children
   }
 
@@ -258,7 +258,7 @@ export function Title(props: {
 }) {
   return (
     <Context.Consumer>
-      {injectProps => <TitleInner {...injectProps} {...props} />}
+      {injectProps => <InnerTitle {...injectProps} {...props} />}
     </Context.Consumer>
   )
 }
@@ -345,4 +345,12 @@ export function Display(
       }}
     </Context.Consumer>
   )
+}
+
+export default {
+  Provider,
+  Route,
+  Title,
+  Display,
+  Context,
 }

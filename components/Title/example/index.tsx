@@ -10,8 +10,8 @@ import Icon from 'antd/lib/icon'
 import 'antd/lib/icon/style/css'
 import Dropdown from 'antd/lib/dropdown'
 import 'antd/lib/dropdown/style/css'
-import { TitleProvider, Title, Display, Route } from '..'
-import AdminLayout from '../../AdminLayout'
+import { Provider, Title, Display, Route } from '..'
+import AdminLayout from '../../admin-layout'
 import '../../AdminLayout/style/css'
 import BackBar from '../../BackBar'
 import '../../BackBar/style/css'
@@ -33,7 +33,7 @@ class App extends React.Component {
   public render() {
     return (
       <Router history={createHashHistory()}>
-        <TitleProvider debug>
+        <Provider debug>
           <AdminLayout
             siteName="example"
             title={
@@ -74,7 +74,7 @@ class App extends React.Component {
               </Switch>
             </AdminLayout.View>
           </AdminLayout>
-        </TitleProvider>
+        </Provider>
       </Router>
     )
   }

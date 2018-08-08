@@ -8,19 +8,83 @@ React 组件库， 收集了工作宝中后台应用的常用组件或套件. �
 yarn add @gdjiami/rc-components
 
 # 依赖
-yarn add react react-dom tslib
+yarn add react react-dom tslib react-router react-router-dom
 ```
 
 ## Usage
 
 所有组件都在`lib`或`es`目录下，lib 目录使用 CommonJS 模块系统， 而 es 使用 ES6 模块系统，另外两个目录下面都有 Typescript 声明文件，所以支持类型检查，开发者可以按需导入需要的组件
 
+`rc-components` 支持类似于`antd`的按需加载方式，如果你使用 typescript 可以使用[`ts-import-plugin`](https://github.com/Brooooooklyn/ts-import-plugin) 插件, 例如：
+
+```js
+// webpack.config.js
+const tsImportPluginFactory = require('ts-import-plugin')
+
+module.exports = {
+  // ...
+  module: {
+    rules: [
+      {
+        test: /\.(jsx|tsx|js|ts)$/,
+        loader: 'ts-loader',
+        options: {
+          transpileOnly: true,
+          getCustomTransformers: () => ({
+            before: [
+              tsImportPluginFactory([
+                // 按需导入antd组件
+                {
+                  libraryName: 'antd',
+                  libraryDirectory: 'lib',
+                  style: 'css',
+                },
+                // 按需导入rc-components组件
+                {
+                  libraryName: '@gdjiami/rc-components',
+                  libraryDirectory: 'lib',
+                  style: 'css',
+                },
+              ]),
+            ],
+          }),
+        },
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  // ...
+}
+```
+
+> 对于`babel`可以使用[`babel-plugin-import`](https://github.com/ant-design/babel-plugin-import) 插件
+
+使用示例
+
 ```typescript
 import React from 'react'
-import Time from '@gdjiami/rc-components/lib/Time'
+import { Login } from '@gdjiami/rc-components'
+import { message } from 'antd'
+import { delay } from './utils'
 
-export default () => {
-  return <Time time={Date.now()} />
+export default class LoginPage extends React.Component {
+  public render() {
+    return (
+      <Login
+        title="登录页面"
+        onSubmit={this.handleSubmit}
+        onSuccess={this.handleSuccess}
+      />
+    )
+  }
+
+  private handleSubmit = async () => {
+    await delay(2000)
+  }
+
+  private handleSuccess = () => {
+    message.success('登录成功')
+  }
 }
 ```
 
@@ -41,7 +105,9 @@ rc-components 是基于 antd 组件库之上的高层组件库，旨在抽象重
 - Ajax 请求库
 - 前端路由类型
 
-* [工作宝 web 应用开发规范](style-guide.md)
+**其他**
+
+- [工作宝 web 应用开发规范](style-guide.md)
 
 ### 组件列表
 
@@ -51,12 +117,11 @@ rc-components 是基于 antd 组件库之上的高层组件库，旨在抽象重
 
 ### 运行实例
 
-每个组件目录下都有一个example目录，可以直接通过`parcel`命令进行执行，例如:
+每个组件目录下都有一个 example 目录，可以直接通过`parcel`命令进行执行，例如:
 
 ```shell
 yarn parcel -- components/AdminLayout/example/index.html
 ```
-
 
 ## License
 

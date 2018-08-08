@@ -10,7 +10,7 @@ import Icon from 'antd/lib/icon'
 import { createComponent } from '../utils/common'
 
 export type LinkComponent = typeof _Link
-export type MenuConfig = {
+export interface MenuConfig {
   path?: string
   icon?: string
   title: string
@@ -32,7 +32,7 @@ export interface AdminLayoutProps {
   after?: React.ReactNode
 }
 
-export interface State {
+interface State {
   collapsed: boolean
 }
 
