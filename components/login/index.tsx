@@ -1,4 +1,8 @@
-import Instance from './Login'
-import Layout from './Layout'
+/**
+ * 入口文件
+ */
+import Login, { LoginProps } from './Login'
+import Layout, { LayoutProps, Alert } from './Layout'
 
-export { Instance, Layout }
+export default Login
+export { LoginProps, Layout, Alert, LayoutProps }

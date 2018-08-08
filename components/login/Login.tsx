@@ -27,6 +27,7 @@ export interface LoginProps
 }
 
 export class Login extends React.Component<LoginProps> {
+  public static Layout = Layout
   public state: {
     logining: boolean
     error?: Error

@@ -14,7 +14,7 @@ export interface LayoutProps {
 
 const defaultBackground = require('./bg.jpg')
 const defaultLogo = require('./logo.png')
-const Alert = createComponent('jm-login__alert')
+export const Alert = createComponent('jm-login__alert')
 
 export default class Layout extends React.PureComponent<LayoutProps> {
   public static Alert = Alert

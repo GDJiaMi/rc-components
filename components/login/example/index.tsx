@@ -1,10 +1,12 @@
+/**
+ * 登录页面示例程序
+ */
 import React from 'react'
 import { Switch, Route } from 'react-router'
 import { HashRouter, Link } from 'react-router-dom'
 import ReactDOM from 'react-dom'
-import { Instance as Login } from '../index'
+import Login from '../index'
 import '../style/css'
-import './style.css'
 
 class App extends React.Component {
   public render() {
