@@ -1,2 +1,2 @@
 import './index.css'
-import '../../AdminLayout/style/index.css'
+import '../../admin-layout/style/index.css'
