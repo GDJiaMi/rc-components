@@ -10,6 +10,8 @@ export interface AllowsProps {
   and?: boolean | (() => boolean)
   // 附加的or条件
   or?: boolean | (() => boolean)
+  // all 必须具备所有actions权限
+  // some 具备其中一个action权限，默认值
   type?: 'all' | 'some'
   // 当条件不满足渲染的内容
   otherwise?: React.ReactNode
@@ -55,25 +57,31 @@ export default class Allows extends React.Component<AllowsProps> {
 /**
  * allows 装饰器形式, 一般用于装饰路由组件, 访问该页面时会展示无权访问错误信息
  */
-export function allows(type: 'all' | 'some', ...actions: Action[]) {
-  return function<P>(Target: React.ComponentType<P>): React.ComponentType<P> {
-    class AllowsWraper extends React.Component<P> {
+export function allowsInner(
+  type: 'all' | 'some',
+  otherwise: React.ReactNode | undefined,
+  ...actions: Action[]
+) {
+  return function<T extends React.ComponentClass<any>>(Target: T): T {
+    class AllowsWraper extends React.Component {
       public render() {
         return (
           <Allows
             action={actions}
             type={type}
             otherwise={
-              <Alert
-                showIcon
-                banner
-                message={
-                  <div>
-                    无权访问, <Link to="goback">点击返回</Link>
-                  </div>
-                }
-                type="error"
-              />
+              otherwise || (
+                <Alert
+                  showIcon
+                  banner
+                  message={
+                    <div>
+                      无权访问, <Link to="goback">点击返回</Link>
+                    </div>
+                  }
+                  type="error"
+                />
+              )
             }
           >
             <Target {...this.props} />
@@ -81,9 +89,12 @@ export function allows(type: 'all' | 'some', ...actions: Action[]) {
         )
       }
     }
-    return AllowsWraper
+    return AllowsWraper as T
   }
 }
 
-export const allowsAll = (...actions: Action[]) => allows('all', ...actions)
-export const allowsSome = (...actions: Action[]) => allows('some', ...actions)
+export const allowsAll = (...actions: Action[]) =>
+  allowsInner('all', undefined, ...actions)
+export const allowsSome = (...actions: Action[]) =>
+  allowsInner('some', undefined, ...actions)
+export const allows = allowsSome

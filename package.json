@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",

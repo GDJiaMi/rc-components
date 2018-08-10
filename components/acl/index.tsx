@@ -8,7 +8,13 @@ import Choose, {
   Option,
   ChooseOptionProps,
 } from './Choose'
-import Allows, { AllowsProps, allows, allowsAll, allowsSome } from './Allows'
+import Allows, {
+  AllowsProps,
+  allows,
+  allowsAll,
+  allowsSome,
+  allowsInner,
+} from './Allows'
 import withAcl, { AclProps, AclInjectedProps } from './withAcl'
 import { Rules, Action, Role } from './type'
 
@@ -21,12 +27,13 @@ export default {
   allows,
   allowsAll,
   allowsSome,
+  allowsInner,
   withAcl,
+  Context,
 }
 
 export {
   AclProviderProps,
-  Context,
   ContextValue,
   ChooseProps,
   ChooseOptionProps,

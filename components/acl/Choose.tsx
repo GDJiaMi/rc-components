@@ -8,6 +8,20 @@ export interface ChooseProps {
 
 type MaybeArray<T> = T[] | T
 
+export type ChooseOptionProps =
+  | {
+      action: Action | Action[]
+    }
+  | {
+      role: Role | Role[]
+    }
+
+export class Option extends React.PureComponent<ChooseOptionProps> {
+  public render() {
+    return this.props.children
+  }
+}
+
 /**
  * 根据权限在子元素中选择可以展示的组件
  * @example
@@ -29,13 +43,18 @@ export default class Choose extends React.Component<ChooseProps> {
           return React.Children.map(children, child => {
             if (
               React.isValidElement<{
-                user?: MaybeArray<Role>
+                role?: MaybeArray<Role>
                 action?: MaybeArray<Action>
               }>(child)
             ) {
               if (child.props.action != null) {
                 // 匹配权限
                 const actions = child.props.action
+
+                if (actions === '*') {
+                  return child
+                }
+
                 const normalized: Action[] = Array.isArray(actions)
                   ? actions
                   : [actions]
@@ -44,10 +63,10 @@ export default class Choose extends React.Component<ChooseProps> {
                 }
 
                 return null
-              } else if (child.props.user != null) {
+              } else if (child.props.role != null) {
                 // 匹配角色
-                const user = child.props.user
-                const normalized = Array.isArray(user) ? user : [user]
+                const role = child.props.role
+                const normalized = Array.isArray(role) ? role : [role]
                 if (is(...normalized)) {
                   return child
                 }
@@ -84,7 +103,7 @@ export class Switch extends React.Component {
             if (
               match == null &&
               React.isValidElement<{
-                user?: MaybeArray<Role>
+                role?: MaybeArray<Role>
                 action?: MaybeArray<Action>
               }>(child)
             ) {
@@ -92,16 +111,22 @@ export class Switch extends React.Component {
               if (child.props.action != null) {
                 // 匹配权限
                 const actions = child.props.action
+
+                if (actions === '*') {
+                  match = child
+                  return
+                }
+
                 const normalized: Action[] = Array.isArray(actions)
                   ? actions
                   : [actions]
                 if (allowsSome(...normalized)) {
                   match = child
                 }
-              } else if (child.props.user != null) {
+              } else if (child.props.role != null) {
                 // 匹配角色
-                const user = child.props.user
-                const normalized = Array.isArray(user) ? user : [user]
+                const role = child.props.role
+                const normalized = Array.isArray(role) ? role : [role]
                 if (is(...normalized)) {
                   match = child
                 }
@@ -113,18 +138,4 @@ export class Switch extends React.Component {
       </Context.Consumer>
     )
   }
-}
-
-export type ChooseOptionProps =
-  | {
-      action: Action | Action[]
-      children: React.ReactNode
-    }
-  | {
-      user: Role | Role[]
-      children: React.ReactNode
-    }
-
-export function Option(props: ChooseOptionProps) {
-  return props.children
 }

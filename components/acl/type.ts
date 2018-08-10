@@ -9,5 +9,5 @@ export type Rules = {
 /**
  * 权限
  */
-export type Action = string | number
+export type Action = string | number | '*'
 export type Role = string | number

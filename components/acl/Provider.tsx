@@ -11,7 +11,8 @@ export interface AclProviderProps {
 export interface ContextValue {
   /**
    * 从一组规则中选择出允许的字段
-   * 例如 choose({[A]: 'foo', [B]: 'bar'}), 如果具备A和B权限，则返回['foo', 'bar']
+   * 例如 choose({[A]: 'foo', [B]: 'bar', '*': 'baz' }), 如果具备A和B权限，则返回['foo', 'bar']
+   * '*'表示通配模式
    */
   choose<T>(options: { [action: string]: T; [actionInNumber: number]: T }): T[]
   /**
@@ -88,6 +89,13 @@ export default class Provider extends React.Component<
       if (!options.hasOwnProperty(action)) {
         continue
       }
+
+      if (action === '*') {
+        // 通配模式
+        list.push(options[action])
+        continue
+      }
+
       if (this.allowsSome(action)) {
         list.push(options[action])
       }
@@ -106,7 +114,12 @@ export default class Provider extends React.Component<
     for (const action of actions) {
       let pass = false
       for (const role of roles) {
-        if (rules[role] && rules[role].indexOf(action) !== -1) {
+        // 存在角色，且声明了action
+        if (
+          rules[role] &&
+          rules[role].findIndex(act => act.toString() === action.toString()) !==
+            -1
+        ) {
           pass = true
           break
         }
@@ -130,7 +143,12 @@ export default class Provider extends React.Component<
     for (const action of actions) {
       let pass = false
       for (const role of roles) {
-        if (rules[role] && rules[role].indexOf(action) !== -1) {
+        // 存在角色，且声明了action
+        if (
+          rules[role] &&
+          rules[role].findIndex(act => act.toString() === action.toString()) !==
+            -1
+        ) {
           pass = true
           break
         }
@@ -144,8 +162,10 @@ export default class Provider extends React.Component<
   }
 
   private is = (...roles: Role[]) => {
-    for (let role of roles) {
-      if (this.state.role.indexOf(role) !== -1) {
+    for (const role of roles) {
+      if (
+        this.state.role.findIndex(r => r.toString() === role.toString()) !== -1
+      ) {
         return true
       }
     }
