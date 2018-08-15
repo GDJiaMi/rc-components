@@ -12,7 +12,7 @@ export interface TenementDesc {
   id: string
   name: string
   // 扩展字段，自定义，用户选择器不会关心这里面的内容
-  extra: any
+  extra?: any
 }
 
 /**
@@ -31,7 +31,7 @@ export interface DepartmentDesc {
   // 关联的企业，不是所有情况都存在，主要用于格式化/展示
   tenement?: TenementDesc
   // 扩展字段，自定义，用户选择器不会关心这里面的内容
-  extra: any
+  extra?: any
 }
 
 /**
@@ -43,7 +43,7 @@ export interface UserDesc {
   // 手机号码
   mobile: string
   // 扩展字段，自定义，用户选择器不会关心这里面的内容
-  extra: any
+  extra?: any
   // 关联的企业或部门
   tenement?: TenementDesc
   department?: DepartmentDesc
@@ -53,7 +53,7 @@ export interface Adaptor {
   /**
    * 获取部门树
    */
-  getDepartmentTree(tenement: string): Promise<DepartmentDesc>
+  getDepartmentTree(tenementId: string): Promise<DepartmentDesc>
   /**
    * 获取部门成员
    */

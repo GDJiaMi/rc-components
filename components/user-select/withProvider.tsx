@@ -7,7 +7,7 @@ export default function withProvider<P extends Adaptor>(
 ) {
   class withUserSelect extends React.Component<
     {
-      wrappedComponentRef?: React.Ref<typeof Target>
+      wrappedComponentRef?: React.Ref<any>
     } & Omit<P, keyof Adaptor>
   > {
     public render() {

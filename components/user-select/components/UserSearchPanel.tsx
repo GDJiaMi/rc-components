@@ -9,6 +9,7 @@ import Input from 'antd/lib/input'
 import Spin from 'antd/lib/spin'
 import Alert from 'antd/lib/alert'
 import List from 'antd/lib/list'
+import Pagination from 'antd/lib/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { PaginationProps } from 'antd/lib/pagination'
 import Group from './Group'
@@ -60,11 +61,11 @@ class UserSearchPanel extends React.Component<Props, State> {
     const { searchable, children } = this.props
     const { searchMode } = this.state
     if (!searchable) {
-      return <Group>{children}</Group>
+      return <Group className="user-search-panel">{children}</Group>
     }
 
     return (
-      <Group header={this.renderHeader()}>
+      <Group header={this.renderHeader()} className="user-search-panel">
         {searchMode ? this.renderBody() : children}
       </Group>
     )
@@ -73,25 +74,35 @@ class UserSearchPanel extends React.Component<Props, State> {
   public reset() {}
 
   private renderHeader() {
-    const { query, searching } = this.state
+    const { query, searching, searchMode } = this.state
     return (
       <div>
         <Form layout="inline" onSubmit={this.handleSubmit}>
           <Form.Item>
             <Input
+              size="small"
               placeholder="用户"
               value={query}
               onChange={this.handleQueryChange}
             />
           </Form.Item>
           <Form.Item>
-            <Button htmlType="submit" type="primary" loading={searching}>
+            <Button
+              size="small"
+              htmlType="submit"
+              type="primary"
+              loading={searching}
+            >
               搜索
             </Button>
           </Form.Item>
-          <Form.Item>
-            <Button onClick={this.cancelSearch}>取消</Button>
-          </Form.Item>
+          {!!searchMode && (
+            <Form.Item>
+              <Button size="small" onClick={this.cancelSearch}>
+                取消
+              </Button>
+            </Form.Item>
+          )}
         </Form>
       </div>
     )
@@ -108,11 +119,10 @@ class UserSearchPanel extends React.Component<Props, State> {
             split={false}
             size="small"
             dataSource={dataSource}
-            pagination={pagination}
-            header={this.renderListHeader()}
             renderItem={this.renderItem}
           />
         </div>
+        <Pagination {...pagination} />
       </Spin>
     )
   }
@@ -137,7 +147,7 @@ class UserSearchPanel extends React.Component<Props, State> {
     )
   }
 
-  private renderItem(item: UserDesc) {
+  private renderItem = (item: UserDesc) => {
     const value = this.props.value || []
     const checked = value.findIndex(i => i.id === item.id) !== -1
     return (
@@ -190,6 +200,7 @@ class UserSearchPanel extends React.Component<Props, State> {
     }
     this.setState(
       {
+        searchMode: true,
         pagination: {
           ...this.state.pagination,
           current: 1,

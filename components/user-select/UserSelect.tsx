@@ -1,6 +1,8 @@
 /**
  * 用户选择器
  * TODO: 处理disabled禁用状态
+ * TODO: 最多选择限制
+ * TODO: 性能优化
  */
 import React from 'react'
 import Modal from 'antd/lib/modal'
@@ -13,21 +15,13 @@ import UsersPanel from './components/UsersPanel'
 import UserSearchPanel from './components/UserSearchPanel'
 import SelectedPanel from './components/SelectedPanel'
 
-export type UserSelectUsers = Array<{
-  value: UserDesc
-  // 是否禁用
-  disabled?: boolean
-}>
-
-export type UserSelectDepartments = Array<{
-  value: DepartmentDesc
-  // 是否禁用
-  disabled?: boolean
-}>
+export interface IUserSelect {
+  show(): void
+}
 
 export interface UserSelectValue {
-  users: UserSelectUsers
-  departments?: UserSelectDepartments
+  users?: UserDesc[]
+  departments?: DepartmentDesc[]
   tenements?: TenementDesc[]
 }
 
@@ -42,9 +36,8 @@ export type UserSelectLocale = Partial<{
 export interface UserSelectProps {
   // 企业ID，如果为空则表示是平台
   tenementId?: string
-  wrappedComponentRef?: React.Ref<UserSelectInner>
-  value: UserSelectValue
-  onChange: (value: UserSelectValue) => void
+  value?: UserSelectValue
+  onChange?: (value: UserSelectValue) => void
   // 是否可以选择部门
   departmentSelectable?: boolean
   // 是否可以选择企业
@@ -55,6 +48,9 @@ export interface UserSelectProps {
   max?: number
   // 最多可选中部门
   maxDepartment?: number
+  // 最多可选企业
+  maxTenement?: number
+  width?: number
   // 文案
   locale?: UserSelectLocale
   // 格式化已选中用户，department是可选的，在选中搜索用户时可能为空
@@ -84,19 +80,53 @@ const DefaultLocale: UserSelectLocale = {
   tip: '',
 }
 
-class UserSelectInner extends React.Component<Props, State> {
-  public static defaultProps = {}
+class UserSelectInner extends React.Component<Props, State>
+  implements IUserSelect {
+  public static defaultProps = {
+    width: 980,
+    userSearchable: true,
+  }
   public state: State = {
     visible: false,
     currentTenementId: this.props.tenementId,
   }
 
-  private get tenementSelectable(): boolean {
-    return this.props.tenementId == null && this.tenementSelectable
+  public static getDerivedStateFromProps(props: Props, state: State) {
+    if (!state.visible) {
+      return null
+    }
+
+    const derivedState: Partial<State> = {}
+    let dirty = false
+    const value = props.value || {}
+    if (!arrayEqual(value.users, state.selectedUsers)) {
+      dirty = true
+      derivedState.selectedUsers = value.users
+    }
+
+    if (!arrayEqual(value.departments, state.selectedDepartments)) {
+      dirty = true
+      derivedState.selectedDepartments = value.departments
+    }
+
+    if (!arrayEqual(value.tenements, state.selectedTenements)) {
+      dirty = true
+      derivedState.selectedTenements = value.tenements
+    }
+
+    if (dirty) {
+      return derivedState
+    }
+
+    return null
   }
 
   private get tenementVisible(): boolean {
     return this.props.tenementId == null
+  }
+
+  private get tenementSelectable(): boolean {
+    return !!this.props.tenementSelectable && this.tenementVisible
   }
 
   private get departmentSelectable(): boolean {
@@ -109,7 +139,7 @@ class UserSelectInner extends React.Component<Props, State> {
       <Modal
         visible={visible}
         title={this.getLocale('title')}
-        width={825}
+        width={this.props.width}
         maskClosable={false}
         onOk={this.handleOk}
         onCancel={this.handleCancel}
@@ -154,23 +184,25 @@ class UserSelectInner extends React.Component<Props, State> {
           value={selectedUsers}
           onChange={this.handleUsersChange}
         >
-          <DepartemntTree
-            // 部门树
-            tenementId={currentTenementId}
-            tenement={currentTenement}
-            selectable={departmentSelectable}
-            selected={currentDepartmentId}
-            onSelect={this.handleDepartmentSelect}
-            value={selectedDepartments}
-            onChange={this.handleDepartmentChange}
-          />
-          <UsersPanel
-            tenementId={currentTenementId}
-            departmentId={currentDepartmentId}
-            department={currentDepartment}
-            value={selectedUsers}
-            onChange={this.handleUsersChange}
-          />
+          <div className="jm-us-containers">
+            <DepartemntTree
+              // 部门树
+              tenementId={currentTenementId}
+              tenement={currentTenement}
+              selectable={departmentSelectable}
+              selected={currentDepartmentId}
+              onSelect={this.handleDepartmentSelect}
+              value={selectedDepartments}
+              onChange={this.handleDepartmentChange}
+            />
+            <UsersPanel
+              tenementId={currentTenementId}
+              departmentId={currentDepartmentId}
+              department={currentDepartment}
+              value={selectedUsers}
+              onChange={this.handleUsersChange}
+            />
+          </div>
         </UserSearchPanel>
         <SelectedPanel
           tenementSelectable={tenementSelectable}
@@ -179,6 +211,9 @@ class UserSelectInner extends React.Component<Props, State> {
           departments={selectedDepartments}
           users={selectedUsers}
           onChange={this.handleSelectedChange}
+          userFormatter={this.props.userFormatter}
+          departmentFormatter={this.props.departmentFormatter}
+          tenementFormatter={this.props.tenementFormatter}
         />
       </div>
     )
@@ -266,6 +301,24 @@ class UserSelectInner extends React.Component<Props, State> {
   private getLocale(key: keyof UserSelectLocale) {
     return (this.props.locale || DefaultLocale)[key] || ''
   }
+}
+
+function arrayEqual<T>(a1: T[] | undefined, a2: T[] | undefined) {
+  if (a1 != null && a2 != null) {
+    if (a1.length != a2.length) {
+      return false
+    }
+
+    for (const i of a1) {
+      for (const j of a2) {
+        if (i !== j) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+  return false
 }
 
 export default withProvider(UserSelectInner)

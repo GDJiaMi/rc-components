@@ -8,6 +8,7 @@ import Input from 'antd/lib/input'
 import Spin from 'antd/lib/spin'
 import Alert from 'antd/lib/alert'
 import List from 'antd/lib/list'
+import Pagination from 'antd/lib/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { PaginationProps } from 'antd/lib/pagination'
 import { TenementDesc, Adaptor } from '../Provider'
@@ -76,13 +77,19 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
         <Form layout="inline" onSubmit={this.handleSubmit}>
           <Form.Item>
             <Input
+              size="small"
               placeholder="企业"
               value={query}
               onChange={this.handleQueryChange}
             />
           </Form.Item>
           <Form.Item>
-            <Button htmlType="submit" type="primary" loading={loading}>
+            <Button
+              size="small"
+              htmlType="submit"
+              type="primary"
+              loading={loading}
+            >
               搜索
             </Button>
           </Form.Item>
@@ -94,19 +101,21 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
   private renderBody() {
     const { loading, dataSource, pagination } = this.state
     return (
-      <Spin spinning={loading} className="jm-us-container">
-        <div className="jm-us-container__body">
-          <List
-            bordered={false}
-            split={false}
-            size="small"
-            dataSource={dataSource}
-            pagination={pagination}
-            header={this.renderListHeader()}
-            renderItem={this.renderItem}
-          />
-        </div>
-      </Spin>
+      <div className="jm-us-container">
+        <Spin spinning={loading}>
+          {this.renderListHeader()}
+          <div className="jm-us-container__body">
+            <List
+              bordered={false}
+              split={false}
+              size="small"
+              dataSource={dataSource}
+              renderItem={this.renderItem}
+            />
+          </div>
+          <Pagination {...pagination} />
+        </Spin>
+      </div>
     )
   }
 
@@ -130,7 +139,7 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     )
   }
 
-  private renderItem(item: TenementDesc) {
+  private renderItem = (item: TenementDesc) => {
     const value = this.props.value || []
     const checked = value.findIndex(i => i.id === item.id) !== -1
     const selected = this.props.selected === item.id

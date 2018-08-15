@@ -1,0 +1,87 @@
+.jm-us {
+  display: flex;
+}
+
+.jm-us-group {
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  padding: 10px 10px;
+}
+
+.jm-us-group.user-search-panel {
+  width: 485px;
+  flex-shrink: 0;
+}
+
+.jm-us-group.grow {
+  flex: 1;
+}
+
+.jm-us-group:not(:first-child) {
+  margin-left: 1em;
+}
+
+.jm-us-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.jm-us-group__header {
+  flex-shrink: 0;
+  margin-top: -10px;
+  margin-bottom: 3px;
+}
+
+.jm-us-group__header .ant-form {
+  white-space: nowrap;
+}
+
+.jm-us-group__container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.jm-us-group__container h3 {
+  font-size: 14px;
+}
+
+.jm-us-group__container h3 a{
+  float: right;
+}
+
+.jm-us-containers {
+  display: flex;
+  flex: 1;
+}
+
+.jm-us-container {
+  height: 100%;
+  flex: 1;
+  min-width: 230px;
+  padding: 5px 10px;
+}
+
+.jm-us-container:not(:first-child) {
+  border-left: 1px solid #d0d0d0;
+}
+
+.jm-us-container__body {
+  height: 500px;
+  overflow: auto;
+}
+
+.jm-us-container__body .ant-checkbox-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.jm-us-checkbox,
+.jm-us-container__body .ant-checkbox-group-item {
+  padding: 3px 5px;
+  cursor: pointer;
+}
+
+.jm-us-checkbox.selected {
+  background-color: #bae7ff;
+}

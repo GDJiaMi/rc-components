@@ -1,5 +1,6 @@
 /**
  * 已选状态区
+ * TODO: 清空
  */
 import React from 'react'
 import Tag from 'antd/lib/tag'
@@ -43,8 +44,11 @@ export default class SelectedPanel extends React.PureComponent<
       users,
     } = this.props
     return (
-      <Group>
-        <h3>已选择用户 ({users ? users.length : 0})</h3>
+      <Group className="grow">
+        <h3>
+          已选择用户 ({users ? users.length : 0})
+          <a>清空</a>
+        </h3>
         <div className="tags">
           {!!users &&
             users.map(u =>
@@ -58,7 +62,10 @@ export default class SelectedPanel extends React.PureComponent<
         </div>
         {!!departmentSelectable && (
           <>
-            <h3>已选择部门 ({departments ? departments.length : 0})</h3>
+            <h3>
+              已选择部门 ({departments ? departments.length : 0})
+              <a>清空</a>
+            </h3>
             <div className="tags">
               {!!departments &&
                 departments.map(d =>
@@ -74,7 +81,10 @@ export default class SelectedPanel extends React.PureComponent<
         )}
         {!!tenementSelectable && (
           <>
-            <h3>已选择企业 ({tenements ? tenements.length : 0})</h3>
+            <h3>
+              已选择企业 ({tenements ? tenements.length : 0})
+              <a>清空</a>
+            </h3>
             <div className="tags">
               {!!tenements &&
                 tenements.map(t =>

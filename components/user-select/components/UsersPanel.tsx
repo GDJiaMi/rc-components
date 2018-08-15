@@ -30,6 +30,7 @@ interface State {
 
 class UsersPanelInner extends React.Component<Props, State> {
   public state: State = {
+    loading: false,
     dataSource: [],
     pagination: {
       current: 1,
@@ -66,20 +67,22 @@ class UsersPanelInner extends React.Component<Props, State> {
     const { loading, dataSource, pagination } = this.state
     const { value } = this.props
     return (
-      <Spin spinning={loading} className="jm-us-container">
-        {this.renderListHeader()}
-        <div className="jm-us-container__body">
-          <Checkbox.Group
-            options={dataSource.map(i => ({
-              label: i.name,
-              value: i.id,
-            }))}
-            value={value && value.map(i => i.id)}
-            onChange={this.handleChange}
-          />
-        </div>
-        <Pagination {...pagination} />
-      </Spin>
+      <div className="jm-us-container">
+        <Spin spinning={loading}>
+          {this.renderListHeader()}
+          <div className="jm-us-container__body">
+            <Checkbox.Group
+              options={dataSource.map(i => ({
+                label: i.name,
+                value: i.id,
+              }))}
+              value={value && value.map(i => i.id)}
+              onChange={this.handleChange}
+            />
+          </div>
+          <Pagination {...pagination} />
+        </Spin>
+      </div>
     )
   }
 
@@ -133,6 +136,37 @@ class UsersPanelInner extends React.Component<Props, State> {
     const { loading } = this.state
     if (tenementId == null || departmentId == null || loading) {
       return
+    }
+
+    try {
+      this.setState({
+        loading: true,
+        error: undefined,
+      })
+      const {
+        pagination: { current = 1, pageSize = PageSize },
+      } = this.state
+      const res = await this.props.getDepartmentUsers(
+        tenementId,
+        departmentId,
+        current,
+        pageSize,
+      )
+      this.setState({
+        dataSource: res.items,
+        pagination: {
+          ...this.state.pagination,
+          total: res.total,
+        },
+      })
+    } catch (error) {
+      this.setState({
+        error,
+      })
+    } finally {
+      this.setState({
+        loading: false,
+      })
     }
   }
 }

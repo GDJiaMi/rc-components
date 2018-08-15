@@ -34,7 +34,9 @@ interface State {
 }
 
 class DepartmentTree extends React.Component<Props, State> {
-  public state: State = {}
+  public state: State = {
+    loading: false,
+  }
 
   public componentDidMount() {
     this.fetchDepartment()
@@ -50,21 +52,23 @@ class DepartmentTree extends React.Component<Props, State> {
   public render() {
     const { loading, error } = this.state
     return (
-      <Spin spinning={loading} className="jm-us-container">
-        {!!error && (
-          <Alert
-            showIcon
-            banner
-            type="error"
-            message={
-              <span>
-                {error.message}, <a onClick={this.fetchDepartment}>重试</a>
-              </span>
-            }
-          />
-        )}
-        {this.renderTree()}
-      </Spin>
+      <div className="jm-us-container">
+        <Spin spinning={!!loading}>
+          {!!error && (
+            <Alert
+              showIcon
+              banner
+              type="error"
+              message={
+                <span>
+                  {error.message}, <a onClick={this.fetchDepartment}>重试</a>
+                </span>
+              }
+            />
+          )}
+          <div className="jm-us-container__body">{this.renderTree()}</div>
+        </Spin>
+      </div>
     )
   }
 
