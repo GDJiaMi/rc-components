@@ -23,11 +23,13 @@ export interface DepartmentDesc {
   // 部门名称
   name: string
   // 用户数(不包括下级部门)
-  userCount: string
+  userCount?: string
   // 默认是否展开
-  open: boolean
+  open?: boolean
   // 子部门
   children?: DepartmentDesc[]
+  // 关联的企业，不是所有情况都存在，主要用于格式化/展示
+  tenement?: TenementDesc
   // 扩展字段，自定义，用户选择器不会关心这里面的内容
   extra: any
 }
@@ -38,12 +40,13 @@ export interface DepartmentDesc {
 export interface UserDesc {
   id: string
   name: string
-  // 职位
-  position: string
   // 手机号码
   mobile: string
   // 扩展字段，自定义，用户选择器不会关心这里面的内容
   extra: any
+  // 关联的企业或部门
+  tenement?: TenementDesc
+  department?: DepartmentDesc
 }
 
 export interface Adaptor {
@@ -90,7 +93,9 @@ interface State {
     string,
     { list: { [page: string]: UserDesc[] }; total: number }
   >
+  // 首页
   defaultTenements?: { items: TenementDesc[]; total: number }
+  // 首页
   defaultUsers?: { items: UserDesc[]; total: number }
 }
 
@@ -167,7 +172,7 @@ export default class Provider extends React.Component<ProviderProps> {
     pageSize: number,
   ): Promise<{ items: UserDesc[]; total: number }> => {
     const isDefaultQuery = query == ''
-    if (isDefaultQuery && this.store.defaultUsers) {
+    if (isDefaultQuery && page === 1 && this.store.defaultUsers) {
       return this.store.defaultUsers
     }
     const res = await this.props.adaptor.searchUser(query, page, pageSize)
@@ -181,7 +186,7 @@ export default class Provider extends React.Component<ProviderProps> {
     pageSize: number,
   ): Promise<{ items: TenementDesc[]; total: number }> => {
     const isDefaultQuery = query == ''
-    if (isDefaultQuery && this.store.defaultTenements) {
+    if (isDefaultQuery && page === 1 && this.store.defaultTenements) {
       return this.store.defaultTenements
     }
     const res = await this.props.adaptor.searchTenement(query, page, pageSize)
