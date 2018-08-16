@@ -225,7 +225,10 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
         pageSize,
       )
       this.setState({
-        dataSource: res.items,
+        dataSource: res.items.map(i => ({
+          ...i,
+          department: this.props.department,
+        })),
         pagination: {
           ...this.state.pagination,
           total: res.total,

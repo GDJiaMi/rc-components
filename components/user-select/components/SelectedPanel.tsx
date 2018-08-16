@@ -1,13 +1,22 @@
 /**
  * 已选状态区
- * TODO: 显示级联关系
  */
 import React from 'react'
 import Tag from 'antd/lib/tag'
+import Popover from 'antd/lib/popover'
 import Group from './Group'
 import { TenementDesc, DepartmentDesc, UserDesc } from '../Provider'
 
-interface SelectedPanelProps {
+export type SelectedPanelFormatter = Partial<{
+  userLabel: (user: UserDesc) => string
+  userTip: (user: UserDesc) => string
+  departmentLabel: (department: DepartmentDesc) => string
+  departmentTip: (department: DepartmentDesc) => string
+  tenementLabel: (tenement: TenementDesc) => string
+  tenementTip: (tenement: TenementDesc) => string
+}>
+
+export interface SelectedPanelProps {
   departmentSelectable?: boolean
   tenementSelectable?: boolean
   tenements?: TenementDesc[]
@@ -20,17 +29,7 @@ interface SelectedPanelProps {
       tenements: TenementDesc[] | undefined
     },
   ) => void
-  userFormatter?: (
-    user: UserDesc,
-    department?: DepartmentDesc,
-    tenement?: TenementDesc,
-  ) => string
-  // 格式化已选中部门
-  departmentFormatter?: (
-    department: DepartmentDesc,
-    tenement?: TenementDesc,
-  ) => string
-  tenementFormatter?: (tenement: TenementDesc) => string
+  formatter?: SelectedPanelFormatter
 }
 
 export default class SelectedPanel extends React.PureComponent<
@@ -57,8 +56,7 @@ export default class SelectedPanel extends React.PureComponent<
               users.map(u =>
                 this.renderTag(
                   u.id,
-                  this.formatUser(u),
-                  'blue',
+                  this.format('user', u),
                   this.handleClose('users', u),
                 ),
               )}
@@ -74,8 +72,7 @@ export default class SelectedPanel extends React.PureComponent<
                   departments.map(d =>
                     this.renderTag(
                       d.id,
-                      this.formatDepartment(d),
-                      'blue',
+                      this.format('department', d),
                       this.handleClose('departments', d),
                     ),
                   )}
@@ -93,8 +90,7 @@ export default class SelectedPanel extends React.PureComponent<
                   tenements.map(t =>
                     this.renderTag(
                       t.id,
-                      this.formatTenement(t),
-                      'blue',
+                      this.format('tenement', t),
                       this.handleClose('tenements', t),
                     ),
                   )}
@@ -108,14 +104,16 @@ export default class SelectedPanel extends React.PureComponent<
 
   private renderTag(
     id: string,
-    content: string,
-    color: string,
+    content: [string, string], // content, tip
     onClose: Function,
   ) {
+    const [label, tip] = content
     return (
-      <Tag key={id} color={color} onClose={onClose} title={content} closable>
-        {content}
-      </Tag>
+      <Popover content={tip} key={id} placement="right">
+        <Tag color="blue" onClose={onClose} title={label} closable>
+          {label}
+        </Tag>
+      </Popover>
     )
   }
 
@@ -158,21 +156,36 @@ export default class SelectedPanel extends React.PureComponent<
     }
   }
 
-  private formatUser(user: UserDesc) {
-    return this.props.userFormatter
-      ? this.props.userFormatter(user, user.department, user.tenement)
-      : `${user.id}(${user.mobile})`
+  private formatDepartment(d: DepartmentDesc) {
+    return `${d.tenement ? d.tenement.name + ' > ' : ''}${d.name}`
   }
 
-  private formatDepartment(department: DepartmentDesc) {
-    return this.props.departmentFormatter
-      ? this.props.departmentFormatter(department, department.tenement)
-      : department.name
+  private formatUser(u: UserDesc) {
+    return `${u.department ? this.formatDepartment(u.department) + ' > ' : ''}${
+      u.name
+    }`
   }
 
-  private formatTenement(tenement: TenementDesc) {
-    return this.props.tenementFormatter
-      ? this.props.tenementFormatter(tenement)
-      : tenement.name
+  private format(
+    type: 'user' | 'department' | 'tenement',
+    value: UserDesc | DepartmentDesc | TenementDesc,
+  ): [string, string] {
+    const defaultLabel = value.name
+    const defaultTip: string =
+      type === 'department'
+        ? this.formatDepartment(value)
+        : type === 'user'
+          ? this.formatUser(value as UserDesc)
+          : defaultLabel
+
+    if (this.props.formatter) {
+      const labelFormatter = this.props.formatter[type + 'Label']
+      const tipFormatter = this.props.formatter[type + 'Tip']
+      return [
+        labelFormatter ? labelFormatter(value) : defaultLabel,
+        tipFormatter ? tipFormatter(value) : defaultTip,
+      ]
+    }
+    return [defaultLabel, defaultTip]
   }
 }

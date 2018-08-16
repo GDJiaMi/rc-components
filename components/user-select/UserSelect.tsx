@@ -13,7 +13,9 @@ import TenementSearch from './components/TenementSearchPanel'
 import DepartemntTree from './components/DepartmentTree'
 import UsersPanel from './components/UsersPanel'
 import UserSearchPanel from './components/UserSearchPanel'
-import SelectedPanel from './components/SelectedPanel'
+import SelectedPanel, {
+  SelectedPanelFormatter,
+} from './components/SelectedPanel'
 
 export interface IUserSelect {
   show(): void
@@ -32,6 +34,8 @@ export type UserSelectLocale = Partial<{
   // 提示文本
   tip: string
 }>
+
+export type UserSelectFormatter = SelectedPanelFormatter
 
 export interface UserSelectProps {
   // 企业ID，如果为空则表示是平台
@@ -53,11 +57,8 @@ export interface UserSelectProps {
   width?: number
   // 文案
   locale?: UserSelectLocale
-  // 格式化已选中用户，department是可选的，在选中搜索用户时可能为空
-  userFormatter?: (user: UserDesc) => string
-  // 格式化已选中部门
-  departmentFormatter?: (department: DepartmentDesc) => string
-  tenementFormatter?: (tenement: TenementDesc) => string
+  // 格式化已选
+  formatter?: UserSelectFormatter
 }
 
 interface Props extends UserSelectProps, Adaptor {}
@@ -226,9 +227,7 @@ class UserSelectInner extends React.Component<Props, State>
           departments={selectedDepartments}
           users={selectedUsers}
           onChange={this.handleSelectedChange}
-          userFormatter={this.props.userFormatter}
-          departmentFormatter={this.props.departmentFormatter}
-          tenementFormatter={this.props.tenementFormatter}
+          formatter={this.props.formatter}
         />
       </div>
     )
