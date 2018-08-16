@@ -1,6 +1,5 @@
 /**
  * 用户选择器
- * TODO: 最多选择限制
  * TODO: 性能优化
  */
 import React from 'react'
@@ -12,6 +11,7 @@ import TenementSearch from './components/TenementSearchPanel'
 import DepartemntTree from './components/DepartmentTree'
 import UsersPanel from './components/UsersPanel'
 import UserSearchPanel from './components/UserSearchPanel'
+import memoize from 'lodash/memoize'
 import SelectedPanel, {
   SelectedPanelFormatter,
   SelectedPanelValue,
@@ -45,11 +45,11 @@ export interface UserSelectProps {
   // 用户是支持搜索
   userSearchable?: boolean
   // 最多可选中用户
-  max?: number
+  max?: number | string
   // 最多可选中部门
-  maxDepartment?: number
+  maxDepartment?: number | string
   // 最多可选企业
-  maxTenement?: number
+  maxTenement?: number | string
   // 保留value的值，不允许删除已有的数据
   keepValue?: boolean
   width?: number
@@ -257,9 +257,17 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   private handleTenementChange = (tenements: TenementDesc[]) => {
-    this.setState({
-      selectedTenements: tenements,
-    })
+    if (
+      this.canSet(
+        this.props.maxTenement,
+        tenements,
+        this.state.selectedTenements,
+      )
+    ) {
+      this.setState({
+        selectedTenements: tenements,
+      })
+    }
   }
 
   private handleTenementSelect = (
@@ -275,9 +283,17 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   private handleDepartmentChange = (departments: DepartmentDesc[]) => {
-    this.setState({
-      selectedDepartments: departments,
-    })
+    if (
+      this.canSet(
+        this.props.maxDepartment,
+        departments,
+        this.state.selectedDepartments,
+      )
+    ) {
+      this.setState({
+        selectedDepartments: departments,
+      })
+    }
   }
 
   private handleDepartmentSelect = (
@@ -291,9 +307,11 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   private handleUsersChange = (users: UserDesc[]) => {
-    this.setState({
-      selectedUsers: users,
-    })
+    if (this.canSet(this.props.max, users, this.state.selectedUsers)) {
+      this.setState({
+        selectedUsers: users,
+      })
+    }
   }
 
   private handleSelectedChange = ({
@@ -351,6 +369,25 @@ class UserSelectInner extends React.Component<Props, State>
   private getLocale(key: keyof UserSelectLocale) {
     return (this.props.locale || DefaultLocale)[key] || ''
   }
+
+  private canSet<T>(
+    max: number | string | undefined,
+    newValue: T[],
+    oldValue?: T[],
+  ) {
+    return (
+      this.getMax(max) >= newValue.length ||
+      newValue.length < (oldValue ? oldValue.length : 0)
+    )
+  }
+
+  private getMax = memoize((value?: string | number) => {
+    return value == null
+      ? Infinity
+      : typeof value === 'number'
+        ? value
+        : parseInt(value)
+  })
 }
 
 function arrayEqual<T>(a1: T[] | undefined, a2: T[] | undefined) {
