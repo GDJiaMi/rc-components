@@ -252,7 +252,11 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
         pagination: { current = 1, pageSize = PageSize },
         query,
       } = this.state
-      const res = await this.props.searchTenement(query, current, pageSize)
+      const res = await this.props.searchTenement(
+        query.trim(),
+        current,
+        pageSize,
+      )
       this.setState({
         dataSource: res.items,
         pagination: {

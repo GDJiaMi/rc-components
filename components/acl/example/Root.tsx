@@ -5,7 +5,6 @@ import AdminLayout, { MenuConfig } from '../../admin-layout'
 import '../../admin-layout/style/css'
 import Home from './containers/Home'
 
-// TODO: 支持通配
 const menu = {
   '*': {
     path: '/',

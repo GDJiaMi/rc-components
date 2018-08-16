@@ -38,13 +38,13 @@ export interface UserSelectProps {
   tenementId?: string
   value?: UserSelectValue
   onChange?: (value: UserSelectValue) => void
-  // 是否可以选择部门
+  // 是否可以选择部门, 默认关闭
   departmentSelectable?: boolean
-  // 是否可以选择企业
+  // 是否可以选择企业, 默认关闭
   tenementSelectable?: boolean
-  // 用户是支持搜索
+  // 用户是支持搜索, 默认开启
   userSearchable?: boolean
-  // 最多可选中用户
+  // 最多可选中用户, 默认不限制
   max?: number | string
   // 最多可选中部门
   maxDepartment?: number | string
@@ -57,6 +57,8 @@ export interface UserSelectProps {
   locale?: UserSelectLocale
   // 格式化已选
   formatter?: UserSelectFormatter
+  header?: React.ReactNode
+  footer?: React.ReactNode
 }
 
 interface Props extends UserSelectProps, Adaptor {}
@@ -86,7 +88,6 @@ const DefaultLocale: UserSelectLocale = {
 class UserSelectInner extends React.Component<Props, State>
   implements IUserSelect {
   public static defaultProps = {
-    width: 1000,
     userSearchable: true,
   }
   public state: State = {
@@ -109,6 +110,10 @@ class UserSelectInner extends React.Component<Props, State>
     return !!this.props.departmentSelectable
   }
 
+  private get width(): number {
+    return this.props.width || this.tenementVisible ? 1050 : 888
+  }
+
   public shouldComponentUpdate(nextProps: Props, nextState: State) {
     if (!this.state.visible && !nextState.visible) {
       return false
@@ -124,6 +129,12 @@ class UserSelectInner extends React.Component<Props, State>
       const derivedState: Partial<State> = {}
       let dirty = false
       const value = this.props.value || {}
+
+      if (this.props.tenementId !== this.state.currentTenementId) {
+        dirty = true
+        derivedState.currentTenementId = this.props.tenementId
+      }
+
       if (!arrayEqual(value.users, this.state.selectedUsers)) {
         dirty = true
         derivedState.selectedUsers = value.users
@@ -151,7 +162,7 @@ class UserSelectInner extends React.Component<Props, State>
       <Modal
         visible={visible}
         title={this.getLocale('title')}
-        width={this.props.width}
+        width={this.width}
         maskClosable={false}
         onOk={this.handleOk}
         onCancel={this.handleCancel}
@@ -201,6 +212,7 @@ class UserSelectInner extends React.Component<Props, State>
           wrappedComponentRef={this.userSearchPanel}
           keepValue={keepValue}
           orgValue={this.props.value && this.props.value.users}
+          header={this.props.header}
         >
           <div className="jm-us-containers">
             <DepartemntTree
@@ -247,6 +259,7 @@ class UserSelectInner extends React.Component<Props, State>
     const okText = this.getLocale('ok')
     return (
       <div>
+        {this.props.footer}
         {!!tip && <div className="jh-us-tip">{tip}</div>}
         <Button onClick={this.handleCancel}>{cancelText}</Button>
         <Button onClick={this.handleOk} type="primary">

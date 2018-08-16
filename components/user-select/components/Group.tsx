@@ -10,7 +10,9 @@ export default function Group(props: {
 }) {
   return (
     <section className={`jm-us-group ${props.className || ''}`}>
-      <header className="jm-us-group__header">{props.header}</header>
+      {!!props.header && (
+        <header className="jm-us-group__header">{props.header}</header>
+      )}
       <main className="jm-us-group__container">{props.children}</main>
     </section>
   )

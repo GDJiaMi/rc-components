@@ -2,7 +2,6 @@
  * Provider
  * 1. 用于提供全局的缓存store，避免重复请求
  * 2. 提供api接口适配器配置
- * TODO: 缓存优化，使用lodash的momoize
  */
 import React from 'react'
 
@@ -95,10 +94,8 @@ interface State {
     string,
     { list: { [page: string]: UserDesc[] }; total: number }
   >
-  // 首页
-  defaultTenements?: { items: TenementDesc[]; total: number }
-  // 首页
-  defaultUsers?: { items: UserDesc[]; total: number }
+  usersCached: Map<string, { items: UserDesc[]; total: number }>
+  tenementsCached: Map<string, { items: TenementDesc[]; total: number }>
 }
 
 export const Context = React.createContext<Adaptor>({} as Adaptor)
@@ -111,8 +108,9 @@ export default class Provider extends React.Component<ProviderProps> {
   public store: State = {
     departmentTrees: new Map(),
     departmentUsers: new Map(),
+    usersCached: new Map(),
+    tenementsCached: new Map(),
   }
-
   private contextValue: Adaptor
 
   public componentWillMount() {
@@ -174,9 +172,10 @@ export default class Provider extends React.Component<ProviderProps> {
     pageSize: number,
     tenement?: string,
   ): Promise<{ items: UserDesc[]; total: number }> => {
-    const isDefaultQuery = query == ''
-    if (isDefaultQuery && page === 1 && this.store.defaultUsers) {
-      return this.store.defaultUsers
+    const key = `${query}-${page}-${pageSize}-${tenement || ''}`
+    const cached = this.store.usersCached.get(key)
+    if (cached) {
+      return cached
     }
     const res = await this.props.adaptor.searchUser(
       query,
@@ -184,7 +183,7 @@ export default class Provider extends React.Component<ProviderProps> {
       pageSize,
       tenement,
     )
-    this.store.defaultUsers = res
+    this.store.usersCached.set(key, res)
     return res
   }
 
@@ -193,12 +192,13 @@ export default class Provider extends React.Component<ProviderProps> {
     page: number,
     pageSize: number,
   ): Promise<{ items: TenementDesc[]; total: number }> => {
-    const isDefaultQuery = query == ''
-    if (isDefaultQuery && page === 1 && this.store.defaultTenements) {
-      return this.store.defaultTenements
+    const key = `${query}-${page}-${pageSize}`
+    const cached = this.store.tenementsCached.get(key)
+    if (cached) {
+      return cached
     }
     const res = await this.props.adaptor.searchTenement(query, page, pageSize)
-    this.store.defaultTenements = res
+    this.store.tenementsCached.set(key, res)
     return res
   }
 }

@@ -77,14 +77,32 @@
 .jm-us-container:not(:first-child) {
   border-left: 1px solid #d0d0d0;
 }
+/* 默认 */
+.jm-us-group__container .jm-us-container__body {
+  height: 560px;
+}
+
+/* 显示container header时的适配高度 */
+.jm-us-group__container .jm-us-container__header+.jm-us-container__body {
+  height: 520px;
+}
+
+/*显示group header*/
+.jm-us-group__header~.jm-us-group__container .jm-us-container__body {
+  height: 500px;
+}
+
+/*显示group header + container header*/
+.jm-us-group__header~.jm-us-group__container .jm-us-container__header+.jm-us-container__body {
+  height: 480px;
+}
 
 .jm-us-container__body {
-  height: 500px;
   overflow: auto;
 }
 
 .jm-us-group.selected .jm-us-container__body {
-  height: 580px;
+  height: 580px !important;
   overflow-x: hidden;
 }
 
@@ -100,10 +118,6 @@
   position: absolute;
   right: 3px;
   top: 6px;
-}
-
-.jm-us-container__header + .jm-us-container__body {
-  height: 480px;
 }
 
 .jm-us-container__footer {

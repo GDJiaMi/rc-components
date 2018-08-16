@@ -27,6 +27,7 @@ export interface UserSearchPanelProps {
   onChange?: (value: UserDesc[]) => void
   orgValue?: UserDesc[]
   keepValue?: boolean
+  header?: React.ReactNode
 }
 
 interface Props extends UserSearchPanelProps, Adaptor {}
@@ -61,10 +62,14 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
     dataSource: [],
   }
   public render() {
-    const { searchable, children } = this.props
+    const { searchable, children, header } = this.props
     const { searchMode } = this.state
     if (!searchable) {
-      return <Group className="user-search-panel">{children}</Group>
+      return (
+        <Group header={header} className="user-search-panel">
+          {children}
+        </Group>
+      )
     }
 
     return (
@@ -125,6 +130,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
             </Form.Item>
           )}
         </Form>
+        {this.props.header}
       </div>
     )
   }
