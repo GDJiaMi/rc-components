@@ -83,42 +83,12 @@ const DefaultLocale: UserSelectLocale = {
 class UserSelectInner extends React.Component<Props, State>
   implements IUserSelect {
   public static defaultProps = {
-    width: 980,
+    width: 1000,
     userSearchable: true,
   }
   public state: State = {
     visible: false,
     currentTenementId: this.props.tenementId,
-  }
-
-  public static getDerivedStateFromProps(props: Props, state: State) {
-    if (!state.visible) {
-      return null
-    }
-
-    const derivedState: Partial<State> = {}
-    let dirty = false
-    const value = props.value || {}
-    if (!arrayEqual(value.users, state.selectedUsers)) {
-      dirty = true
-      derivedState.selectedUsers = value.users
-    }
-
-    if (!arrayEqual(value.departments, state.selectedDepartments)) {
-      dirty = true
-      derivedState.selectedDepartments = value.departments
-    }
-
-    if (!arrayEqual(value.tenements, state.selectedTenements)) {
-      dirty = true
-      derivedState.selectedTenements = value.tenements
-    }
-
-    if (dirty) {
-      return derivedState
-    }
-
-    return null
   }
 
   private get tenementVisible(): boolean {
@@ -131,6 +101,42 @@ class UserSelectInner extends React.Component<Props, State>
 
   private get departmentSelectable(): boolean {
     return !!this.props.departmentSelectable
+  }
+
+  public shouldComponentUpdate(nextProps: Props, nextState: State) {
+    if (!nextState.visible) {
+      return false
+    }
+    // TODO: 严格
+    return true
+  }
+
+  public componentDidUpdate(prevProps: Props, prevState: State) {
+    // 从隐藏到显示
+    if (this.state.visible && !prevState.visible) {
+      // 同步状态
+      const derivedState: Partial<State> = {}
+      let dirty = false
+      const value = this.props.value || {}
+      if (!arrayEqual(value.users, this.state.selectedUsers)) {
+        dirty = true
+        derivedState.selectedUsers = value.users
+      }
+
+      if (!arrayEqual(value.departments, this.state.selectedDepartments)) {
+        dirty = true
+        derivedState.selectedDepartments = value.departments
+      }
+
+      if (!arrayEqual(value.tenements, this.state.selectedTenements)) {
+        dirty = true
+        derivedState.selectedTenements = value.tenements
+      }
+
+      if (dirty) {
+        this.setState(derivedState as State)
+      }
+    }
   }
 
   public render() {
@@ -247,6 +253,8 @@ class UserSelectInner extends React.Component<Props, State>
     this.setState({
       currentTenementId: tenementId,
       currentTenement: tenement,
+      currentDepartmentId: undefined,
+      currentDepartment: undefined,
     })
   }
 
@@ -272,11 +280,15 @@ class UserSelectInner extends React.Component<Props, State>
     })
   }
 
-  private handleSelectedChange = (
-    users: UserDesc[] | undefined,
-    departments: DepartmentDesc[] | undefined,
-    tenements: TenementDesc[] | undefined,
-  ) => {
+  private handleSelectedChange = ({
+    users,
+    departments,
+    tenements,
+  }: {
+    users: UserDesc[] | undefined
+    departments: DepartmentDesc[] | undefined
+    tenements: TenementDesc[] | undefined
+  }) => {
     this.handleUsersChange(users || [])
     this.handleDepartmentChange(departments || [])
     this.handleTenementChange(tenements || [])
@@ -304,6 +316,10 @@ class UserSelectInner extends React.Component<Props, State>
 }
 
 function arrayEqual<T>(a1: T[] | undefined, a2: T[] | undefined) {
+  if (a1 == a2) {
+    return true
+  }
+
   if (a1 != null && a2 != null) {
     if (a1.length != a2.length) {
       return false

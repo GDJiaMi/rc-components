@@ -70,6 +70,7 @@ export interface Adaptor {
     query: string,
     page: number,
     pageSize: number,
+    tenementId?: string,
   ): Promise<{ items: UserDesc[]; total: number }>
   /**
    * 企业搜索
@@ -170,12 +171,18 @@ export default class Provider extends React.Component<ProviderProps> {
     query: string,
     page: number,
     pageSize: number,
+    tenement?: string,
   ): Promise<{ items: UserDesc[]; total: number }> => {
     const isDefaultQuery = query == ''
     if (isDefaultQuery && page === 1 && this.store.defaultUsers) {
       return this.store.defaultUsers
     }
-    const res = await this.props.adaptor.searchUser(query, page, pageSize)
+    const res = await this.props.adaptor.searchUser(
+      query,
+      page,
+      pageSize,
+      tenement,
+    )
     this.store.defaultUsers = res
     return res
   }

@@ -1,6 +1,7 @@
 /**
  * 用户选择器用户搜索
  * TODO: placeholder和数据项展示支持自定义
+ * TODO: 区分平台搜索和企业搜索
  */
 import React from 'react'
 import Form from 'antd/lib/form'
@@ -122,7 +123,7 @@ class UserSearchPanel extends React.Component<Props, State> {
             renderItem={this.renderItem}
           />
         </div>
-        <Pagination {...pagination} />
+        <Pagination className="jm-us-container__footer" {...pagination} />
       </Spin>
     )
   }
@@ -151,7 +152,7 @@ class UserSearchPanel extends React.Component<Props, State> {
     const value = this.props.value || []
     const checked = value.findIndex(i => i.id === item.id) !== -1
     return (
-      <div className={`jm-us-checkbox`}>
+      <div className={`jm-us-checkbox`} title={item.name}>
         <Checkbox checked={checked} onChange={this.handleCheck(item)}>
           {item.name}
         </Checkbox>

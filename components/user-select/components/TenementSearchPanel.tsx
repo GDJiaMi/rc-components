@@ -22,7 +22,6 @@ export interface TenementSearchPanelProps {
   value?: TenementDesc[]
   onChange?: (value: TenementDesc[]) => void
   // 当前选中的企业
-  // TODO: 高亮显示
   selected?: string
   onSelect?: (tenementId: string, detail: TenementDesc) => void
 }
@@ -64,7 +63,11 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
   }
 
   public render() {
-    return <Group header={this.renderHeader()}>{this.renderBody()}</Group>
+    return (
+      <Group className="tenement-search-panel" header={this.renderHeader()}>
+        {this.renderBody()}
+      </Group>
+    )
   }
 
   public reset = () => {}
@@ -113,7 +116,7 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
               renderItem={this.renderItem}
             />
           </div>
-          <Pagination {...pagination} />
+          <Pagination className="jm-us-container__footer" {...pagination} />
         </Spin>
       </div>
     )
@@ -147,7 +150,8 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     return (
       <div
         className={`jm-us-checkbox ${selected ? 'selected' : ''}`}
-        onClick={this.handleSelect(item)}
+        onClickCapture={this.handleSelect(item)}
+        title={item.name}
       >
         {!!selectable ? (
           <Checkbox checked={checked} onChange={this.handleCheck(item)}>
@@ -163,7 +167,7 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
   private handleSelect(item: TenementDesc) {
     if (this.props.onSelect) {
       const onSelect = this.props.onSelect
-      return () => {
+      return (evt: React.MouseEvent) => {
         onSelect(item.id, item)
       }
     }

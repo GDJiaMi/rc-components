@@ -133,7 +133,11 @@ class DepartmentTree extends React.Component<Props, State> {
   /**
    * 处理树节点选中
    */
-  private handleTreeCheck = (keys: string[], evt: AntTreeNodeEvent) => {
+  private handleTreeCheck = (
+    keys: (string[]) | { checked: string[] },
+    evt: AntTreeNodeEvent,
+  ) => {
+    keys = Array.isArray(keys) ? keys : keys.checked
     const value = this.props.value || []
     const checkedNodes: DepartmentDesc[] = []
     this.getCheckedNodes(
