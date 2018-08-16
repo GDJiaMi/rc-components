@@ -17,6 +17,8 @@ export interface UsersPanelProps {
   department?: DepartmentDesc
   value?: UserDesc[]
   onChange?: (value: UserDesc[]) => void
+  orgValue?: UserDesc[]
+  keepValue?: boolean
 }
 
 interface Props extends UsersPanelProps, Adaptor {}
@@ -123,9 +125,17 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
   private renderItem = (item: UserDesc) => {
     const value = this.props.value || []
     const checked = value.findIndex(i => i.id === item.id) !== -1
+    const disabled =
+      this.props.keepValue &&
+      this.props.orgValue &&
+      this.props.orgValue.findIndex(i => i.id === item.id) !== -1
     return (
       <div className={`jm-us-checkbox`} title={item.name}>
-        <Checkbox checked={checked} onChange={this.handleCheck(item)}>
+        <Checkbox
+          checked={checked}
+          disabled={disabled}
+          onChange={this.handleCheck(item)}
+        >
           {item.name}
         </Checkbox>
       </div>

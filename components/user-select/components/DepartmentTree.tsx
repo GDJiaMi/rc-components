@@ -23,6 +23,8 @@ export interface DepartmentTreeProps {
   // 已选中部门
   value?: DepartmentDesc[]
   onChange?: (value: DepartmentDesc[]) => void
+  orgValue?: DepartmentDesc[]
+  keepValue?: boolean
 }
 
 interface Props extends Adaptor, DepartmentTreeProps {}
@@ -120,9 +122,16 @@ class DepartmentTree extends React.PureComponent<Props, State> {
    * 渲染树节点
    */
   private renderTreeNode = (tree: DepartmentDesc) => {
+    const { selectable, keepValue, orgValue } = this.props
+    const disabled =
+      selectable &&
+      keepValue &&
+      orgValue &&
+      orgValue.findIndex(i => i.id === tree.id) !== -1
     const userCount = tree.userCount != null ? `(${tree.userCount})` : ''
     return tree.children != null && tree.children.length !== 0 ? (
       <Tree.TreeNode
+        disableCheckbox={disabled}
         title={`${tree.name} ${userCount} `}
         key={tree.id}
         // @ts-ignore
@@ -132,6 +141,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       </Tree.TreeNode>
     ) : (
       <Tree.TreeNode
+        disableCheckbox={disabled}
         title={`${tree.name} ${userCount}`}
         key={tree.id}
         // @ts-ignore

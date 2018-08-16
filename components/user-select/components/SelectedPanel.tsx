@@ -7,6 +7,12 @@ import Popover from 'antd/lib/popover'
 import Group from './Group'
 import { TenementDesc, DepartmentDesc, UserDesc } from '../Provider'
 
+export interface SelectedPanelValue {
+  users?: UserDesc[]
+  departments?: DepartmentDesc[]
+  tenements?: TenementDesc[]
+}
+
 export type SelectedPanelFormatter = Partial<{
   userLabel: (user: UserDesc) => string
   userTip: (user: UserDesc) => string
@@ -22,13 +28,9 @@ export interface SelectedPanelProps {
   tenements?: TenementDesc[]
   departments?: DepartmentDesc[]
   users?: UserDesc[]
-  onChange: (
-    value: {
-      users: UserDesc[] | undefined
-      departments: DepartmentDesc[] | undefined
-      tenements: TenementDesc[] | undefined
-    },
-  ) => void
+  keepValue?: boolean
+  orgValue?: SelectedPanelValue
+  onChange: (value: SelectedPanelValue) => void
   formatter?: SelectedPanelFormatter
 }
 
@@ -55,6 +57,7 @@ export default class SelectedPanel extends React.PureComponent<
             {!!users &&
               users.map(u =>
                 this.renderTag(
+                  'users',
                   u.id,
                   this.format('user', u),
                   this.handleClose('users', u),
@@ -71,6 +74,7 @@ export default class SelectedPanel extends React.PureComponent<
                 {!!departments &&
                   departments.map(d =>
                     this.renderTag(
+                      'departments',
                       d.id,
                       this.format('department', d),
                       this.handleClose('departments', d),
@@ -89,6 +93,7 @@ export default class SelectedPanel extends React.PureComponent<
                 {!!tenements &&
                   tenements.map(t =>
                     this.renderTag(
+                      'tenements',
                       t.id,
                       this.format('tenement', t),
                       this.handleClose('tenements', t),
@@ -103,14 +108,21 @@ export default class SelectedPanel extends React.PureComponent<
   }
 
   private renderTag(
+    type: 'users' | 'departments' | 'tenements',
     id: string,
     content: [string, string], // content, tip
     onClose: Function,
   ) {
+    const { keepValue, orgValue } = this.props
+    const value = orgValue && orgValue[type]
+    const disabled =
+      keepValue &&
+      value &&
+      (value as Array<{ id: string }>).findIndex(i => i.id === id) !== -1
     const [label, tip] = content
     return (
       <Popover content={tip} key={id} placement="right">
-        <Tag color="blue" onClose={onClose} title={label} closable>
+        <Tag color="blue" onClose={onClose} title={label} closable={!disabled}>
           {label}
         </Tag>
       </Popover>

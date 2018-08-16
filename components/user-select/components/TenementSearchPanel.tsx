@@ -20,11 +20,13 @@ import { PageSize } from '../constants'
 export interface TenementSearchPanelProps {
   // 是否可选
   selectable?: boolean
+  orgValue?: TenementDesc[]
   value?: TenementDesc[]
   onChange?: (value: TenementDesc[]) => void
   // 当前选中的企业
   selected?: string
   onSelect?: (tenementId: string, detail: TenementDesc) => void
+  keepValue?: boolean
 }
 
 interface Props extends TenementSearchPanelProps, Adaptor {}
@@ -160,9 +162,14 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
 
   private renderItem = (item: TenementDesc) => {
     const value = this.props.value || []
-    const checked = value.findIndex(i => i.id === item.id) !== -1
-    const selected = this.props.selected === item.id
     const selectable = this.props.selectable
+    const checked = selectable && value.findIndex(i => i.id === item.id) !== -1
+    const disabled =
+      selectable &&
+      this.props.keepValue &&
+      this.props.orgValue &&
+      this.props.orgValue.findIndex(i => i.id === item.id) !== -1
+    const selected = this.props.selected === item.id
     return (
       <div
         className={`jm-us-checkbox ${selected ? 'selected' : ''}`}
@@ -170,7 +177,11 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
         title={item.name}
       >
         {!!selectable ? (
-          <Checkbox checked={checked} onChange={this.handleCheck(item)}>
+          <Checkbox
+            checked={checked}
+            onChange={this.handleCheck(item)}
+            disabled={disabled}
+          >
             {item.name}
           </Checkbox>
         ) : (

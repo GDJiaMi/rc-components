@@ -1,6 +1,5 @@
 /**
  * 用户选择器
- * TODO: 处理disabled禁用状态
  * TODO: 最多选择限制
  * TODO: 性能优化
  */
@@ -15,17 +14,14 @@ import UsersPanel from './components/UsersPanel'
 import UserSearchPanel from './components/UserSearchPanel'
 import SelectedPanel, {
   SelectedPanelFormatter,
+  SelectedPanelValue,
 } from './components/SelectedPanel'
 
 export interface IUserSelect {
   show(): void
 }
 
-export interface UserSelectValue {
-  users?: UserDesc[]
-  departments?: DepartmentDesc[]
-  tenements?: TenementDesc[]
-}
+export type UserSelectValue = SelectedPanelValue
 
 export type UserSelectLocale = Partial<{
   title: string
@@ -54,6 +50,8 @@ export interface UserSelectProps {
   maxDepartment?: number
   // 最多可选企业
   maxTenement?: number
+  // 保留value的值，不允许删除已有的数据
+  keepValue?: boolean
   width?: number
   // 文案
   locale?: UserSelectLocale
@@ -115,7 +113,7 @@ class UserSelectInner extends React.Component<Props, State>
     if (!this.state.visible && !nextState.visible) {
       return false
     }
-    // TODO: 严格
+    // TODO: 严格检查
     return true
   }
 
@@ -170,7 +168,7 @@ class UserSelectInner extends React.Component<Props, State>
 
   private renderBody() {
     const { tenementSelectable, tenementVisible, departmentSelectable } = this
-    const { userSearchable } = this.props
+    const { userSearchable, keepValue } = this.props
     const {
       currentTenementId,
       currentTenement,
@@ -186,9 +184,11 @@ class UserSelectInner extends React.Component<Props, State>
           <TenementSearch
             // 企业选择器
             selectable={tenementSelectable}
+            orgValue={this.props.value && this.props.value.tenements}
             value={selectedTenements}
             onChange={this.handleTenementChange}
             selected={currentTenementId}
+            keepValue={keepValue}
             onSelect={this.handleTenementSelect}
             wrappedComponentRef={this.tenementSearchPanel}
           />
@@ -199,6 +199,8 @@ class UserSelectInner extends React.Component<Props, State>
           value={selectedUsers}
           onChange={this.handleUsersChange}
           wrappedComponentRef={this.userSearchPanel}
+          keepValue={keepValue}
+          orgValue={this.props.value && this.props.value.users}
         >
           <div className="jm-us-containers">
             <DepartemntTree
@@ -210,6 +212,8 @@ class UserSelectInner extends React.Component<Props, State>
               onSelect={this.handleDepartmentSelect}
               value={selectedDepartments}
               onChange={this.handleDepartmentChange}
+              keepValue={keepValue}
+              orgValue={this.props.value && this.props.value.departments}
             />
             <UsersPanel
               tenementId={currentTenementId}
@@ -217,12 +221,16 @@ class UserSelectInner extends React.Component<Props, State>
               department={currentDepartment}
               value={selectedUsers}
               onChange={this.handleUsersChange}
+              keepValue={keepValue}
+              orgValue={this.props.value && this.props.value.users}
             />
           </div>
         </UserSearchPanel>
         <SelectedPanel
           tenementSelectable={tenementSelectable}
           departmentSelectable={departmentSelectable}
+          keepValue={keepValue}
+          orgValue={this.props.value}
           tenements={selectedTenements}
           departments={selectedDepartments}
           users={selectedUsers}
@@ -292,11 +300,7 @@ class UserSelectInner extends React.Component<Props, State>
     users,
     departments,
     tenements,
-  }: {
-    users: UserDesc[] | undefined
-    departments: DepartmentDesc[] | undefined
-    tenements: TenementDesc[] | undefined
-  }) => {
+  }: UserSelectValue) => {
     this.handleUsersChange(users || [])
     this.handleDepartmentChange(departments || [])
     this.handleTenementChange(tenements || [])

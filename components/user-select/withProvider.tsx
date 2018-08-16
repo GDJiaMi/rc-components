@@ -10,6 +10,8 @@ export default function withProvider<P extends Adaptor>(
       wrappedComponentRef?: React.Ref<any>
     } & Omit<P, keyof Adaptor>
   > {
+    static displayName: string = `InjectUserSelectAdaptor(${Target.name ||
+      'Unknown'})`
     public render() {
       return (
         <Context.Consumer>
