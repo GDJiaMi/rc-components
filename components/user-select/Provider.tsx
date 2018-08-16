@@ -2,6 +2,7 @@
  * Provider
  * 1. 用于提供全局的缓存store，避免重复请求
  * 2. 提供api接口适配器配置
+ * TODO: 缓存优化，使用lodash的momoize
  */
 import React from 'react'
 

@@ -1,5 +1,6 @@
 /**
  * 用户选择器中的企业搜索框和搜索结果展示
+ * TODO: 支持空字符搜索
  */
 import React from 'react'
 import Form from 'antd/lib/form'
@@ -70,7 +71,22 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     )
   }
 
-  public reset = () => {}
+  public reset = () => {
+    this.setState(
+      {
+        query: '',
+        pagination: {
+          ...this.state.pagination,
+          current: 1,
+          total: 0,
+          loading: false,
+          error: undefined,
+        },
+        // 恢复默认
+      },
+      this.search,
+    )
+  }
 
   private renderHeader() {
     const { query, loading } = this.state

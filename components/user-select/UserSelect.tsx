@@ -73,6 +73,10 @@ interface State {
   selectedUsers?: UserDesc[]
 }
 
+interface Closable {
+  reset(): void
+}
+
 const DefaultLocale: UserSelectLocale = {
   title: '用户选择',
   ok: '确定',
@@ -91,6 +95,9 @@ class UserSelectInner extends React.Component<Props, State>
     currentTenementId: this.props.tenementId,
   }
 
+  private tenementSearchPanel = React.createRef<Closable>()
+  private userSearchPanel = React.createRef<Closable>()
+
   private get tenementVisible(): boolean {
     return this.props.tenementId == null
   }
@@ -104,7 +111,7 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   public shouldComponentUpdate(nextProps: Props, nextState: State) {
-    if (!nextState.visible) {
+    if (!this.state.visible && !nextState.visible) {
       return false
     }
     // TODO: 严格
@@ -182,6 +189,7 @@ class UserSelectInner extends React.Component<Props, State>
             onChange={this.handleTenementChange}
             selected={currentTenementId}
             onSelect={this.handleTenementSelect}
+            wrappedComponentRef={this.tenementSearchPanel}
           />
         )}
         <UserSearchPanel
@@ -189,6 +197,7 @@ class UserSelectInner extends React.Component<Props, State>
           searchable={userSearchable}
           value={selectedUsers}
           onChange={this.handleUsersChange}
+          wrappedComponentRef={this.userSearchPanel}
         >
           <div className="jm-us-containers">
             <DepartemntTree
@@ -295,19 +304,45 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   private handleCancel = () => {
-    this.setState({ visible: false }, () => {
-      this.reset()
-    })
-  }
-
-  private handleOk = () => {
-    // TODO:
-    // this.props.onChange()
     this.reset()
   }
 
+  private handleOk = () => {
+    if (this.props.onChange) {
+      const {
+        selectedUsers,
+        selectedDepartments,
+        selectedTenements,
+      } = this.state
+      this.props.onChange({
+        users: selectedUsers || [],
+        departments: selectedDepartments || [],
+        tenements: selectedTenements || [],
+      })
+    }
+
+    this.reset()
+  }
+
+  /**
+   * 模态框关闭后重置状态
+   */
   private reset = () => {
-    // TODO: 重置状态
+    this.setState(
+      {
+        visible: false,
+        currentTenementId: undefined,
+        currentTenement: undefined,
+        currentDepartmentId: undefined,
+        currentDepartment: undefined,
+      },
+      () => {
+        if (this.tenementSearchPanel.current) {
+          this.tenementSearchPanel.current.reset()
+        }
+        this.userSearchPanel.current!.reset()
+      },
+    )
   }
 
   private getLocale(key: keyof UserSelectLocale) {

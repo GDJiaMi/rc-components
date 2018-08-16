@@ -38,7 +38,7 @@ interface State {
   dataSource: UserDesc[]
 }
 
-class UserSearchPanel extends React.Component<Props, State> {
+class UserSearchPanel extends React.PureComponent<Props, State> {
   public state: State = {
     query: '',
     pagination: {
@@ -67,12 +67,30 @@ class UserSearchPanel extends React.Component<Props, State> {
 
     return (
       <Group header={this.renderHeader()} className="user-search-panel">
-        {searchMode ? this.renderBody() : children}
+        {this.renderBody()}
+        {React.isValidElement(children) ? (
+          React.cloneElement<any>(children, {
+            style: { display: searchMode ? 'none' : 'flex' },
+          })
+        ) : (
+          <div style={{ display: searchMode ? 'none' : 'block' }}>
+            {children}
+          </div>
+        )}
       </Group>
     )
   }
 
-  public reset() {}
+  public reset = () => {
+    this.setState({
+      pagination: { ...this.state.pagination, current: 1, total: 0 },
+      query: '',
+      dataSource: [],
+      searching: false,
+      searchMode: false,
+      error: undefined,
+    })
+  }
 
   private renderHeader() {
     const { query, searching, searchMode } = this.state
@@ -110,21 +128,26 @@ class UserSearchPanel extends React.Component<Props, State> {
   }
 
   private renderBody() {
-    const { searching, dataSource, pagination } = this.state
+    const { searching, dataSource, pagination, searchMode } = this.state
     return (
-      <Spin spinning={searching}>
-        {this.renderListHeader()}
-        <div className="jm-us-container__body">
-          <List
-            bordered={false}
-            split={false}
-            size="small"
-            dataSource={dataSource}
-            renderItem={this.renderItem}
-          />
-        </div>
-        <Pagination className="jm-us-container__footer" {...pagination} />
-      </Spin>
+      <div
+        className="jm-us-container"
+        style={{ display: searchMode ? 'block' : 'none' }}
+      >
+        <Spin spinning={searching}>
+          {this.renderListHeader()}
+          <div className="jm-us-container__body">
+            <List
+              bordered={false}
+              split={false}
+              size="small"
+              dataSource={dataSource}
+              renderItem={this.renderItem}
+            />
+          </div>
+          <Pagination className="jm-us-container__footer" {...pagination} />
+        </Spin>
+      </div>
     )
   }
 

@@ -28,7 +28,7 @@ interface State {
   dataSource: UserDesc[]
 }
 
-class UsersPanelInner extends React.Component<Props, State> {
+class UsersPanelInner extends React.PureComponent<Props, State> {
   public state: State = {
     loading: false,
     dataSource: [],
@@ -59,7 +59,7 @@ class UsersPanelInner extends React.Component<Props, State> {
       this.props.tenementId !== preProps.tenementId ||
       this.props.departmentId !== preProps.departmentId
     ) {
-      this.fetchUsers()
+      this.resetPagination(this.fetchUsers)
     }
   }
 
@@ -84,7 +84,14 @@ class UsersPanelInner extends React.Component<Props, State> {
     )
   }
 
-  public reset = () => {}
+  public reset = () => {
+    this.resetPagination()
+    this.setState({
+      loading: false,
+      error: undefined,
+      dataSource: [],
+    })
+  }
 
   private renderListHeader() {
     const { error, dataSource } = this.state
@@ -122,6 +129,15 @@ class UsersPanelInner extends React.Component<Props, State> {
           {item.name}
         </Checkbox>
       </div>
+    )
+  }
+
+  private resetPagination = (cb?: () => void) => {
+    this.setState(
+      {
+        pagination: { ...this.state.pagination, current: 1, total: 0 },
+      },
+      cb,
     )
   }
 
@@ -190,9 +206,7 @@ class UsersPanelInner extends React.Component<Props, State> {
       return
     }
     if (tenementId == null || departmentId == null) {
-      this.setState({
-        dataSource: [],
-      })
+      this.reset()
       return
     }
 

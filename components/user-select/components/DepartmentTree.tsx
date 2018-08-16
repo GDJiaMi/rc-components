@@ -1,10 +1,12 @@
 /**
  * 部门树
+ * TODO: defaultExpandedKeys 优化
  */
 import React from 'react'
 import Spin from 'antd/lib/spin'
 import Alert from 'antd/lib/alert'
 import Tree, { AntTreeNodeEvent } from 'antd/lib/tree'
+import memoize from 'lodash/memoize'
 import withProvider from '../withProvider'
 import { Adaptor, DepartmentDesc, TenementDesc } from '../Provider'
 import { DefaultExpandedLevel } from '../constants'
@@ -33,7 +35,7 @@ interface State {
   defaultExpandedKeys?: string[]
 }
 
-class DepartmentTree extends React.Component<Props, State> {
+class DepartmentTree extends React.PureComponent<Props, State> {
   public state: State = {
     loading: false,
   }
@@ -77,7 +79,15 @@ class DepartmentTree extends React.Component<Props, State> {
     return this.state.dataSourceById && this.state.dataSourceById[id]
   }
 
-  public reset() {}
+  public reset() {
+    this.setState({
+      loading: false,
+      error: undefined,
+      dataSource: undefined,
+      dataSourceById: undefined,
+      defaultExpandedKeys: undefined,
+    })
+  }
 
   private renderTree = () => {
     const { dataSource, defaultExpandedKeys } = this.state
@@ -186,21 +196,20 @@ class DepartmentTree extends React.Component<Props, State> {
   private fetchDepartment = async () => {
     const tenementId = this.props.tenementId
     if (tenementId == null) {
+      this.reset()
       return
     }
     try {
       this.setState({ error: undefined, loading: true })
       const res = await this.props.getDepartmentTree(tenementId)
       // 缓存
-      const cached = {}
-      const expanedKeys: string[] = []
-      this.walkTree(res, cached)
+      const cached = DepartmentTree.getCached(res, this.props.tenement)
       // 计算默认展开
-      this.genExpandedKeys(res, expanedKeys)
+      const expandedKeys = DepartmentTree.getExpandedKeys(res)
       this.setState({
         dataSource: res,
         dataSourceById: cached,
-        defaultExpandedKeys: expanedKeys,
+        defaultExpandedKeys: expandedKeys,
       })
     } catch (error) {
       this.setState({ error })
@@ -209,19 +218,34 @@ class DepartmentTree extends React.Component<Props, State> {
     }
   }
 
-  private walkTree(
+  private static getCached = memoize(
+    (res: DepartmentDesc, tenement: TenementDesc | undefined) => {
+      const cached = {}
+      DepartmentTree.walkTree(res, tenement, cached)
+      return cached
+    },
+  )
+
+  private static walkTree(
     tree: DepartmentDesc,
+    tenement: TenementDesc | undefined,
     map: { [id: string]: DepartmentDesc },
   ) {
-    map[tree.id] = { ...tree, tenement: this.props.tenement }
+    map[tree.id] = { ...tree, tenement: tenement }
     if (tree.children && tree.children.length) {
       tree.children.forEach(n => {
-        this.walkTree(n, map)
+        DepartmentTree.walkTree(n, tenement, map)
       })
     }
   }
 
-  private genExpandedKeys = (
+  private static getExpandedKeys = memoize((res: DepartmentDesc) => {
+    const expanedKeys: string[] = []
+    DepartmentTree.genExpandedKeys(res, expanedKeys)
+    return expanedKeys
+  })
+
+  private static genExpandedKeys = (
     tree: DepartmentDesc,
     keys: string[],
     level: number = 1,
@@ -233,7 +257,7 @@ class DepartmentTree extends React.Component<Props, State> {
     }
     if (tree.children != null && tree.children.length !== 0) {
       tree.children.forEach(subnode =>
-        this.genExpandedKeys(subnode, keys, level + 1),
+        DepartmentTree.genExpandedKeys(subnode, keys, level + 1),
       )
     }
   }
