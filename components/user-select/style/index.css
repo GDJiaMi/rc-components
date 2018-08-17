@@ -140,3 +140,13 @@
 .jm-us-checkbox.selected {
   background-color: #bae7ff;
 }
+
+.jm-us-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.jm-us-footer .buttons {
+  margin-left: 0.8em;
+}

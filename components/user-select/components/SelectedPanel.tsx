@@ -25,6 +25,7 @@ export type SelectedPanelFormatter = Partial<{
 export interface SelectedPanelProps {
   departmentSelectable?: boolean
   tenementSelectable?: boolean
+  userSelectable?: boolean
   tenements?: TenementDesc[]
   departments?: DepartmentDesc[]
   users?: UserDesc[]
@@ -42,6 +43,7 @@ export default class SelectedPanel extends React.PureComponent<
     const {
       tenementSelectable,
       departmentSelectable,
+      userSelectable,
       tenements,
       departments,
       users,
@@ -49,21 +51,25 @@ export default class SelectedPanel extends React.PureComponent<
     return (
       <Group className="grow selected">
         <div className="jm-us-container__body">
-          <h3>
-            已选择用户 ({users ? users.length : 0})
-            <a onClick={this.handleCloseAll('users')}>清空</a>
-          </h3>
-          <div className="tags">
-            {!!users &&
-              users.map(u =>
-                this.renderTag(
-                  'users',
-                  u.id,
-                  this.format('user', u),
-                  this.handleClose('users', u),
-                ),
-              )}
-          </div>
+          {!!userSelectable && (
+            <>
+              <h3>
+                已选择用户 ({users ? users.length : 0})
+                <a onClick={this.handleCloseAll('users')}>清空</a>
+              </h3>
+              <div className="tags">
+                {!!users &&
+                  users.map(u =>
+                    this.renderTag(
+                      'users',
+                      u.id,
+                      this.format('user', u),
+                      this.handleClose('users', u),
+                    ),
+                  )}
+              </div>
+            </>
+          )}
           {!!departmentSelectable && (
             <>
               <h3>

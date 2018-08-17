@@ -42,6 +42,8 @@ export interface UserSelectProps {
   departmentSelectable?: boolean
   // 是否可以选择企业, 默认关闭
   tenementSelectable?: boolean
+  // 是否可以选择用户
+  userSelectable?: boolean
   // 用户是支持搜索, 默认开启
   userSearchable?: boolean
   // 最多可选中用户, 默认不限制
@@ -93,6 +95,7 @@ class UserSelectInner extends React.Component<Props, State>
   implements IUserSelect {
   public static defaultProps = {
     userSearchable: true,
+    userSelectable: true,
   }
   public state: State = {
     visible: false,
@@ -186,6 +189,7 @@ class UserSelectInner extends React.Component<Props, State>
       userSearchable,
       keepValue,
       tenementSearchPlaceholder,
+      userSelectable,
       userSearchPlaceholder,
       renderUserSearchItem,
     } = this.props
@@ -217,7 +221,7 @@ class UserSelectInner extends React.Component<Props, State>
         <UserSearchPanel
           tenementId={currentTenementId}
           platformSearch={this.tenementVisible}
-          searchable={userSearchable}
+          searchable={userSearchable && userSelectable}
           value={selectedUsers}
           onChange={this.handleUsersChange}
           wrappedComponentRef={this.userSearchPanel}
@@ -240,20 +244,23 @@ class UserSelectInner extends React.Component<Props, State>
               keepValue={keepValue}
               orgValue={this.props.value && this.props.value.departments}
             />
-            <UsersPanel
-              tenementId={currentTenementId}
-              departmentId={currentDepartmentId}
-              department={currentDepartment}
-              value={selectedUsers}
-              onChange={this.handleUsersChange}
-              keepValue={keepValue}
-              orgValue={this.props.value && this.props.value.users}
-            />
+            {!!userSelectable && (
+              <UsersPanel
+                tenementId={currentTenementId}
+                departmentId={currentDepartmentId}
+                department={currentDepartment}
+                value={selectedUsers}
+                onChange={this.handleUsersChange}
+                keepValue={keepValue}
+                orgValue={this.props.value && this.props.value.users}
+              />
+            )}
           </div>
         </UserSearchPanel>
         <SelectedPanel
           tenementSelectable={tenementSelectable}
           departmentSelectable={departmentSelectable}
+          userSelectable={userSelectable}
           keepValue={keepValue}
           orgValue={this.props.value}
           tenements={selectedTenements}
@@ -271,13 +278,17 @@ class UserSelectInner extends React.Component<Props, State>
     const cancelText = this.getLocale('cancel')
     const okText = this.getLocale('ok')
     return (
-      <div>
-        {this.props.footer}
-        {!!tip && <div className="jh-us-tip">{tip}</div>}
-        <Button onClick={this.handleCancel}>{cancelText}</Button>
-        <Button onClick={this.handleOk} type="primary">
-          {okText}
-        </Button>
+      <div className="jm-us-footer">
+        <div>
+          {this.props.footer}
+          {!!tip && <div className="jh-us-tip">{tip}</div>}
+        </div>
+        <div className="buttons">
+          <Button onClick={this.handleCancel}>{cancelText}</Button>
+          <Button onClick={this.handleOk} type="primary">
+            {okText}
+          </Button>
+        </div>
       </div>
     )
   }
@@ -393,7 +404,7 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   private getLocale(key: keyof UserSelectLocale) {
-    return (this.props.locale || DefaultLocale)[key] || ''
+    return (this.props.locale || DefaultLocale)[key] || DefaultLocale[key]
   }
 
   private canSet<T>(
