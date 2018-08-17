@@ -5,6 +5,8 @@ import React from 'react'
 import { DepartmentDesc, TenementDesc } from './Provider'
 import UserSelect, { UserSelectLocale, IUserSelect } from './UserSelect'
 
+export { TenementDesc, DepartmentDesc }
+
 export interface DepartmentSelectValue {
   departments?: DepartmentDesc[]
   tenements?: TenementDesc[]

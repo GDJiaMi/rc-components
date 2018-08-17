@@ -9,6 +9,8 @@ import SearchableSelect, {
 } from './components/SearchableSelect'
 import { Omit } from '../utils/type-utils'
 
+export { UserDesc }
+
 export type UserSearchProps = Partial<
   Omit<SearchableSelectProps<UserDesc>, 'onFetch' | 'notFoundContent'>
 > & {
