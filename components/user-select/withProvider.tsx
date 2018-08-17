@@ -1,6 +1,6 @@
 import React from 'react'
 import { Adaptor, Context } from './Provider'
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+import { Omit } from 'react-router'
 
 export default function withProvider<P extends Adaptor>(
   Target: React.ComponentClass<P>,

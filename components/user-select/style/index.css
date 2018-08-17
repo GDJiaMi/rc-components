@@ -77,22 +77,27 @@
 .jm-us-container:not(:first-child) {
   border-left: 1px solid #d0d0d0;
 }
+
 /* 默认 */
+
 .jm-us-group__container .jm-us-container__body {
   height: 560px;
 }
 
 /* 显示container header时的适配高度 */
+
 .jm-us-group__container .jm-us-container__header+.jm-us-container__body {
   height: 520px;
 }
 
 /*显示group header*/
+
 .jm-us-group__header~.jm-us-group__container .jm-us-container__body {
   height: 500px;
 }
 
 /*显示group header + container header*/
+
 .jm-us-group__header~.jm-us-group__container .jm-us-container__header+.jm-us-container__body {
   height: 480px;
 }
@@ -149,4 +154,35 @@
 
 .jm-us-footer .buttons {
   margin-left: 0.8em;
+}
+
+/* 用户搜索器 */
+
+.jm-user-search {
+  display: inline-block;
+  min-width: 150px;
+  position: relative;
+}
+
+.jm-user-search .ant-select {
+  width: 100%;
+}
+
+.jm-user-search .anticon {
+  position: absolute;
+  color: #1890ff;
+  font-size: 19px;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 6px;
+  background: #ffffffbf;
+}
+
+.jm-user-search__error {
+  color:#ff4444;
+  text-align: center;
+}
+
+.jm-user-search__error .anticon {
+  margin-right: 0.5em;
 }

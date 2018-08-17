@@ -3,7 +3,7 @@
  */
 import React from 'react'
 import { ContextValue, Context } from './Provider'
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+import { Omit } from '../utils/type-utils'
 
 export type AclProps<P extends ContextValue> = Omit<P, keyof ContextValue> & {
   wrappedComponentRef?: React.Ref<any>
