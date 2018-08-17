@@ -5,7 +5,7 @@ import { Omit } from 'react-router'
 export default function withProvider<P extends Adaptor>(
   Target: React.ComponentClass<P>,
 ) {
-  class withUserSelect extends React.Component<
+  return class withUserSelect extends React.Component<
     {
       wrappedComponentRef?: React.Ref<any>
     } & Omit<P, keyof Adaptor>
@@ -24,5 +24,4 @@ export default function withProvider<P extends Adaptor>(
       )
     }
   }
-  return withUserSelect
 }
