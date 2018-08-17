@@ -1,6 +1,5 @@
 /**
  * 部门树
- * TODO: defaultExpandedKeys 优化
  */
 import React from 'react'
 import Spin from 'antd/lib/spin'
@@ -34,7 +33,7 @@ interface State {
   error?: Error
   dataSource?: DepartmentDesc
   dataSourceById?: { [key: string]: DepartmentDesc }
-  defaultExpandedKeys?: string[]
+  expandedKeys?: string[]
 }
 
 class DepartmentTree extends React.PureComponent<Props, State> {
@@ -87,31 +86,32 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       error: undefined,
       dataSource: undefined,
       dataSourceById: undefined,
-      defaultExpandedKeys: undefined,
+      expandedKeys: undefined,
     })
   }
 
   private renderTree = () => {
-    const { dataSource, defaultExpandedKeys } = this.state
+    const { dataSource, expandedKeys } = this.state
 
     if (dataSource == null) {
       return null
     }
 
-    const { selectable, value, selected } = this.props
-    // TODO: 抽取到state，避免重复渲染
+    const { selectable, value, selected, tenementId } = this.props
     const checkedKeys = (value || []).map(i => i.id)
     const selectedKeys = selected ? [selected] : undefined
 
     return (
       <Tree
+        key={tenementId}
         checkStrictly
         checkable={selectable}
         checkedKeys={checkedKeys}
         selectedKeys={selectedKeys}
+        expandedKeys={expandedKeys}
         onCheck={this.handleTreeCheck}
         onSelect={this.handleTreeSelect}
-        defaultExpandedKeys={defaultExpandedKeys}
+        onExpand={this.handleExpand}
       >
         {this.renderTreeNode(dataSource)}
       </Tree>
@@ -191,6 +191,12 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
+  private handleExpand = (keys: string[]) => {
+    this.setState({
+      expandedKeys: keys,
+    })
+  }
+
   private handleTreeSelect = (keys: string[]) => {
     const departmentId = keys[0]
     if (this.props.onSelect) {
@@ -219,7 +225,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       this.setState({
         dataSource: res,
         dataSourceById: cached,
-        defaultExpandedKeys: expandedKeys,
+        expandedKeys: [...expandedKeys],
       })
     } catch (error) {
       this.setState({ error })
@@ -260,7 +266,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     keys: string[],
     level: number = 1,
   ) => {
-    if (tree.open && level < DefaultExpandedLevel) {
+    if (tree.open || level < DefaultExpandedLevel) {
       keys.push(tree.id)
     } else {
       return

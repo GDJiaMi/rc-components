@@ -1,7 +1,5 @@
 /**
  * 用户选择器用户搜索
- * TODO: placeholder和数据项展示支持自定义
- * TODO: 区分平台搜索和企业搜索
  */
 import React from 'react'
 import Form from 'antd/lib/form'
@@ -23,10 +21,13 @@ export interface UserSearchPanelProps {
   children: React.ReactNode
   // 如果tenementId为空，则为平台搜索
   tenementId?: string
+  platformSearch?: boolean
   value?: UserDesc[]
   onChange?: (value: UserDesc[]) => void
   orgValue?: UserDesc[]
   keepValue?: boolean
+  placeholder?: string
+  renderItem?: (item: UserDesc) => React.ReactNode
   header?: React.ReactNode
 }
 
@@ -107,7 +108,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
           <Form.Item>
             <Input
               size="small"
-              placeholder="用户"
+              placeholder={this.props.placeholder || '用户'}
               value={query}
               onChange={this.handleQueryChange}
             />
@@ -181,6 +182,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
 
   private renderItem = (item: UserDesc) => {
     const value = this.props.value || []
+    const renderItem = this.props.renderItem
     const checked = value.findIndex(i => i.id === item.id) !== -1
     const disabled =
       this.props.keepValue &&
@@ -193,7 +195,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
           checked={checked}
           onChange={this.handleCheck(item)}
         >
-          {item.name}
+          {renderItem ? renderItem(item) : item.name}
         </Checkbox>
       </div>
     )
@@ -257,11 +259,17 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
 
     try {
       this.setState({ searching: true, error: undefined })
+      const { tenementId, platformSearch } = this.props
       const {
         pagination: { current = 1, pageSize = PageSize },
         query,
       } = this.state
-      const res = await this.props.searchUser(query, current, pageSize)
+      const res = await this.props.searchUser(
+        query,
+        current,
+        pageSize,
+        platformSearch ? tenementId : undefined,
+      )
       this.setState({
         dataSource: res.items,
         pagination: {

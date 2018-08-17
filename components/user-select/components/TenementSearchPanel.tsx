@@ -1,6 +1,5 @@
 /**
  * 用户选择器中的企业搜索框和搜索结果展示
- * TODO: 支持空字符搜索
  */
 import React from 'react'
 import Form from 'antd/lib/form'
@@ -27,6 +26,7 @@ export interface TenementSearchPanelProps {
   selected?: string
   onSelect?: (tenementId: string, detail: TenementDesc) => void
   keepValue?: boolean
+  placeholder?: string
 }
 
 interface Props extends TenementSearchPanelProps, Adaptor {}
@@ -99,7 +99,7 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
           <Form.Item>
             <Input
               size="small"
-              placeholder="企业"
+              placeholder={this.props.placeholder || '企业'}
               value={query}
               onChange={this.handleQueryChange}
             />

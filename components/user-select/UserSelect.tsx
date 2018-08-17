@@ -59,6 +59,10 @@ export interface UserSelectProps {
   formatter?: UserSelectFormatter
   header?: React.ReactNode
   footer?: React.ReactNode
+  // 其他，极为少用的定制化
+  tenementSearchPlaceholder?: string
+  userSearchPlaceholder?: string
+  renderUserSearchItem?: (item: UserDesc) => React.ReactNode
 }
 
 interface Props extends UserSelectProps, Adaptor {}
@@ -118,7 +122,6 @@ class UserSelectInner extends React.Component<Props, State>
     if (!this.state.visible && !nextState.visible) {
       return false
     }
-    // TODO: 严格检查
     return true
   }
 
@@ -179,7 +182,13 @@ class UserSelectInner extends React.Component<Props, State>
 
   private renderBody() {
     const { tenementSelectable, tenementVisible, departmentSelectable } = this
-    const { userSearchable, keepValue } = this.props
+    const {
+      userSearchable,
+      keepValue,
+      tenementSearchPlaceholder,
+      userSearchPlaceholder,
+      renderUserSearchItem,
+    } = this.props
     const {
       currentTenementId,
       currentTenement,
@@ -202,10 +211,12 @@ class UserSelectInner extends React.Component<Props, State>
             keepValue={keepValue}
             onSelect={this.handleTenementSelect}
             wrappedComponentRef={this.tenementSearchPanel}
+            placeholder={tenementSearchPlaceholder}
           />
         )}
         <UserSearchPanel
           tenementId={currentTenementId}
+          platformSearch={this.tenementVisible}
           searchable={userSearchable}
           value={selectedUsers}
           onChange={this.handleUsersChange}
@@ -213,6 +224,8 @@ class UserSelectInner extends React.Component<Props, State>
           keepValue={keepValue}
           orgValue={this.props.value && this.props.value.users}
           header={this.props.header}
+          placeholder={userSearchPlaceholder}
+          renderItem={renderUserSearchItem}
         >
           <div className="jm-us-containers">
             <DepartemntTree

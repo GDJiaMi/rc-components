@@ -65,6 +65,7 @@ export interface Adaptor {
   ): Promise<{ items: UserDesc[]; total: number }>
   /**
    * 用户搜索
+   * tenementId不为空时，表示企业内搜索
    */
   searchUser(
     query: string,
