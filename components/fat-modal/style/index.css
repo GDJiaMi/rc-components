@@ -1,0 +1,14 @@
+.jm-fatmodal .ant-alert {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+}
+
+.jm-fatmodal .ant-alert-placeholder {
+  height: 1em;
+}
+
+.jm-fatmodal .ant-modal-body {
+  position: relative;
+}
