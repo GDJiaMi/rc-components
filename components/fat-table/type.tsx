@@ -28,6 +28,7 @@ export interface IFatTable<T> {
   setList(list: T[]): void
   remove(ids: any[]): void
   shift(id: any, dir?: 'up' | 'down'): void
+  submit(evt: React.FormEvent<void>): void
   canShiftUp(id: string): boolean
   canShiftDown(id: string): boolean
   updateItems(updator: (list: T[]) => T[]): void

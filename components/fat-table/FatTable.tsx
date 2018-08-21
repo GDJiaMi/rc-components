@@ -3,10 +3,16 @@ import Form, { FormComponentProps } from 'antd/lib/form'
 import Button from 'antd/lib/button'
 import Table from 'antd/lib/table'
 import Alert from 'antd/lib/alert'
+import Modal from 'antd/lib/modal'
 import { PaginationProps } from 'antd/lib/pagination'
 import { DefaultPagination } from './constants'
 import { QueryComponentProps, QueryGetter } from '../query'
-import { FatTableProps, FatTableRenderer } from './type'
+import {
+  FatTableProps,
+  FatTableRenderer,
+  IFatTable,
+  PaginationInfo,
+} from './type'
 
 interface Props<T, P extends object>
   extends FatTableProps<T, P>,
@@ -28,10 +34,9 @@ interface State<T> {
   dataSource: T[]
 }
 
-export default class FatTableInner<T, P extends object> extends React.Component<
-  Props<T, P>,
-  State<T>
-> {
+export default class FatTableInner<T, P extends object>
+  extends React.Component<Props<T, P>, State<T>>
+  implements IFatTable<T> {
   public static defaultProps = {
     searchText: '搜索',
     idKey: 'id',
@@ -59,6 +64,16 @@ export default class FatTableInner<T, P extends object> extends React.Component<
 
   private query: QueryGetter
   private defaultValues: Partial<P> = {}
+
+  public static getDerivedStateFromProps<T, P extends object>(
+    props: Props<T, P>,
+    state: State<T>,
+  ) {
+    if (props.onChange && props.value && props.value !== state.dataSource) {
+      return { dataSource: props.value }
+    }
+    return
+  }
 
   public componentWillMount() {
     this.initialState()
@@ -89,6 +104,183 @@ export default class FatTableInner<T, P extends object> extends React.Component<
   public submit = (evt: React.FormEvent<void>) => {
     evt.preventDefault()
     this.search(true)
+  }
+
+  // 命令式触发请求
+  public fetch = (validate: boolean = true, resetPage: boolean = true) => {
+    this.search(validate, resetPage)
+  }
+
+  // 获取已选中
+  public getSelected = (): T[] => {
+    return this.state.selected.rows || []
+  }
+
+  public getSelectedIds = (): any[] => {
+    return this.state.selected.keys || []
+  }
+
+  // 清除已选中
+  public clearSelected = () => {
+    this.setState({
+      selected: {
+        keys: [],
+        rows: [],
+      },
+    })
+  }
+
+  public getList = () => {
+    return this.state.dataSource
+  }
+
+  // TODO: setDataSource, 触发onChange
+  public setList = (list: T[]) => {
+    this.setState({ dataSource: list })
+  }
+
+  /**
+   * 重置所有数据并重新获取
+   */
+  public clearForm = () => {
+    const { defaultPagination, namespace, search } = this.props
+    // 初始化表单默认值
+    this.props.form.resetFields()
+    this.setState({
+      pagination: {
+        ...this.state.pagination,
+        current: (defaultPagination && defaultPagination.current) || 1,
+        pageSize: (defaultPagination && defaultPagination.pageSize) || 15,
+      },
+      // TODO: 触发onChange
+      dataSource: [],
+    })
+    this.clearSelected()
+    search.clear(namespace)
+  }
+
+  // 移除元素
+  public remove(ids: any[]) {
+    if (ids.length === 0) {
+      return
+    }
+
+    if (this.props.confirmOnRemove) {
+      Modal.confirm({
+        title: '提示',
+        content: '确认删除?',
+        onOk: () => {
+          this.removeItems(ids)
+        },
+        okText: '确认',
+        cancelText: '取消',
+      })
+    } else {
+      this.removeItems(ids)
+    }
+  }
+
+  // TODO: 目前只支持前端分页模式
+  // 是否可以上移
+  public canShiftUp(id: string) {
+    const { idKey } = this.props
+    const { dataSource } = this.state
+    return dataSource[0] && dataSource[0][idKey as string] !== id
+  }
+
+  // 是否可以下移
+  // TODO: 目前只支持前端分页模式
+  public canShiftDown(id: string) {
+    const { idKey } = this.props
+    const { dataSource } = this.state
+    const last = dataSource.length - 1
+    return dataSource[last] && dataSource[last][idKey as string] !== id
+  }
+
+  // 移动元素
+  // 暂时只能用于前端分页模式
+  // TODO: 支持fetch模式
+  public shift(id: any, dir: 'up' | 'down' = 'up') {
+    if (!this.state.allReady) {
+      return
+    }
+
+    const { idKey } = this.props
+    const list = this.state.dataSource
+    const index = list.findIndex(i => i[idKey as string] === id)
+    if (
+      index === -1 ||
+      (dir === 'up' ? index === 0 : index === list.length - 1)
+    ) {
+      return
+    }
+
+    const toIndex = dir === 'up' ? index - 1 : index + 1
+    const to = list[toIndex]
+    const current = list[index]
+    list[toIndex] = current
+    list[index] = to
+    // TODO: 触发onchange
+    this.setState({ dataSource: list })
+  }
+
+  public updateItems(updator: (list: T[]) => T[]): void {
+    const items = updator([...this.state.dataSource]) || []
+    items.forEach(this.updateItem)
+  }
+
+  private updateItem = (item: T) => {
+    const list = [...this.state.dataSource]
+    const { idKey } = this.props
+    const index = list.findIndex(
+      i => i[idKey as string] === item[idKey as string],
+    )
+    if (index !== -1) {
+      list.splice(index, 1, item)
+
+      if (this.props.onChange) {
+        this.props.onChange(list)
+      }
+      // TODO: update
+      this.setState({ dataSource: list })
+    }
+  }
+
+  // FIXME: 删除可能跨页，但这个页面的数据未必已经加载
+  private removeItems(ids: any[]) {
+    const { idKey } = this.props
+    const pageSize = this.state.pagination.pageSize || 15
+    const dataSource = [...this.state.dataSource]
+    const currentPageLength = dataSource.length
+    const total = this.state.pagination.total || currentPageLength
+    const onlyOnePage = total <= pageSize && total === currentPageLength
+    // 一个水平线，低于这个水平线就需要更新了
+    const lowLine = pageSize / 3 || 3
+
+    if (
+      this.state.allReady || // 前端分页模式
+      onlyOnePage || // 只有一页，不需要考虑下一页补全问题
+      currentPageLength - ids.length > lowLine // 删除后高于水平线
+    ) {
+      // 原地删除
+      // TODO: 调用onChange
+      ids.forEach(id => {
+        const index = dataSource.findIndex(i => i[idKey as string] === id)
+        if (index !== -1) {
+          dataSource.splice(index, 1)
+          this.setState({
+            dataSource,
+            pagination: {
+              ...this.state.pagination,
+              total: (this.state.pagination.total || currentPageLength) - 1,
+            },
+          })
+        }
+      })
+    } else {
+      // 重载
+      this.search(false, false)
+    }
   }
 
   private defaultRenderer = () => {
@@ -276,7 +468,111 @@ export default class FatTableInner<T, P extends object> extends React.Component<
   /**
    * 搜索
    * @param validate 开启验证
-   * @param resetPage TODO
+   * @param resetPage 是否重置页码
    */
-  private search = (validate: boolean = false, resetPage: boolean = true) => {}
+  private search = (validate: boolean = false, resetPage: boolean = true) => {
+    const doit = (values: any) => {
+      if (resetPage) {
+        this.setState({
+          pagination: {
+            ...this.state.pagination,
+            current: 1,
+          },
+        })
+      }
+      const extraParams = this.props.getExtraParams
+        ? this.props.getExtraParams()
+        : {}
+      window.setTimeout(() => {
+        this.fetchList({ ...(extraParams as object), ...values })
+      })
+    }
+
+    if (validate) {
+      this.props.form.validateFields((errors, values) => {
+        if (errors != null) {
+          return
+        }
+        doit(values)
+      })
+    } else {
+      const values = this.props.form.getFieldsValue()
+      doit(values)
+    }
+  }
+
+  /**
+   * 获取列表
+   */
+  private fetchList = async (extraParams: Partial<P> = {}) => {
+    const { loading, pagination } = this.state
+    if (loading || this.props.onFetch == null) {
+      return
+    }
+
+    const { offsetMode, onFetch, namespace } = this.props
+    let { current = 1, pageSize = 15 } = pagination
+    const paramsToSerial = {
+      current,
+      pageSize,
+      ...(extraParams as object),
+    }
+
+    if (offsetMode) {
+      current = (current - 1) * pageSize
+    }
+
+    const params = {
+      ...(extraParams as object),
+      current,
+      pageSize,
+    }
+
+    try {
+      this.setState({
+        allReady: false,
+        error: undefined,
+        loading: true,
+      })
+      const { list, total } = await onFetch(params as P & PaginationInfo)
+      this.setState(
+        {
+          pagination: {
+            ...this.state.pagination,
+            total,
+          },
+          dataSource: list,
+          allReady: total === list.length,
+        },
+        () => {
+          // 页码纠正
+          if (total != 0 && list.length === 0 && paramsToSerial.current !== 1) {
+            // 说明页码偏移了
+            const correctPage = Math.ceil(total / pageSize)
+            this.setState({
+              pagination: {
+                ...this.state.pagination,
+                current: correctPage,
+              },
+              loading: false,
+            })
+            // 重试
+            setTimeout(() => {
+              this.fetchList(extraParams)
+            }, 100)
+            return
+          }
+          this.props.search.set(namespace as string, paramsToSerial)
+        },
+      )
+    } catch (error) {
+      this.setState({
+        error,
+      })
+    } finally {
+      this.setState({
+        loading: true,
+      })
+    }
+  }
 }
