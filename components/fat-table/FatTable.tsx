@@ -1,3 +1,6 @@
+/**
+ * TODO: 支持批量上移下移
+ */
 import React from 'react'
 import Form, { FormComponentProps } from 'antd/lib/form'
 import Button from 'antd/lib/button'
@@ -5,6 +8,7 @@ import Table from 'antd/lib/table'
 import Alert from 'antd/lib/alert'
 import Modal from 'antd/lib/modal'
 import { PaginationProps } from 'antd/lib/pagination'
+import message from 'antd/lib/message'
 import { DefaultPagination } from './constants'
 import { QueryComponentProps, QueryGetter } from '../query'
 import {
@@ -70,6 +74,7 @@ export default class FatTableInner<T, P extends object>
     state: State<T>,
   ) {
     if (props.onChange && props.value && props.value !== state.dataSource) {
+      // 同步value 和 dataSource
       return { dataSource: props.value }
     }
     return
@@ -101,26 +106,38 @@ export default class FatTableInner<T, P extends object>
     )
   }
 
+  /**
+   * 处理表单提交
+   */
   public submit = (evt: React.FormEvent<void>) => {
     evt.preventDefault()
     this.search(true)
   }
 
-  // 命令式触发请求
+  /**
+   * 命令式触发请求
+   */
   public fetch = (validate: boolean = true, resetPage: boolean = true) => {
     this.search(validate, resetPage)
   }
 
-  // 获取已选中
+  /**
+   * 获取已选中
+   */
   public getSelected = (): T[] => {
     return this.state.selected.rows || []
   }
 
+  /**
+   * 获取已选中的id
+   */
   public getSelectedIds = (): any[] => {
     return this.state.selected.keys || []
   }
 
-  // 清除已选中
+  /**
+   * 清除已选中
+   */
   public clearSelected = () => {
     this.setState({
       selected: {
@@ -130,13 +147,18 @@ export default class FatTableInner<T, P extends object>
     })
   }
 
+  /**
+   * 获取当前dataSource
+   */
   public getList = () => {
     return this.state.dataSource
   }
 
-  // TODO: setDataSource, 触发onChange
+  /**
+   * 设置当前的dataSource
+   */
   public setList = (list: T[]) => {
-    this.setState({ dataSource: list })
+    this.setDataSource(list)
   }
 
   /**
@@ -146,20 +168,26 @@ export default class FatTableInner<T, P extends object>
     const { defaultPagination, namespace, search } = this.props
     // 初始化表单默认值
     this.props.form.resetFields()
-    this.setState({
-      pagination: {
-        ...this.state.pagination,
-        current: (defaultPagination && defaultPagination.current) || 1,
-        pageSize: (defaultPagination && defaultPagination.pageSize) || 15,
-      },
-      // TODO: 触发onChange
-      dataSource: [],
-    })
     this.clearSelected()
-    search.clear(namespace)
+    this.setState(
+      {
+        pagination: {
+          ...this.state.pagination,
+          current: (defaultPagination && defaultPagination.current) || 1,
+          pageSize: (defaultPagination && defaultPagination.pageSize) || 15,
+          total: 0,
+        },
+      },
+      () => {
+        this.setDataSource([])
+        search.clear(namespace)
+      },
+    )
   }
 
-  // 移除元素
+  /**
+   * 移除元素
+   */
   public remove(ids: any[]) {
     if (ids.length === 0) {
       return
@@ -180,48 +208,85 @@ export default class FatTableInner<T, P extends object>
     }
   }
 
-  // TODO: 目前只支持前端分页模式
-  // 是否可以上移
-  public canShiftUp(id: string) {
+  /**
+   * 根据id获取字段在全局的索引
+   * @returns [number, number] 全局索引，当前页面索引
+   */
+  public getIndexById(id: any): [number, number] {
     const { idKey } = this.props
-    const { dataSource } = this.state
-    return dataSource[0] && dataSource[0][idKey as string] !== id
+    const {
+      dataSource,
+      allReady,
+      pagination: { pageSize = 15, current = 1 },
+    } = this.state
+    const indexInCurrentPage = dataSource.findIndex(
+      i => i[idKey as string] === id,
+    )
+    if (allReady || indexInCurrentPage === -1) {
+      return [indexInCurrentPage, indexInCurrentPage]
+    }
+    return [(current - 1) * pageSize + indexInCurrentPage, indexInCurrentPage]
   }
 
-  // 是否可以下移
-  // TODO: 目前只支持前端分页模式
-  public canShiftDown(id: string) {
-    const { idKey } = this.props
-    const { dataSource } = this.state
-    const last = dataSource.length - 1
-    return dataSource[last] && dataSource[last][idKey as string] !== id
+  /**
+   * 是否可以上移
+   */
+  public canShiftUp(id: any) {
+    const [index] = this.getIndexById(id)
+    return index !== 0
   }
 
-  // 移动元素
-  // 暂时只能用于前端分页模式
-  // TODO: 支持fetch模式
+  /**
+   * 是否可以下移
+   */
+  public canShiftDown(id: any) {
+    const [index] = this.getIndexById(id)
+    const {
+      pagination: { total = 0 },
+    } = this.state
+    return index < total - 1
+  }
+
+  /**
+   * 移动元素
+   */
   public shift(id: any, dir: 'up' | 'down' = 'up') {
-    if (!this.state.allReady) {
+    const {
+      allReady,
+      pagination: { total = 0 },
+    } = this.state
+    const [index, indexInCurrentPage] = this.getIndexById(id)
+
+    if (index === -1 || (dir === 'up' ? index === 0 : index === total - 1)) {
       return
     }
 
-    const { idKey } = this.props
-    const list = this.state.dataSource
-    const index = list.findIndex(i => i[idKey as string] === id)
-    if (
-      index === -1 ||
-      (dir === 'up' ? index === 0 : index === list.length - 1)
-    ) {
-      return
-    }
+    const dataSource = [...this.state.dataSource]
+    const shiftInPlace =
+      allReady ||
+      (indexInCurrentPage > 0 && indexInCurrentPage < dataSource.length - 1) // 非跨页
 
-    const toIndex = dir === 'up' ? index - 1 : index + 1
-    const to = list[toIndex]
-    const current = list[index]
-    list[toIndex] = current
-    list[index] = to
-    // TODO: 触发onchange
-    this.setState({ dataSource: list })
+    // shift inplace
+    if (shiftInPlace) {
+      const toIndex =
+        dir === 'up' ? indexInCurrentPage - 1 : indexInCurrentPage + 1
+      const to = dataSource[toIndex]
+      const current = dataSource[indexInCurrentPage]
+      dataSource[toIndex] = current
+      dataSource[indexInCurrentPage] = to
+      // persist if need
+      this.handleShift(current, dir, () => {
+        // 触发更新
+        this.setDataSource(dataSource)
+      })
+    } else {
+      // shift remote
+      this.handleShift(dataSource[indexInCurrentPage], dir, () => {
+        // 重新加载数据
+        // TODO: 可能要跟随
+        this.search(false, false)
+      })
+    }
   }
 
   public updateItems(updator: (list: T[]) => T[]): void {
@@ -364,6 +429,19 @@ export default class FatTableInner<T, P extends object>
   }
 
   /**
+   * 设置dataSource
+   */
+  private setDataSource(dataSource: T[]) {
+    if (this.props.onChange) {
+      this.props.onChange(dataSource)
+    } else {
+      this.setState({
+        dataSource,
+      })
+    }
+  }
+
+  /**
    * 初始化状态
    */
   private initialState() {
@@ -498,6 +576,27 @@ export default class FatTableInner<T, P extends object>
     } else {
       const values = this.props.form.getFieldsValue()
       doit(values)
+    }
+  }
+
+  private async handleShift(
+    from: T,
+    dir: 'up' | 'down',
+    onSuccess: () => void,
+  ) {
+    if (!this.props.onShift) {
+      onSuccess()
+      return
+    }
+
+    try {
+      this.setState({ loading: true })
+      await this.props.onShift(from, dir)
+      onSuccess()
+    } catch (err) {
+      message.error(err.message)
+    } finally {
+      this.setState({ loading: false })
     }
   }
 

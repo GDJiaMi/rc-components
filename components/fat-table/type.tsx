@@ -109,4 +109,6 @@ export interface FatTableProps<T, P extends object> {
    */
   // 在删除时显示确认
   confirmOnRemove?: boolean
+  // 上移下移操作
+  onShift?: (form: T, type: 'up' | 'down') => Promise<void>
 }
