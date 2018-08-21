@@ -32,6 +32,7 @@ export interface IFatTable<T> {
   canShiftUp(id: string): boolean
   canShiftDown(id: string): boolean
   updateItems(updator: (list: T[]) => T[]): void
+  updateItem(item: T): void
 }
 
 export type FatTableRenderer<T, P> = ((
@@ -111,4 +112,6 @@ export interface FatTableProps<T, P extends object> {
   confirmOnRemove?: boolean
   // 上移下移操作
   onShift?: (form: T, type: 'up' | 'down') => Promise<void>
+  // 删除操作
+  onRemove?: (ids: any[]) => Promise<void>
 }

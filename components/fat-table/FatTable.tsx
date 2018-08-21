@@ -197,14 +197,12 @@ export default class FatTableInner<T, P extends object>
       Modal.confirm({
         title: '提示',
         content: '确认删除?',
-        onOk: () => {
-          this.removeItems(ids)
-        },
+        onOk: () => this.handleRemove(ids),
         okText: '确认',
         cancelText: '取消',
       })
     } else {
-      this.removeItems(ids)
+      this.handleRemove(ids)
     }
   }
 
@@ -289,61 +287,80 @@ export default class FatTableInner<T, P extends object>
     }
   }
 
+  /**
+   * 批量更新
+   */
   public updateItems(updator: (list: T[]) => T[]): void {
     const items = updator([...this.state.dataSource]) || []
-    items.forEach(this.updateItem)
+    if (items.length === 0) {
+      return
+    }
+    const idKey = this.props.idKey as string
+    const dataSource = [...this.state.dataSource]
+    for (const item of items) {
+      const index = dataSource.findIndex(i => i[idKey] === item[idKey])
+      if (index !== -1) {
+        dataSource.splice(index, 1, item)
+      }
+    }
+    this.setDataSource(dataSource)
   }
 
-  private updateItem = (item: T) => {
-    const list = [...this.state.dataSource]
+  /**
+   * 更新单个元素
+   */
+  public updateItem = (item: T) => {
+    const dataSource = [...this.state.dataSource]
     const { idKey } = this.props
-    const index = list.findIndex(
+    const index = dataSource.findIndex(
       i => i[idKey as string] === item[idKey as string],
     )
-    if (index !== -1) {
-      list.splice(index, 1, item)
 
-      if (this.props.onChange) {
-        this.props.onChange(list)
-      }
-      // TODO: update
-      this.setState({ dataSource: list })
+    if (index !== -1) {
+      dataSource.splice(index, 1, item)
+      this.setDataSource(dataSource)
     }
   }
 
-  // FIXME: 删除可能跨页，但这个页面的数据未必已经加载
-  private removeItems(ids: any[]) {
-    const { idKey } = this.props
+  /**
+   * 删除后同步列表状态
+   */
+  private syncAfterRemove(ids: any[]) {
+    const idKey = this.props.idKey as string
     const pageSize = this.state.pagination.pageSize || 15
     const dataSource = [...this.state.dataSource]
     const currentPageLength = dataSource.length
     const total = this.state.pagination.total || currentPageLength
     const onlyOnePage = total <= pageSize && total === currentPageLength
-    // 一个水平线，低于这个水平线就需要更新了
-    const lowLine = pageSize / 3 || 3
+    // 水平线，低于这个水平线就需要更新了
+    const lowLine = pageSize / 2 || 7
 
     if (
       this.state.allReady || // 前端分页模式
       onlyOnePage || // 只有一页，不需要考虑下一页补全问题
       currentPageLength - ids.length > lowLine // 删除后高于水平线
     ) {
-      // 原地删除
-      // TODO: 调用onChange
-      ids.forEach(id => {
-        const index = dataSource.findIndex(i => i[idKey as string] === id)
+      // remove in replace
+      let dirty = false
+      for (const id in ids) {
+        const index = dataSource.findIndex(i => i[idKey] === id)
         if (index !== -1) {
           dataSource.splice(index, 1)
-          this.setState({
-            dataSource,
-            pagination: {
-              ...this.state.pagination,
-              total: (this.state.pagination.total || currentPageLength) - 1,
-            },
-          })
+          dirty = true
         }
-      })
+      }
+
+      if (dirty) {
+        this.setState({
+          dataSource,
+          pagination: {
+            ...this.state.pagination,
+            total: total - 1,
+          },
+        })
+      }
     } else {
-      // 重载
+      // reload
       this.search(false, false)
     }
   }
@@ -543,6 +560,46 @@ export default class FatTableInner<T, P extends object>
     }
   }
 
+  private async handleShift(
+    from: T,
+    dir: 'up' | 'down',
+    onSuccess: () => void,
+  ) {
+    if (!this.props.onShift) {
+      onSuccess()
+      return
+    }
+
+    try {
+      this.setState({ loading: true })
+      await this.props.onShift(from, dir)
+      onSuccess()
+    } catch (err) {
+      message.error(err.message)
+    } finally {
+      this.setState({ loading: false })
+    }
+  }
+
+  private async handleRemove(ids: string[]) {
+    if (!this.props.onRemove) {
+      this.syncAfterRemove(ids)
+      return
+    }
+
+    try {
+      this.setState({
+        loading: true,
+      })
+      await this.props.onRemove(ids)
+      this.syncAfterRemove(ids)
+    } catch (err) {
+      message.error(err.message)
+    } finally {
+      this.setState({ loading: false })
+    }
+  }
+
   /**
    * 搜索
    * @param validate 开启验证
@@ -576,27 +633,6 @@ export default class FatTableInner<T, P extends object>
     } else {
       const values = this.props.form.getFieldsValue()
       doit(values)
-    }
-  }
-
-  private async handleShift(
-    from: T,
-    dir: 'up' | 'down',
-    onSuccess: () => void,
-  ) {
-    if (!this.props.onShift) {
-      onSuccess()
-      return
-    }
-
-    try {
-      this.setState({ loading: true })
-      await this.props.onShift(from, dir)
-      onSuccess()
-    } catch (err) {
-      message.error(err.message)
-    } finally {
-      this.setState({ loading: false })
     }
   }
 
