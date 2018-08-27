@@ -1,13 +1,25 @@
+import { Omit } from '../utils/type-utils'
 import { PaginationProps } from 'antd/lib/pagination'
 import { ColumnProps, TableProps } from 'antd/lib/table'
 import { FormComponentProps } from 'antd/lib/form'
 import { CSSProperties } from 'react'
 import { QueryGetter } from '../query'
 
+export type FormProps = FormComponentProps['form']
 export interface PaginationInfo {
   current: number
   pageSize: number
 }
+
+export type ColumnType<T, P> = Omit<ColumnProps<T>, 'render'> & {
+  render?: (
+    record: T,
+    index: number,
+    instance: IFatTable<T, P>,
+  ) => React.ReactNode
+}
+
+export type ColumnsType<T, P> = ColumnType<T, P>[]
 
 export interface ListInfo<T> {
   // 数据总条目数
@@ -15,10 +27,9 @@ export interface ListInfo<T> {
   list: T[]
 }
 
-export type FormProps = FormComponentProps['form']
-
 /**
  * FatTable 可用操作
+ * TODO: getDefaultValues
  */
 export interface IFatTable<T, P> {
   fetch(validate?: boolean, resetPage?: boolean, extraParams?: Partial<P>): void
@@ -80,6 +91,9 @@ export type ChangeHandler<T, P> = (list: T[]) => void
 // onPersist
 export type PersistHandler<T, P> = (params: P & PaginationInfo) => object
 
+/**
+ * 参数
+ */
 export interface FatTableProps<T, P extends object> {
   /**
    * 检索相关
@@ -104,12 +118,13 @@ export interface FatTableProps<T, P extends object> {
 
   // 头部，用于渲染通用的搜索表单
   header?: HeaderRenderer<T, P>
+  // 搜索按钮后面的扩展按钮
+  headerExtra?: React.ReactNode
+  footer?: FooterRenderer<T, P>
   // 用于获取自定义的请求参数, 即form之外的请求参数
   getExtraParams?: () => Partial<P>
   // 初始化，主要用于设置参数默认值
   onInit?: Partial<P> | InitHandler<T, P>
-  // 搜索按钮后面的扩展按钮
-  headerExtra?: React.ReactNode
   // 搜索按钮文本，默认为‘搜索’
   searchText?: string
   // 实现更复杂的界面定制, 一般情况下不需要这么复杂
@@ -125,8 +140,7 @@ export interface FatTableProps<T, P extends object> {
   /**
    * 展示相关
    */
-  columns: ColumnProps<T>[]
-  footer?: FooterRenderer<T, P>
+  columns: ColumnsType<T, P>
   size?: 'default' | 'middle' | 'small'
   borderred?: boolean
 

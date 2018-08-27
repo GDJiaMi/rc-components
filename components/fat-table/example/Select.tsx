@@ -28,6 +28,30 @@ export default class Base extends React.Component {
       title: '生日',
       dataIndex: 'birthday',
     },
+    {
+      title: '操作',
+      render: (item, _, table) => {
+        return (
+          <FatTable.Actions>
+            <FatTable.Action
+              disabled={!table.canShiftUp(item.id)}
+              onClick={() => table.shift(item.id, 'up')}
+            >
+              上移
+            </FatTable.Action>
+            <FatTable.Action
+              disabled={!table.canShiftDown(item.id)}
+              onClick={() => table.shift(item.id, 'down')}
+            >
+              下移
+            </FatTable.Action>
+            <FatTable.Action onClick={() => table.remove([item.id])}>
+              删除
+            </FatTable.Action>
+          </FatTable.Actions>
+        )
+      },
+    },
   ]
   public render() {
     return (

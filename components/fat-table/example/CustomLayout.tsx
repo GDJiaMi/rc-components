@@ -25,7 +25,7 @@ interface Order {
 }
 
 export default class CustomLayout extends React.Component {
-  private columns: ColumnsType<Order> = [
+  private columns: ColumnsType<Order, Params> = [
     { dataIndex: 'name', title: '名称' },
     {
       title: '创建时间',

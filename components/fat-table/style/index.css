@@ -1,3 +1,18 @@
 .jm-search-form {
   margin-bottom: 0.5em;
 }
+
+.jm-table-actions {}
+
+.jm-table-actions>a:not(:first-child) {
+  margin-left: 0.8em;
+}
+
+.jm-table-action.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ant-table-thead th {
+  white-space: nowrap;
+}

@@ -7,7 +7,7 @@
 import React from 'react'
 import Form, { FormComponentProps } from 'antd/lib/form'
 import Button from 'antd/lib/button'
-import Table from 'antd/lib/table'
+import Table, { ColumnProps } from 'antd/lib/table'
 import Alert from 'antd/lib/alert'
 import Modal from 'antd/lib/modal'
 import { PaginationProps } from 'antd/lib/pagination'
@@ -53,7 +53,7 @@ export default class FatTableInner<T, P extends object>
     enablePagination: true,
     defaultPagination: DefaultPagination,
     enablePersist: true,
-    confirmOnRemove: false,
+    confirmOnRemove: true,
   }
 
   public state: State<T> = {
@@ -272,7 +272,9 @@ export default class FatTableInner<T, P extends object>
     const dataSource = [...this.state.dataSource]
     const shiftInPlace =
       allReady ||
-      (indexInCurrentPage > 0 && indexInCurrentPage < dataSource.length - 1) // 非跨页
+      (dir === 'up'
+        ? indexInCurrentPage > 0
+        : indexInCurrentPage < dataSource.length - 1) // 非跨页
 
     // shift inplace
     if (shiftInPlace) {
@@ -334,7 +336,6 @@ export default class FatTableInner<T, P extends object>
 
   /**
    * 删除后同步列表状态
-   * TODO: 删除后移除已选中
    */
   private syncAfterRemove(ids: any[]) {
     const idKey = this.props.idKey as string
@@ -353,7 +354,7 @@ export default class FatTableInner<T, P extends object>
     ) {
       // remove in replace
       let dirty = false
-      for (const id in ids) {
+      for (const id of ids) {
         const index = dataSource.findIndex(i => i[idKey] === id)
         if (index !== -1) {
           dataSource.splice(index, 1)
@@ -374,6 +375,31 @@ export default class FatTableInner<T, P extends object>
       // reload
       this.search(false, false)
     }
+
+    this.removeSelected(ids)
+  }
+
+  private removeSelected(ids: any[]) {
+    const idKey = this.props.idKey as string
+    const keys = [...this.state.selected.keys]
+    const rows = [...this.state.selected.rows]
+    for (const id of ids) {
+      const keyIndex = keys.indexOf(id)
+      if (keyIndex !== -1) {
+        keys.splice(keyIndex, 1)
+      }
+
+      const rowIndex = rows.findIndex(i => i[idKey] === id)
+      if (rowIndex !== -1) {
+        rows.splice(rowIndex, 1)
+      }
+    }
+    this.setState({
+      selected: {
+        keys,
+        rows,
+      },
+    })
   }
 
   private defaultRenderer = () => {
@@ -412,7 +438,6 @@ export default class FatTableInner<T, P extends object>
    */
   private renderBody = () => {
     const {
-      columns,
       idKey,
       enablePagination,
       enableSelect,
@@ -444,7 +469,7 @@ export default class FatTableInner<T, P extends object>
         <Table
           size={size}
           bordered={borderred}
-          columns={columns}
+          columns={this.enhanceColumns()}
           rowKey={idKey}
           loading={loading}
           pagination={enablePagination ? pagination : undefined}
@@ -454,6 +479,22 @@ export default class FatTableInner<T, P extends object>
         />
       </>
     )
+  }
+
+  private enhanceColumns = (): ColumnProps<T>[] => {
+    return this.props.columns.map(column => {
+      if (column.render) {
+        const org = column.render
+        return {
+          ...column,
+          render: (text: any, record: T, index: number) => {
+            return org(record, index, this)
+          },
+        }
+      } else {
+        return column
+      }
+    })
   }
 
   /**

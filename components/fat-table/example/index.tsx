@@ -6,6 +6,7 @@ import '../../admin-layout/style/css'
 import './style.css'
 import Base from './Base'
 import CustomLayout from './CustomLayout'
+import Operation from './Select'
 
 const menus = [
   {
@@ -19,6 +20,10 @@ const menus = [
   {
     path: '/custom-layout',
     title: '自定义布局',
+  },
+  {
+    path: '/operation',
+    title: '常用操作',
   },
 ]
 
@@ -40,6 +45,7 @@ class App extends React.Component {
                   </Route>
                   <Route path="/base" component={Base} />
                   <Route path="/custom-layout" component={CustomLayout} />
+                  <Route path="/operation" component={Operation} />
                 </Switch>
               </AdminLayout.View>
             </AdminLayout>
