@@ -7,13 +7,14 @@ import { ColumnProps } from 'antd/lib/table'
 import Query, { QueryGetter } from '../query'
 import FatTableInner from './FatTable'
 import { FatTableProps } from './type'
+export * from './type'
 
 export { QueryGetter }
 
 export type ColumnsType<T> = ColumnProps<T>[]
 
 // FIXME: 避免使用any
-const FatTableWithForm = Form.create()(FatTableInner) as any
+const FatTableWithForm = Form.create()(FatTableInner as any)
 
 export default function FatTable<T, P extends object>(
   props: FatTableProps<T, P> & {

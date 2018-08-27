@@ -34,9 +34,9 @@ export class Query extends React.PureComponent<Props, State> {
     this.state = {
       search: {
         value: {},
-        clear: this.clear,
-        get: this.get,
-        set: this.set,
+        clear: this.clear.bind(this),
+        get: this.get.bind(this),
+        set: this.set.bind(this),
       },
       rawSearch: '',
     }

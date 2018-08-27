@@ -1,5 +1,8 @@
 /**
  * TODO: 支持批量上移下移
+ * TODO: 增强column的功能，支持nowrap，排序等功能
+ * TODO: 处理Table onChange 事件，完善排序，过滤状态的处理
+ * TODO: 性能优化
  */
 import React from 'react'
 import Form, { FormComponentProps } from 'antd/lib/form'
@@ -40,13 +43,14 @@ interface State<T> {
 
 export default class FatTableInner<T, P extends object>
   extends React.Component<Props<T, P>, State<T>>
-  implements IFatTable<T> {
+  implements IFatTable<T, P> {
   public static defaultProps = {
     searchText: '搜索',
     idKey: 'id',
     namespace: '',
     offsetMode: true,
     fetchOnMount: true,
+    enablePagination: true,
     defaultPagination: DefaultPagination,
     enablePersist: true,
     confirmOnRemove: false,
@@ -77,14 +81,16 @@ export default class FatTableInner<T, P extends object>
       // 同步value 和 dataSource
       return { dataSource: props.value }
     }
-    return
+    return null
   }
 
-  public componentWillMount() {
+  public constructor(props: Props<T, P>) {
+    super(props)
     this.initialState()
   }
 
   public componentDidMount() {
+    console.log('mount')
     // 初始化加载列表
     if (this.props.fetchOnMount && this.props.onChange == null) {
       this.search(false, false)
@@ -117,8 +123,12 @@ export default class FatTableInner<T, P extends object>
   /**
    * 命令式触发请求
    */
-  public fetch = (validate: boolean = true, resetPage: boolean = true) => {
-    this.search(validate, resetPage)
+  public fetch = (
+    validate: boolean = true,
+    resetPage: boolean = true,
+    extraParams?: Partial<P>,
+  ) => {
+    this.search(validate, resetPage, extraParams)
   }
 
   /**
@@ -324,6 +334,7 @@ export default class FatTableInner<T, P extends object>
 
   /**
    * 删除后同步列表状态
+   * TODO: 删除后移除已选中
    */
   private syncAfterRemove(ids: any[]) {
     const idKey = this.props.idKey as string
@@ -464,7 +475,7 @@ export default class FatTableInner<T, P extends object>
   private initialState() {
     const {
       namespace,
-      defaultValues,
+      onInit,
       defaultPagination,
       enablePersist,
       onChange,
@@ -473,32 +484,25 @@ export default class FatTableInner<T, P extends object>
 
     // 可控模式
     if (onChange != null) {
-      this.setState({ allReady: true })
+      this.state.allReady = true
     }
 
     const query = (this.query = search.get(namespace))
     if (enablePersist) {
       // 初始化分页信息
-      this.setState({
-        pagination: {
-          ...this.state.pagination,
-          pageSize: query.getInt(
-            'pageSize',
-            (defaultPagination && defaultPagination.pageSize) || 15,
-          ),
-          current: query.getInt(
-            'current',
-            (defaultPagination && defaultPagination.current) || 1,
-          ),
-        },
-      })
+      this.state.pagination.pageSize = query.getInt(
+        'pageSize',
+        (defaultPagination && defaultPagination.pageSize) || 15,
+      )
+      this.state.pagination.current = query.getInt(
+        'current',
+        (defaultPagination && defaultPagination.current) || 1,
+      )
     }
     // 初始化表单默认值
-    if (defaultValues) {
+    if (onInit) {
       this.defaultValues =
-        (typeof defaultValues === 'function'
-          ? defaultValues(query)
-          : defaultValues) || {}
+        (typeof onInit === 'function' ? onInit(query) : onInit) || {}
     }
   }
 
@@ -605,7 +609,11 @@ export default class FatTableInner<T, P extends object>
    * @param validate 开启验证
    * @param resetPage 是否重置页码
    */
-  private search = (validate: boolean = false, resetPage: boolean = true) => {
+  private search = (
+    validate: boolean = false,
+    resetPage: boolean = true,
+    immediatedExtraParams?: Partial<P>,
+  ) => {
     const doit = (values: any) => {
       if (resetPage) {
         this.setState({
@@ -615,9 +623,12 @@ export default class FatTableInner<T, P extends object>
           },
         })
       }
-      const extraParams = this.props.getExtraParams
-        ? this.props.getExtraParams()
-        : {}
+      const extraParams = {
+        ...((immediatedExtraParams as object) || {}),
+        ...(this.props.getExtraParams
+          ? (this.props.getExtraParams() as object)
+          : {}),
+      }
       window.setTimeout(() => {
         this.fetchList({ ...(extraParams as object), ...values })
       })
@@ -645,8 +656,15 @@ export default class FatTableInner<T, P extends object>
       return
     }
 
-    const { offsetMode, onFetch, namespace } = this.props
+    const {
+      offsetMode,
+      onFetch,
+      onPersist,
+      namespace,
+      enablePersist,
+    } = this.props
     let { current = 1, pageSize = 15 } = pagination
+
     const paramsToSerial = {
       current,
       pageSize,
@@ -697,7 +715,13 @@ export default class FatTableInner<T, P extends object>
             }, 100)
             return
           }
-          this.props.search.set(namespace as string, paramsToSerial)
+
+          if (enablePersist) {
+            this.props.search.set(
+              namespace as string,
+              onPersist ? onPersist(paramsToSerial as any) : paramsToSerial,
+            )
+          }
         },
       )
     } catch (error) {
@@ -706,7 +730,7 @@ export default class FatTableInner<T, P extends object>
       })
     } finally {
       this.setState({
-        loading: true,
+        loading: false,
       })
     }
   }
