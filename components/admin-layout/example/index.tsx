@@ -84,9 +84,7 @@ class App extends React.Component {
             </AdminLayout.Action>
             <Dropdown overlay={<div>dropdown</div>}>
               <AdminLayout.Action>
-                <AdminLayout.Avatar
-                  src={require('../../AdminLayout/example/icon.png')}
-                />
+                <AdminLayout.Avatar src={require('./icon.png')} />
                 管理员
               </AdminLayout.Action>
             </Dropdown>
@@ -101,6 +99,9 @@ class App extends React.Component {
               <button onClick={this.toggleShowError}>显示错误信息</button>
             </p>
           </AdminLayout.Body>
+          <AdminLayout.Footer>
+            CopyRight @ 2018 GZB_TEST v0.1
+          </AdminLayout.Footer>
         </AdminLayout.View>
       </AdminLayout>
     )

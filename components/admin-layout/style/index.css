@@ -144,6 +144,7 @@
 }
 
 .jm-header-bar {
+  flex-direction: 0;
   display: flex;
   width: 100%;
   min-height: 58px;
@@ -156,6 +157,7 @@
 }
 
 .jm-body {
+  flex: 1;
   margin: 25px;
   background-color: white;
   border-radius: 5px;
@@ -174,4 +176,11 @@
 
 .ant-menu-submenu-selected>.ant-menu-submenu-title>a {
   color: #fff;
+}
+
+.jm-footer {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 0 16px;
+  margin: 20px 0 24px 0;
 }

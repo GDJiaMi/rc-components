@@ -44,6 +44,7 @@ export default class AdminLayout extends React.Component<
   public static View = createComponent('jm-scroll-view')
   public static Body = createComponent('jm-body')
   public static Action = createComponent('jm-layout__action')
+  public static Footer = createComponent('jm-footer')
   public static Avatar = createComponent<
     React.ImgHTMLAttributes<HTMLImageElement>
   >('jm-layout__avatar', 'img')
