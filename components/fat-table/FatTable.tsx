@@ -170,6 +170,10 @@ export default class FatTableInner<T, P extends object>
     this.setDataSource(list)
   }
 
+  public getDefaultValues() {
+    return this.defaultValues || {}
+  }
+
   /**
    * 重置所有数据并重新获取
    */
@@ -418,7 +422,7 @@ export default class FatTableInner<T, P extends object>
     if (header != null) {
       return (
         <Form className="jm-search-form" layout="inline" onSubmit={this.submit}>
-          {header(form, defaultValues)}
+          {header(form, defaultValues, this)}
           <Form.Item>
             <Button loading={loading} type="primary" htmlType="submit">
               {searchText}
@@ -440,7 +444,6 @@ export default class FatTableInner<T, P extends object>
       idKey,
       enablePagination,
       enableSelect,
-      footer,
       size,
       borderred,
     } = this.props
@@ -475,10 +478,17 @@ export default class FatTableInner<T, P extends object>
           pagination={enablePagination ? pagination : undefined}
           rowSelection={rowSelection}
           dataSource={dataSource}
-          footer={footer}
+          footer={this.renderFooter}
         />
       </>
     )
+  }
+
+  private renderFooter = () => {
+    if (this.props.footer) {
+      return this.props.footer(this)
+    }
+    return null
   }
 
   private enhanceColumns = (): ColumnProps<T>[] => {

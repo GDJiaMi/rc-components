@@ -6,7 +6,7 @@ import Form from 'antd/lib/form'
 import Query, { QueryGetter } from '../query'
 import FatTableInner from './FatTable'
 import { FatTableProps } from './type'
-import { Actions, Action } from './components'
+import { Actions, Action, Nowrap } from './components'
 export * from './type'
 
 export { QueryGetter, Actions, Action }
@@ -21,6 +21,7 @@ export default class FatTable<T, P extends object> extends React.Component<
 > {
   public static Actions = Actions
   public static Action = Action
+  public static Nowrap = Nowrap
   public render() {
     return (
       <Query>

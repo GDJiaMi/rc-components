@@ -5,6 +5,7 @@ export interface HelperProps<T = HTMLDivElement>
   extends React.HTMLAttributes<T> {}
 
 export const Actions = createComponent('jm-table-actions jm-nowrap')
+export const Nowrap = createComponent('jm-nowrap')
 
 export function Action(
   props: HelperProps<HTMLAnchorElement> & {

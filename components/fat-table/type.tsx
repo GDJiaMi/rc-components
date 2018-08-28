@@ -29,7 +29,6 @@ export interface ListInfo<T> {
 
 /**
  * FatTable 可用操作
- * TODO: getDefaultValues
  */
 export interface IFatTable<T, P> {
   fetch(validate?: boolean, resetPage?: boolean, extraParams?: Partial<P>): void
@@ -38,6 +37,7 @@ export interface IFatTable<T, P> {
   clearSelected(): void
   clearForm(): void
   getList(): T[]
+  getDefaultValues(): Partial<P>
   setList(list: T[]): void
   remove(ids: any[]): void
   shift(id: any, dir?: 'up' | 'down'): void
@@ -64,9 +64,12 @@ export type FatTableRenderer<T, P> = ((
 export type HeaderRenderer<T, P> = (
   form: FormProps,
   defaultValues: Partial<P>,
+  instance: IFatTable<T, P>,
 ) => React.ReactNode
 
-export type FooterRenderer<T, P> = () => React.ReactNode
+export type FooterRenderer<T, P> = (
+  instance: IFatTable<T, P>,
+) => React.ReactNode
 
 /**
  * 处理器类型声明
