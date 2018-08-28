@@ -90,7 +90,6 @@ export default class FatTableInner<T, P extends object>
   }
 
   public componentDidMount() {
-    console.log('mount')
     // 初始化加载列表
     if (this.props.fetchOnMount && this.props.onChange == null) {
       this.search(false, false)
@@ -450,7 +449,8 @@ export default class FatTableInner<T, P extends object>
     const rowSelection = enableSelect
       ? {
           selectedRowKeys: selected.keys,
-          onChange: this.handleSelectChange,
+          onSelect: this.handleSelect,
+          onSelectAll: this.handleSelectAll,
         }
       : undefined
 
@@ -552,14 +552,60 @@ export default class FatTableInner<T, P extends object>
   }
 
   /**
-   * 处理表格选择变化
-   * FIXME: rows 可能不等于keys
+   * 选择全部
    */
-  private handleSelectChange = (keys: any[], rows: Object[]) => {
+  private handleSelectAll = (
+    selected: boolean,
+    selectedRows: Object[],
+    changeRow: Object[],
+  ) => {
+    const idKey = this.props.idKey as string
+    const keys = [...this.state.selected.keys]
+    const rows = [...this.state.selected.rows]
+    if (selected) {
+      for (let i of changeRow) {
+        keys.push(i[idKey])
+        rows.push(i as T)
+      }
+    } else {
+      for (let i of changeRow) {
+        const index = keys.findIndex(id => i[idKey] === id)
+        if (index !== -1) {
+          keys.splice(index, 1)
+          rows.splice(index, 1)
+        }
+      }
+    }
+
     this.setState({
       selected: {
         keys,
-        rows: rows as T[],
+        rows,
+      },
+    })
+  }
+
+  /**
+   * 单选
+   */
+  private handleSelect = (record: T, selected: boolean) => {
+    const idKey = this.props.idKey as string
+    const keys = [...this.state.selected.keys]
+    const rows = [...this.state.selected.rows]
+    if (selected) {
+      keys.push(record[idKey])
+      rows.push(record)
+    } else {
+      const index = keys.findIndex(i => record[idKey] == i)
+      if (index !== -1) {
+        keys.splice(index, 1)
+        rows.splice(index, 1)
+      }
+    }
+    this.setState({
+      selected: {
+        keys,
+        rows,
       },
     })
   }

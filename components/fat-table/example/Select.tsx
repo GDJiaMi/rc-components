@@ -57,6 +57,7 @@ export default class Base extends React.Component {
     return (
       <AdminLayout.Body>
         <FatTable<Data, Params>
+          enableSelect
           columns={this.columns}
           onFetch={this.handleFetch}
           // 确认默认值
