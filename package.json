@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -9,8 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "rimraf lib es",
     "build:es6": "tsc -d --outDir ./lib --module CommonJS ",
-    "postbuild:es6": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png)\" ./lib",
-    "postbuild:es6module": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png)\" ./es",
+    "postbuild:es6": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png|svg)\" ./lib",
+    "postbuild:es6module": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png|svg)\" ./es",
     "build:es6module": "tsc -d --outDir ./es",
     "build": "npm run build:es6 && npm run build:es6module",
     "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
@@ -50,6 +50,7 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
+    "@types/node": "^10.9.4",
     "@types/classnames": "^2.2.4",
     "@types/lodash": "^4.14.113",
     "@types/qs": "^6.5.1",

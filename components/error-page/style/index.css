@@ -1,0 +1,33 @@
+.error-page {
+  height: 80%;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-page__icon {
+  width: 33%;
+  max-height: 400px;
+}
+
+.error-page__body {
+  display: flex;
+  flex-direction: column;
+  margin-left: 6em;
+}
+
+.error-page__title {
+  font-size: 65px;
+  margin: 20px 0;
+  color: #54333c;
+}
+
+.error-page__desc {
+  font-size: 23px;
+  color: #59343b;
+}
+
+.error-page__footer .ant-btn:not(:first-child) {
+  margin-left: 0.5em;
+}
