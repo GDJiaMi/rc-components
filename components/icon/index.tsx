@@ -16,7 +16,7 @@ export interface IconProps extends React.SVGProps<any> {
   spinning?: boolean
 }
 
-export class Icon extends React.PureComponent<IconProps, {}> {
+export default class Icon extends React.PureComponent<IconProps, {}> {
   public render() {
     const { src, className, spinning, ...other } = this.props
     return (
