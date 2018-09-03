@@ -12,3 +12,7 @@ export function createComponent<T = HTMLAttributes<HTMLDivElement>>(
     })
   }
 }
+
+export function delay(time: number) {
+  return new Promise(res => window.setTimeout(res, time))
+}

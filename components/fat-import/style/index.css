@@ -1,0 +1,36 @@
+.jm-import {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.jm-import-content {
+  width: 120px;
+  height: 120px;
+}
+
+.jm-import-desc {
+  margin-top: 1em;
+  text-align: center;
+}
+
+.jm-import-desc.success {
+  color: green;
+}
+
+.jm-import-desc.error {
+  color: red;
+  white-space: nowrap;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jm-import-upload {
+  cursor: pointer;
+}
+
+.jm-import-upload .ant-progress-text {
+  font-size: 0.7em;
+}
