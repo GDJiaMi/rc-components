@@ -308,6 +308,7 @@ export class Route extends React.Component<ExtendedRouteProps> {
  */
 export function Display(
   props: {
+    inline?: boolean
     breadcrumb?: boolean
     renderItems?: (
       desc: TitleDesc,
@@ -316,7 +317,7 @@ export function Display(
     ) => React.ReactNode
   } & BreadcrumbProps,
 ) {
-  const { breadcrumb, renderItems, ...other } = props
+  const { breadcrumb, renderItems, className, inline, ...other } = props
   return (
     <Context.Consumer>
       {({ titles }) => {
@@ -327,7 +328,10 @@ export function Display(
               (t, index) => renderItems && renderItems(t, index, titles),
             )
           ) : (
-            <Breadcrumb {...other}>
+            <Breadcrumb
+              {...other}
+              className={`${className || ''} ${inline ? 'inline' : ''}`}
+            >
               {titles.map((t, index) => (
                 <Breadcrumb.Item key={t.id}>
                   {index === titles.length - 1 || t.link == null ? (
