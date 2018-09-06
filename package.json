@@ -50,9 +50,9 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@types/node": "^10.9.4",
     "@types/classnames": "^2.2.4",
     "@types/lodash": "^4.14.113",
+    "@types/node": "^10.9.4",
     "@types/qs": "^6.5.1",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
@@ -79,6 +79,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
-    "qs": "^6.5.2"
+    "qs": "^6.5.2",
+    "react-split-pane": "^0.1.82"
   }
 }
