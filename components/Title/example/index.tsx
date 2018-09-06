@@ -10,14 +10,15 @@ import Icon from 'antd/lib/icon'
 import 'antd/lib/icon/style/css'
 import Dropdown from 'antd/lib/dropdown'
 import 'antd/lib/dropdown/style/css'
-import { Provider, Title, Display, Route } from '..'
+import Title from '../index'
 import AdminLayout from '../../admin-layout'
 import '../../AdminLayout/style/css'
-import BackBar from '../../BackBar'
+import BackBar from '../../back-bar'
 import '../../BackBar/style/css'
 import '../style/css'
 import './style.css'
 
+const Route = Title.Route
 const menus = [
   {
     title: 'Dashboard',
@@ -33,11 +34,11 @@ class App extends React.Component {
   public render() {
     return (
       <Router history={createHashHistory()}>
-        <Provider debug>
+        <Title.Provider debug>
           <AdminLayout
             siteName="example"
             title={
-              <Display
+              <Title.Display
                 breadcrumb
                 style={{ display: 'inline', fontSize: '16px' }}
               />
@@ -74,7 +75,7 @@ class App extends React.Component {
               </Switch>
             </AdminLayout.View>
           </AdminLayout>
-        </Provider>
+        </Title.Provider>
       </Router>
     )
   }

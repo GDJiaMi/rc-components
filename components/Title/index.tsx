@@ -246,23 +246,6 @@ class InnerTitle extends React.Component<InnerTitleProps> {
   }
 }
 
-/**
- * 声明当前title
- */
-export function Title(props: {
-  children: React.ReactNode
-  link?: string
-  exact?: boolean
-  strict?: boolean
-  dontTranformLink?: boolean
-}) {
-  return (
-    <Context.Consumer>
-      {injectProps => <InnerTitle {...injectProps} {...props} />}
-    </Context.Consumer>
-  )
-}
-
 export interface ExtendedRouteProps extends RouteProps {
   title?:
     | React.ReactNode
@@ -351,10 +334,26 @@ export function Display(
   )
 }
 
-export default {
-  Provider,
-  Route,
-  Title,
-  Display,
-  Context,
+/**
+ * 声明当前title
+ */
+export default class Title extends React.PureComponent<{
+  children: React.ReactNode
+  link?: string
+  exact?: boolean
+  strict?: boolean
+  dontTranformLink?: boolean
+}> {
+  public static Provider = Provider
+  public static Route = Route
+  public static Display = Display
+  public static Context = Context
+  public render() {
+    const props = this.props
+    return (
+      <Context.Consumer>
+        {injectProps => <InnerTitle {...injectProps} {...props} />}
+      </Context.Consumer>
+    )
+  }
 }
