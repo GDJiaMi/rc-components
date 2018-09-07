@@ -1,17 +1,15 @@
 /**
  * 包含所有打开的窗口
  * TODO: 激活的tab要显示在当前视窗
- * TODO: 在session下保持状态
  */
 import React from 'react'
 import { withRouter, RouteComponentProps, Link } from 'react-router-dom'
 import Scrollbars from 'react-custom-scrollbars'
 import memoize from 'lodash/memoize'
 import Icon from 'antd/lib/icon'
-import { Context, TitleDesc } from '../title'
 
 export interface TabsProps extends RouteComponentProps<{}> {
-  titles: TitleDesc[]
+  persistOnSession?: boolean
 }
 
 interface TabDesc {
@@ -27,6 +25,10 @@ interface State {
 const style = { height: 38, zIndex: 9, width: '100%', backgroundColor: 'white' }
 
 export class WindowTabs extends React.Component<TabsProps, State> {
+  public static defaultProps = {
+    persistOnSession: true,
+  }
+
   public state: State = {
     tabs: [],
   }
@@ -64,6 +66,16 @@ export class WindowTabs extends React.Component<TabsProps, State> {
 
     // 初始化窗口
     const location = this.props.location
+    if (this.props.persistOnSession) {
+      const data = window.sessionStorage.getItem('__windows-tabs__')
+      if (data) {
+        this.setState({ tabs: JSON.parse(data) }, () => {
+          this.update()
+        })
+        return
+      }
+    }
+
     this.updateTabs([
       {
         key: location.pathname,
@@ -139,6 +151,10 @@ export class WindowTabs extends React.Component<TabsProps, State> {
           if (index > 0) {
             const nextActiveTab = tabs[index - 1]
             history.replace(nextActiveTab.url)
+          } else if (tabs.length) {
+            // 删除第一个, 激活第二个
+            const nextActiveTab = tabs[0]
+            history.replace(nextActiveTab.url)
           } else {
             if (key === '/') {
               return
@@ -176,12 +192,15 @@ export class WindowTabs extends React.Component<TabsProps, State> {
   }
 
   private updateTabs = (tabs: TabDesc[]) => {
-    this.setState({ tabs })
+    this.setState({ tabs }, () => {
+      if (this.props.persistOnSession) {
+        window.sessionStorage.setItem('__windows-tabs__', JSON.stringify(tabs))
+      }
+    })
   }
 
   private getTitle() {
-    const titles = this.props.titles
-    return titles.length ? titles[titles.length - 1].content : document.title
+    return document.title
   }
 
   private getUrl() {
@@ -190,12 +209,4 @@ export class WindowTabs extends React.Component<TabsProps, State> {
   }
 }
 
-export default withRouter(function(props) {
-  return (
-    <Context.Consumer>
-      {({ titles }) => {
-        return <WindowTabs {...props} titles={titles} />
-      }}
-    </Context.Consumer>
-  )
-})
+export default withRouter(WindowTabs)
