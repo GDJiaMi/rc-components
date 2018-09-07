@@ -12,11 +12,13 @@ import Dropdown from 'antd/lib/dropdown'
 import 'antd/lib/dropdown/style/css'
 import Title from '../index'
 import AdminLayout from '../../admin-layout'
-import '../../AdminLayout/style/css'
+import '../../admin-layout/style/css'
 import BackBar from '../../back-bar'
-import '../../BackBar/style/css'
+import '../../back-bar/style/css'
 import '../style/css'
 import './style.css'
+import WindowsTabs from '../../window-tabs'
+import '../../window-tabs/style/css'
 
 const Route = Title.Route
 const menus = [
@@ -43,7 +45,7 @@ class App extends React.Component {
                 style={{ display: 'inline', fontSize: '16px' }}
               />
             }
-            logo={require('../../AdminLayout/example/icon.png')}
+            logo={require('../../admin-layout/example/icon.png')}
             menus={menus}
             after={
               <>
@@ -56,7 +58,7 @@ class App extends React.Component {
                 <Dropdown overlay={<div>dropdown</div>}>
                   <AdminLayout.Action>
                     <AdminLayout.Avatar
-                      src={require('../../AdminLayout/example/icon.png')}
+                      src={require('../../admin-layout/example/icon.png')}
                     />
                     管理员
                   </AdminLayout.Action>
@@ -65,6 +67,7 @@ class App extends React.Component {
             }
           >
             <AdminLayout.View>
+              <WindowsTabs />
               <Title link="/">首页</Title>
               <Switch>
                 <Route path="/" exact component={Dashboard} title="控制台" />
