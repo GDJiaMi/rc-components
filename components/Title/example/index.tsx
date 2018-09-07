@@ -73,7 +73,7 @@ class App extends React.Component {
                 <Route path="/" exact component={Dashboard} title="控制台" />
                 <Route path="/orders" title="订单">
                   <Route path="/orders" exact component={Orders} />
-                  <Route path="/orders/:id" component={Order} />
+                  <Route path="/orders/:id" component={Order} remountOnChange />
                 </Route>
               </Switch>
             </AdminLayout.View>

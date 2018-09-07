@@ -98,6 +98,10 @@ class InnerProvider extends React.Component<ProviderProps, ContextValue> {
         console.log('update', [...titles])
       }
       this.setState({ titles }, this.updateDocumentTitle)
+    } else {
+      // 不存在，可能被误删了。因为数据是先增加后删的，对于使用路由变量的组件，路由变化后可能导致
+      // 重新挂载，这时候就会导致误删
+      this.setTitle(t)
     }
   }
 
@@ -155,19 +159,6 @@ class InnerTitle extends React.Component<InnerTitleProps> {
   private key: string
   private link: string
 
-  public constructor(props: InnerTitleProps) {
-    super(props)
-    if (this.props.link && this.props.link !== '/') {
-      if (this.props.link in uidmap) {
-        this.key = uidmap[this.props.link]
-      } else {
-        this.key = uidmap[this.props.link] = String(uid++)
-      }
-    } else {
-      this.key = String(uid++)
-    }
-  }
-
   public componentWillMount() {
     const {
       link,
@@ -179,11 +170,19 @@ class InnerTitle extends React.Component<InnerTitleProps> {
     } = this.props
 
     if (link) {
-      if (dontTranformLink) {
+      // '/' 可能存在多个, 所以为他们创建多个
+      if (link === '/') {
+        this.key = String(uid++)
+      } else if (link in uidmap) {
+        this.key = uidmap[link]
+      }
+
+      if (dontTranformLink || path.isAbsolute(link)) {
+        // 不要转换，一般是绝对路径
         this.link = link
-      } else if (path.isAbsolute(link)) {
-        // 绝对路径
-        this.link = link
+        if (this.key == null) {
+          this.key = uidmap[link] = String(uid++)
+        }
       } else {
         // 相对路径
         let absLink: string = ''
@@ -199,6 +198,10 @@ class InnerTitle extends React.Component<InnerTitleProps> {
           absLink = location.pathname
         }
 
+        if (this.key == null) {
+          this.key = uidmap[absLink] = String(uid++)
+        }
+
         // 相对路径
         const match = matchPath(location.pathname, {
           path: absLink,
@@ -210,6 +213,8 @@ class InnerTitle extends React.Component<InnerTitleProps> {
           this.link = match.url
         }
       }
+    } else {
+      this.key = String(uid++)
     }
 
     this.props.pushTitle({
@@ -250,6 +255,7 @@ export interface ExtendedRouteProps extends RouteProps {
   title?:
     | React.ReactNode
     | ((props: RouteComponentProps<any>) => React.ReactNode)
+  remountOnChange?: boolean
 }
 
 /**
@@ -257,7 +263,14 @@ export interface ExtendedRouteProps extends RouteProps {
  */
 export class Route extends React.Component<ExtendedRouteProps> {
   public render() {
-    const { title, component, render, children, ...other } = this.props
+    const {
+      title,
+      remountOnChange,
+      component,
+      render,
+      children,
+      ...other
+    } = this.props
     return (
       <IRoute
         {...other}
@@ -272,13 +285,17 @@ export class Route extends React.Component<ExtendedRouteProps> {
                 {typeof title === 'function' ? title(props) : title}
               </Title>
             )}
-            {component != null
-              ? React.createElement(component, props)
-              : render != null
-                ? render(props)
-                : typeof children === 'function'
-                  ? children(props)
-                  : children}
+            <React.Fragment
+              key={remountOnChange ? props.location.pathname : undefined}
+            >
+              {component != null
+                ? React.createElement(component, props)
+                : render != null
+                  ? render(props)
+                  : typeof children === 'function'
+                    ? children(props)
+                    : children}
+            </React.Fragment>
           </>
         )}
       />

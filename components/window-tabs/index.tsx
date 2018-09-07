@@ -1,7 +1,7 @@
 /**
  * 包含所有打开的窗口
  * TODO: 激活的tab要显示在当前视窗
- * TODO: 相同路由下面的组件变动需要重新刷新
+ * TODO: 在session下保持状态
  */
 import React from 'react'
 import { withRouter, RouteComponentProps, Link } from 'react-router-dom'
