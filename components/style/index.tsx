@@ -1,4 +1,4 @@
 /**
  * 通用的样式
- * TODO: 导入所有组件的样式
  */
+import './global.css'
