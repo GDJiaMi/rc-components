@@ -46,6 +46,8 @@ export interface UserSelectProps {
   userSelectable?: boolean
   // 用户是支持搜索, 默认开启
   userSearchable?: boolean
+  // 部门节点选择完全受控，父子节点选中状态不再关联
+  checkStrictly?: boolean
   // 最多可选中用户, 默认不限制
   max?: number | string
   // 最多可选中部门
@@ -190,6 +192,7 @@ class UserSelectInner extends React.Component<Props, State>
       keepValue,
       tenementSearchPlaceholder,
       userSelectable,
+      checkStrictly,
       userSearchPlaceholder,
       renderUserSearchItem,
     } = this.props
@@ -234,6 +237,7 @@ class UserSelectInner extends React.Component<Props, State>
           <div className="jm-us-containers">
             <DepartemntTree
               // 部门树
+              checkStrictly={checkStrictly}
               tenementId={currentTenementId}
               tenement={currentTenement}
               selectable={departmentSelectable}

@@ -4,7 +4,7 @@
 import React from 'react'
 import Spin from 'antd/lib/spin'
 import Alert from 'antd/lib/alert'
-import Tree, { AntTreeNodeEvent } from 'antd/lib/tree'
+import Tree, { AntTreeNodeEvent, AntTreeNode } from 'antd/lib/tree'
 import memoize from 'lodash/memoize'
 import withProvider from '../withProvider'
 import { Adaptor, DepartmentDesc, TenementDesc } from '../Provider'
@@ -162,9 +162,41 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     keys: (string[]) | { checked: string[] },
     evt: AntTreeNodeEvent,
   ) => {
+    const checkStrictly = this.props.checkStrictly
+    const checkedTree: Array<{ pos: string; id: string }> = []
     keys = Array.isArray(keys) ? keys : keys.checked
+    if (!checkStrictly) {
+      const checkedPositions = (evt as any).checkedNodesPositions as Array<{
+        node: { key: string }
+        pos: string
+      }>
+      checkedPositions.forEach(pos => {
+        let done = false
+        for (let i = 0; i < checkedTree.length; i++) {
+          const key = checkedTree[i].pos
+          if (key.startsWith(pos.pos)) {
+            // replace
+            checkedTree.splice(i, 1, {
+              pos: pos.pos,
+              id: pos.node.key,
+            })
+            done = true
+            break
+          } else if (pos.pos.startsWith(key)) {
+            // already exist
+            done = true
+            break
+          }
+        }
+
+        if (!done) {
+          checkedTree.push({ pos: pos.pos, id: pos.node.key })
+        }
+      })
+    }
+
     // 将keys映射为DepartmentDesc[]
-    const selectedValue = keys
+    const selectedValue = (checkStrictly ? keys : checkedTree.map(i => i.id))
       .map(id => {
         return this.state.dataSourceById![id]
       })

@@ -24,6 +24,8 @@ export interface DepartmentSelectProps {
   max?: number | string
   // 最多可选企业
   maxTenement?: number | string
+  // 部门节点选择完全受控，父子节点选中状态不再关联
+  checkStrictly?: boolean
   // 保留value的值，不允许删除已有的数据
   keepValue?: boolean
   width?: number
