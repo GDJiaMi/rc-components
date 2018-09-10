@@ -1,6 +1,5 @@
 /**
  * 包含所有打开的窗口
- * TODO: 激活的tab要显示在当前视窗
  */
 import React from 'react'
 import { withRouter, RouteComponentProps, Link } from 'react-router-dom'
@@ -110,6 +109,7 @@ export class WindowTabs extends React.Component<TabsProps, State> {
           {this.state.tabs.map(k => (
             <Link
               to={k.url}
+              id={`jm-window-tab__${k.key}`}
               className={`jm-window-tab ${
                 location.pathname === k.key ? 'active' : ''
               }`}
@@ -196,6 +196,17 @@ export class WindowTabs extends React.Component<TabsProps, State> {
       if (this.props.persistOnSession) {
         window.sessionStorage.setItem('__windows-tabs__', JSON.stringify(tabs))
       }
+
+      // focus
+      window.requestAnimationFrame(() => {
+        const active = document.getElementById(
+          `jm-window-tab__${this.props.location.pathname}`,
+        )
+        if (active) {
+          const offsetLeft = active.offsetLeft
+          this.scrollbar.current!.scrollLeft(offsetLeft)
+        }
+      })
     })
   }
 
