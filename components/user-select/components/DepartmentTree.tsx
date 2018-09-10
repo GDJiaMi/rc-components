@@ -22,6 +22,7 @@ export interface DepartmentTreeProps {
   // 已选中部门
   value?: DepartmentDesc[]
   onChange?: (value: DepartmentDesc[]) => void
+  checkStrictly?: boolean
   orgValue?: DepartmentDesc[]
   keepValue?: boolean
 }
@@ -40,6 +41,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   public state: State = {
     loading: false,
   }
+
+  private preservedValue: DepartmentDesc[] = []
 
   public componentDidMount() {
     this.fetchDepartment()
@@ -91,6 +94,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   private renderTree = () => {
+    const { checkStrictly } = this.props
     const { dataSource, expandedKeys } = this.state
 
     if (dataSource == null) {
@@ -104,7 +108,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return (
       <Tree
         key={tenementId}
-        checkStrictly
+        checkStrictly={checkStrictly}
         checkable={selectable}
         checkedKeys={checkedKeys}
         selectedKeys={selectedKeys}
@@ -152,37 +156,28 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
   /**
    * 处理树节点选中
+   * TODO: 支持checkStrictly模式
    */
   private handleTreeCheck = (
     keys: (string[]) | { checked: string[] },
     evt: AntTreeNodeEvent,
   ) => {
     keys = Array.isArray(keys) ? keys : keys.checked
-    const value = this.props.value || []
-    const checkedNodes: DepartmentDesc[] = []
-    this.getCheckedNodes(
-      (evt.checkedNodes || []).map(i => (i.props as { id: string }).id),
-      checkedNodes,
-    )
+    // 将keys映射为DepartmentDesc[]
     const selectedValue = keys
       .map(id => {
-        let index = value.findIndex(i => i.id === id)
-        if (index !== -1) {
-          return value[index]
-        }
-        index = checkedNodes.findIndex(i => i.id === id)
-        if (index !== -1) {
-          return checkedNodes[index]
-        }
-        return null
+        return this.state.dataSourceById![id]
       })
-      .filter(i => i != null) as DepartmentDesc[]
+      .concat(this.preservedValue)
 
     if (this.props.onChange) {
       this.props.onChange(selectedValue)
     }
   }
 
+  /**
+   * 获取已选中的部门节点
+   */
   private getCheckedNodes(keys: string[], results: DepartmentDesc[]) {
     if (this.state.dataSourceById) {
       for (const id of keys) {
@@ -222,15 +217,43 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       const cached = DepartmentTree.getCached(res, this.props.tenement)
       // 计算默认展开
       const expandedKeys = DepartmentTree.getExpandedKeys(res)
-      this.setState({
-        dataSource: res,
-        dataSourceById: cached,
-        expandedKeys: [...expandedKeys],
-      })
+      this.setState(
+        {
+          dataSource: res,
+          dataSourceById: cached,
+          expandedKeys: [...expandedKeys],
+        },
+        () => {
+          this.updatePreserveValue()
+        },
+      )
     } catch (error) {
       this.setState({ error })
     } finally {
       this.setState({ loading: false })
+    }
+  }
+
+  /**
+   * Tree选择是无法保留跨企业的数据的，所有需要计算非当前树的保留字段，避免被移除
+   */
+  private updatePreserveValue() {
+    const value = this.props.value
+    const tenementId = this.props.tenementId
+    this.preservedValue = []
+    if (value == null) {
+      return
+    }
+    // 记录非当前企业的已选值
+    for (const item of value) {
+      if (item.tenement && item.tenement.id !== tenementId) {
+        this.preservedValue.push(item)
+      } else if (
+        this.state.dataSourceById &&
+        this.state.dataSourceById[item.id] == null
+      ) {
+        this.preservedValue.push(item)
+      }
     }
   }
 
