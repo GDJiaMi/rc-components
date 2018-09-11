@@ -175,7 +175,7 @@
   top: 50%;
   transform: translateY(-50%);
   right: 6px;
-  background: #ffffffbf;
+  background: #ffffff;
 }
 
 .jm-user-search__error {
@@ -185,4 +185,25 @@
 
 .jm-user-search__error .anticon {
   margin-right: 0.5em;
+}
+
+.jm-department-filter .anticon{
+  color: #c1c1c1;
+}
+ 
+.jm-department-filter .ant-input {
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px dashed #d0d0d0;
+}
+
+.jm-department-filter .ant-input:focus,
+.jm-department-filter .ant-input:hover {
+  box-shadow: unset;
+  border-bottom: 1px solid #1890ff;
+}
+
+.jm-matching {
+  display: inline-block;
+  background-color: #ffffa8;
 }

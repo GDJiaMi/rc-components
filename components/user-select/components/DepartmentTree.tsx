@@ -4,8 +4,11 @@
 import React from 'react'
 import Spin from 'antd/lib/spin'
 import Alert from 'antd/lib/alert'
-import Tree, { AntTreeNodeEvent, AntTreeNode } from 'antd/lib/tree'
+import Input from 'antd/lib/input'
+import Icon from 'antd/lib/icon'
+import Tree, { AntTreeNodeEvent } from 'antd/lib/tree'
 import memoize from 'lodash/memoize'
+import debounce from 'lodash/debounce'
 import withProvider from '../withProvider'
 import { Adaptor, DepartmentDesc, TenementDesc } from '../Provider'
 import { DefaultExpandedLevel } from '../constants'
@@ -32,6 +35,7 @@ interface Props extends Adaptor, DepartmentTreeProps {}
 interface State {
   loading?: boolean
   error?: Error
+  filter?: string
   dataSource?: DepartmentDesc
   dataSourceById?: { [key: string]: DepartmentDesc }
   expandedKeys?: string[]
@@ -56,10 +60,19 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   public render() {
-    const { loading, error } = this.state
+    const { loading, error, dataSource } = this.state
     return (
       <div className="jm-us-container">
         <Spin spinning={!!loading}>
+          {!!dataSource && (
+            <Input
+              className="jm-department-filter"
+              prefix={<Icon type="filter" />}
+              onChange={this.handleFilterChange}
+              size="small"
+              placeholder="筛选部门"
+            />
+          )}
           {!!error && (
             <Alert
               showIcon
@@ -110,6 +123,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         key={tenementId}
         checkStrictly={checkStrictly}
         checkable={selectable}
+        autoExpandParent
         checkedKeys={checkedKeys}
         selectedKeys={selectedKeys}
         expandedKeys={expandedKeys}
@@ -132,11 +146,28 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       keepValue &&
       orgValue &&
       orgValue.findIndex(i => i.id === tree.id) !== -1
-    const userCount = tree.userCount != null ? `(${tree.userCount})` : ''
+    const filter = this.state.filter || ''
+    const userCount = tree.userCount != null ? ` (${tree.userCount})` : ''
+    const filterIndex = tree.name.indexOf(filter)
+    const beforeStr = tree.name.substr(0, filterIndex)
+    const afterStr = tree.name.substr(filterIndex + filter.length)
+
+    const title =
+      filterIndex !== -1 ? (
+        <span>
+          {beforeStr}
+          <span className="jm-matching">{filter}</span>
+          {afterStr}
+          {userCount}
+        </span>
+      ) : (
+        `${tree.name}${userCount}`
+      )
+
     return tree.children != null && tree.children.length !== 0 ? (
       <Tree.TreeNode
         disableCheckbox={disabled}
-        title={`${tree.name} ${userCount} `}
+        title={title}
         key={tree.id}
         // @ts-ignore
         id={tree.id}
@@ -146,13 +177,41 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     ) : (
       <Tree.TreeNode
         disableCheckbox={disabled}
-        title={`${tree.name} ${userCount}`}
+        title={title}
         key={tree.id}
         // @ts-ignore
         id={tree.id}
       />
     )
   }
+
+  private handleFilterChange = (evt: React.ChangeEvent<{ value: string }>) => {
+    this.setState(
+      {
+        filter: evt.target.value,
+      },
+      this.regenerateExpandedKeys,
+    )
+  }
+
+  private regenerateExpandedKeys = debounce(() => {
+    let newExpandedKeys: string[] = []
+    const { dataSource, dataSourceById, filter = '' } = this.state
+    if (dataSourceById == null || filter.trim() === '') {
+      newExpandedKeys =
+        dataSource == null ? [] : DepartmentTree.getExpandedKeys(dataSource)
+    } else {
+      newExpandedKeys = Object.keys(dataSourceById)
+        .map(key => {
+          if (dataSourceById[key].name.indexOf(filter) !== -1) {
+            return dataSourceById[key].id
+          }
+          return null
+        })
+        .filter(i => !!i) as string[]
+    }
+    this.setState({ expandedKeys: newExpandedKeys })
+  }, 500)
 
   /**
    * 处理树节点选中
