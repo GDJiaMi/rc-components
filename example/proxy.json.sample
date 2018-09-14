@@ -1,0 +1,7 @@
+{
+  "/eim": {
+    "target": "http://192.168.76.142:9090",
+    "changeOrigin": true,
+    "secure": false
+  }
+}
