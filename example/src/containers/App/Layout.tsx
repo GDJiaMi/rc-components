@@ -4,6 +4,9 @@
 import React from 'react'
 import { AdminLayout, Title, WindowTabs, Acl } from '@gdjiami/rc-components'
 import { AclInjectedProps } from '@gdjiami/rc-components/lib/acl'
+import { Dropdown, Menu } from 'antd'
+import { ClickParam } from 'antd/lib/menu'
+import history from '@src/history'
 import menus from './menus'
 
 const logo = require('./logo.png')
@@ -25,9 +28,17 @@ export class Layout extends React.Component<Props> {
         after={
           <>
             <AdminLayout.Action>One</AdminLayout.Action>
-            <AdminLayout.Action>
-              <AdminLayout.Avatar src={logo} />
-            </AdminLayout.Action>
+            <Dropdown
+              overlay={
+                <Menu onClick={this.handleMenuClick}>
+                  <Menu.Item key="logout">退出登录</Menu.Item>
+                </Menu>
+              }
+            >
+              <AdminLayout.Action>
+                <AdminLayout.Avatar src={logo} />
+              </AdminLayout.Action>
+            </Dropdown>
           </>
         }
       >
@@ -38,6 +49,12 @@ export class Layout extends React.Component<Props> {
         </AdminLayout.View>
       </AdminLayout>
     )
+  }
+
+  private handleMenuClick = (params: ClickParam) => {
+    if (params.key === 'logout') {
+      history.replace('/login')
+    }
   }
 }
 
