@@ -24,7 +24,7 @@
   "dependencies": {
     "@gdjiami/jslib": "^0.1.2",
     "@gdjiami/jsonrpc": "^1.0.1",
-    "@gdjiami/rc-components": "^0.1.17",
+    "@gdjiami/rc-components": "^0.1.19",
     "antd": "3.7.0",
     "mobx": "^5.1.0",
     "mobx-react": "^5.2.6",

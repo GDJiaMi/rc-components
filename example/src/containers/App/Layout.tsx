@@ -2,14 +2,17 @@
  * 后台布局
  */
 import React from 'react'
-import { AdminLayout, Title } from '@gdjiami/rc-components'
+import { AdminLayout, Title, WindowTabs, Acl } from '@gdjiami/rc-components'
+import { AclInjectedProps } from '@gdjiami/rc-components/lib/acl'
 import menus from './menus'
 
 const logo = require('./logo.png')
 
-export default class Layout extends React.PureComponent<{
+interface Props extends AclInjectedProps {
   path: string
-}> {
+}
+
+export class Layout extends React.PureComponent<Props> {
   public render() {
     return (
       <AdminLayout
@@ -17,7 +20,8 @@ export default class Layout extends React.PureComponent<{
         title={<Title.Display breadcrumb inline />}
         logo={logo}
         path={this.props.path}
-        menus={menus}
+        // @ts-ignore
+        menus={this.props.choose(menus)}
         after={
           <>
             <AdminLayout.Action>One</AdminLayout.Action>
@@ -28,6 +32,7 @@ export default class Layout extends React.PureComponent<{
         }
       >
         <AdminLayout.View>
+          <WindowTabs />
           {this.props.children}
           <AdminLayout.Footer>版本号 Power By GZB</AdminLayout.Footer>
         </AdminLayout.View>
@@ -35,3 +40,5 @@ export default class Layout extends React.PureComponent<{
     )
   }
 }
+
+export default Acl.withAcl(Layout)

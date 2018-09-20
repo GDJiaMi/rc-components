@@ -8,7 +8,7 @@ export default class Home extends React.Component {
   public render() {
     return (
       <AdminLayout.Body>
-        <Title.Title>首页</Title.Title>
+        <Title>首页</Title>
         Home
       </AdminLayout.Body>
     )

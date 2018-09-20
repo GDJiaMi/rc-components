@@ -12,9 +12,9 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@gdjiami/jsonrpc/-/jsonrpc-1.0.1.tgz#7783ef67ed0b090cf8eca48f29a3d8f8b67e58c7"
 
-"@gdjiami/rc-components@^0.1.17":
-  version "0.1.17"
-  resolved "https://registry.yarnpkg.com/@gdjiami/rc-components/-/rc-components-0.1.17.tgz#6ff6e63da31ac3915d0119cbe087b26e5ea3d8f2"
+"@gdjiami/rc-components@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@gdjiami/rc-components/-/rc-components-0.1.19.tgz#13ffd55927e6830705159316c5b1db108aec62e6"
   dependencies:
     classnames "^2.2.6"
     qs "^6.5.2"
