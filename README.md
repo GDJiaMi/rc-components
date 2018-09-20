@@ -2,6 +2,8 @@
 
 React 组件库， 收集了工作宝中后台应用的常用组件或套件. 致力于减少应用开发的代码重复，提高维护效率
 
+[DEMO](http://demo.ejiahe.com/api/rc-components/#/)
+
 ## Installation
 
 ```shell
