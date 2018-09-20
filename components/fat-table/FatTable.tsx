@@ -464,7 +464,9 @@ export default class FatTableInner<T, P extends object>
             banner
             message={
               <span>
-                数据加载失败({error.message}), <a onClick={this.retry}>重试</a>
+                数据加载失败(
+                {error.message}
+                ), <a onClick={this.retry}>重试</a>
               </span>
             }
           />

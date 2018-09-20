@@ -11,8 +11,10 @@ const { Choose, Option, Switch, Allows } = Acl
 
 @observer
 export default class Home extends React.Component {
-  @observable and: boolean = true
-  @observable or: boolean = false
+  @observable
+  and: boolean = true
+  @observable
+  or: boolean = false
 
   public render() {
     return (

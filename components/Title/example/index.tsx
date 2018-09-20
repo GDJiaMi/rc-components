@@ -128,7 +128,10 @@ class Order extends React.Component<RouteComponentProps<{ id: string }>> {
         </BackBar>
         <AdminLayout.Body>
           <Title link=":id">
-            <span>订单详情-{this.state.name}</span>
+            <span>
+              订单详情-
+              {this.state.name}
+            </span>
           </Title>
           <h1>{this.state.name}</h1>
           <p>balbalaba</p>

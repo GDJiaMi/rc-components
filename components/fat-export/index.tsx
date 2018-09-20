@@ -112,7 +112,8 @@ export default class Export extends React.Component<ExportProps, State>
               >
                 <Radio value={ExportScope.All}>{allText}</Radio>
                 <Radio value={ExportScope.Current}>{currentText}</Radio>
-              </Radio.Group>,
+              </Radio.Group>
+              ,
             </div>
           )}
           {!!footer && <div className="jm-import-desc">{footer}</div>}

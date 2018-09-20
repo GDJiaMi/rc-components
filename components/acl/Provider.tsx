@@ -8,6 +8,10 @@ export interface AclProviderProps {
   role: Array<Role> | Role
 }
 
+export interface OptionArray<T> extends Array<Action | T> {
+  0: Action
+}
+
 export interface ContextValue {
   /**
    * 从一组规则中选择出允许的字段
@@ -19,7 +23,7 @@ export interface ContextValue {
    * 重载方法
    * 处理 [[A, 'foo'], ['*', 'baz', 'yep'], [B, 'bar']] 这样的数据格式
    */
-  choose<T>(options: Array<[Action, ...T[]]>): T[]
+  choose<T>(options: Array<OptionArray<T>>): T[]
   /**
    * 是否具备指定的所有权限(全部满足)
    */
@@ -86,7 +90,7 @@ export default class Provider extends React.Component<
   }
 
   choose<T>(options: { [action: string]: T; [actionInNumber: number]: T }): T[]
-  choose<T>(options: Array<[Action, ...T[]]>): T[]
+  choose<T>(options: Array<OptionArray<T>>): T[]
   choose<T>(
     options:
       | (Array<[Action, ...T[]]>)

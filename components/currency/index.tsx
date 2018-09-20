@@ -1,7 +1,9 @@
 /**
  * 货币，数字格式化
  */
-export interface CurrencyProps {
+import React, { StatelessComponent, HTMLAttributes } from 'react'
+
+export interface CurrencyProps extends HTMLAttributes<HTMLSpanElement> {
   precision?: number
   prefix?: string
   suffix?: string
@@ -10,10 +12,15 @@ export interface CurrencyProps {
 
 const ThousandRegex = /\d(?=(\d{3})+\.)/g
 
-export default function Currency(props: CurrencyProps) {
+const Currency: StatelessComponent<CurrencyProps> = (props: CurrencyProps) => {
+  const { suffix, value, precision, prefix, ...other } = props
   return (
-    (props.suffix || '') +
-    props.value.toFixed(props.precision || 2).replace(ThousandRegex, '$&,') +
-    (props.suffix || '')
+    <span {...other}>
+      {(prefix || '') +
+        value.toFixed(precision || 2).replace(ThousandRegex, '$&,') +
+        (suffix || '')}
+    </span>
   )
 }
+
+export default Currency
