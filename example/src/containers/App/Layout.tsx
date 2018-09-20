@@ -12,7 +12,7 @@ interface Props extends AclInjectedProps {
   path: string
 }
 
-export class Layout extends React.PureComponent<Props> {
+export class Layout extends React.Component<Props> {
   public render() {
     return (
       <AdminLayout
