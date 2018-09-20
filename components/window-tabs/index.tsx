@@ -21,7 +21,13 @@ interface State {
   tabs: TabDesc[]
 }
 
-const style = { height: 38, zIndex: 9, width: '100%', backgroundColor: 'white' }
+const style = {
+  height: 38,
+  zIndex: 9,
+  width: '100%',
+  backgroundColor: 'white',
+  flexShrink: 0,
+}
 
 export class WindowTabs extends React.Component<TabsProps, State> {
   public static defaultProps = {

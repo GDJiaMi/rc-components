@@ -16,6 +16,11 @@ export interface ContextValue {
    */
   choose<T>(options: { [action: string]: T; [actionInNumber: number]: T }): T[]
   /**
+   * 重载方法
+   * 处理 [[A, 'foo'], ['*', 'baz', 'yep'], [B, 'bar']] 这样的数据格式
+   */
+  choose<T>(options: Array<[Action, ...T[]]>): T[]
+  /**
    * 是否具备指定的所有权限(全部满足)
    */
   allowsAll(...actions: Action[]): boolean
@@ -80,24 +85,41 @@ export default class Provider extends React.Component<
     )
   }
 
-  choose<T>(options: {
-    [action: string]: T
-    [actionInNumber: number]: T
-  }): T[] {
-    const list = []
-    for (const action in options) {
-      if (!options.hasOwnProperty(action)) {
-        continue
-      }
+  choose<T>(options: { [action: string]: T; [actionInNumber: number]: T }): T[]
+  choose<T>(options: Array<[Action, ...T[]]>): T[]
+  choose<T>(
+    options:
+      | (Array<[Action, ...T[]]>)
+      | ({ [action: string]: T; [actionInNumber: number]: T }),
+  ): T[] {
+    let list: T[] = []
+    if (Array.isArray(options)) {
+      for (const item of options) {
+        const [action, ...res] = item
+        if (action === '*') {
+          list = list.concat(res)
+          continue
+        }
 
-      if (action === '*') {
-        // 通配模式
-        list.push(options[action])
-        continue
+        if (this.allowsSome(action)) {
+          list = list.concat(res)
+        }
       }
+    } else {
+      for (const action in options) {
+        if (!options.hasOwnProperty(action)) {
+          continue
+        }
 
-      if (this.allowsSome(action)) {
-        list.push(options[action])
+        if (action === '*') {
+          // 通配模式
+          list.push(options[action])
+          continue
+        }
+
+        if (this.allowsSome(action)) {
+          list.push(options[action])
+        }
       }
     }
     return list

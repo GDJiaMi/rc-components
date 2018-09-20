@@ -29,8 +29,12 @@ export interface FatModalProps<T> extends Partial<FatModalLocale> {
   width?: string
 }
 
-interface TemporaryProps<T> extends Partial<FatModalLocale> {
+export interface TemporaryProps<T> extends Partial<FatModalLocale> {
   defaultValue: Partial<T>
+}
+
+export interface IFatModal<T> {
+  show(props?: TemporaryProps<T>): void
 }
 
 interface Props<T> extends FormComponentProps, FatModalProps<T> {}
@@ -43,7 +47,8 @@ interface State<T> {
   templateProps?: TemporaryProps<T>
 }
 
-export class FatModalInner<T> extends React.Component<Props<T>, State<T>> {
+export class FatModalInner<T> extends React.Component<Props<T>, State<T>>
+  implements IFatModal<T> {
   public state: State<T> = {
     loading: false,
   }
@@ -158,7 +163,7 @@ const FatModalWithForm = Form.create()(FatModalInner) as any
 
 export default function FatModal<T>(
   props: FatModalProps<T> & {
-    wrappedComponentRef?: React.Ref<FatModalInner<T>>
+    wrappedComponentRef?: React.Ref<IFatModal<T>>
   },
 ) {
   return <FatModalWithForm {...props} />

@@ -266,17 +266,6 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
-  /**
-   * 获取已选中的部门节点
-   */
-  private getCheckedNodes(keys: string[], results: DepartmentDesc[]) {
-    if (this.state.dataSourceById) {
-      for (const id of keys) {
-        results.push(this.state.dataSourceById[id])
-      }
-    }
-  }
-
   private handleExpand = (keys: string[]) => {
     this.setState({
       expandedKeys: keys,
