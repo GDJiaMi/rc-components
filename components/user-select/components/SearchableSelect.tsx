@@ -6,7 +6,6 @@ import Select, { SelectValue } from 'antd/lib/select'
 import Icon from 'antd/lib/icon'
 import Spin from 'antd/lib/spin'
 import debounce from 'lodash/debounce'
-import { Adaptor } from '../Provider'
 import { PageSize } from '../constants'
 
 export interface SearchableSelectProps<T> {
@@ -31,7 +30,7 @@ export interface SearchableSelectProps<T> {
   ) => Promise<{ total: number; items: T[] }>
 }
 
-interface Props<T> extends SearchableSelectProps<T>, Adaptor {}
+interface Props<T> extends SearchableSelectProps<T> {}
 interface State<T> {
   loading?: boolean
   error?: Error
@@ -39,7 +38,7 @@ interface State<T> {
   query: string
 }
 
-export default class TenementSearch<
+export default class SearchableSelect<
   T extends { id: string }
 > extends React.Component<Props<T>, State<T>> {
   public state: State<T> = {
