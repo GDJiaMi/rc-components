@@ -2,7 +2,7 @@
  * 基本
  */
 import React from 'react'
-import FatTable, { ColumnsType, FetchHandler } from '../index'
+import FatTable, { ColumnsType, FetchHandler, IFatTable } from '../index'
 import Input from 'antd/lib/input'
 import Form from 'antd/lib/form'
 import AdminLayout from '../../admin-layout'
@@ -19,6 +19,7 @@ interface Data {
 }
 
 export default class Base extends React.Component {
+  private table = React.createRef<IFatTable<Data, Params>>()
   private columns: ColumnsType<Data, Params> = [
     {
       title: '名称',
@@ -47,6 +48,7 @@ export default class Base extends React.Component {
             </>
           )}
           headerExtra={<Form.Item>header extra here</Form.Item>}
+          wrappedComponentRef={this.table}
         />
       </AdminLayout.Body>
     )

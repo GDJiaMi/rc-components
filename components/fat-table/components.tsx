@@ -1,4 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
+import { LocationDescriptor } from 'history'
 import { createComponent } from '../utils/common'
 
 export interface HelperProps<T = HTMLDivElement>
@@ -7,19 +9,26 @@ export interface HelperProps<T = HTMLDivElement>
 export const Actions = createComponent('jm-table-actions jm-nowrap')
 export const Nowrap = createComponent('jm-nowrap')
 
+/**
+ * 表格行操作项
+ */
 export function Action(
   props: HelperProps<HTMLAnchorElement> & {
     disabled?: boolean
+    to?: LocationDescriptor
   },
 ) {
-  const { className, disabled, onClick, ...other } = props
-  return (
-    <a
-      className={`jm-table-action ${className || ''} ${
-        disabled ? 'disabled' : ''
-      }`}
-      onClick={disabled ? undefined : onClick}
-      {...other}
-    />
-  )
+  const { className, to, disabled, onClick, ...other } = props
+  const commonProps = {
+    className: `jm-table-action ${className || ''} ${
+      disabled ? 'disabled' : ''
+    }`,
+    onClick: disabled ? undefined : onClick,
+    ...other,
+  }
+
+  if (to != null) {
+    return <Link to={to} {...commonProps} />
+  }
+  return <a {...commonProps} />
 }

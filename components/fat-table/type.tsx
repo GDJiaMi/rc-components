@@ -40,6 +40,11 @@ export interface IFatTable<T, P> {
   getDefaultValues(): Partial<P>
   setList(list: T[]): void
   remove(ids: any[]): void
+  removeSelected(): void
+  // handle* 可以直接用于事件绑定
+  handleRemoveSelected(): void
+  shiftUp(id: any): void
+  shiftDown(id: any): void
   shift(id: any, dir?: 'up' | 'down'): void
   submit(evt: React.FormEvent<void>): void
   canShiftUp(id: string): boolean
@@ -67,6 +72,8 @@ export type HeaderRenderer<T, P> = (
   instance: IFatTable<T, P>,
 ) => React.ReactNode
 
+export type HeaderExtraRenderer<T, P> = HeaderRenderer<T, P> | React.ReactNode
+
 export type FooterRenderer<T, P> = (
   instance: IFatTable<T, P>,
 ) => React.ReactNode
@@ -83,7 +90,11 @@ export type FetchHandler<T, P> = (
 ) => Promise<ListInfo<T>>
 
 // onShift
-export type ShiftHandler<T, P> = (form: T, type: 'up' | 'down') => Promise<void>
+export type ShiftHandler<T, P> = (
+  from: T,
+  to: T | null,
+  type: 'up' | 'down',
+) => Promise<void>
 
 // onRemove
 export type RemoveHandler<T, P> = (ids: any[]) => Promise<void>
@@ -122,7 +133,7 @@ export interface FatTableProps<T, P extends object> {
   // 头部，用于渲染通用的搜索表单
   header?: HeaderRenderer<T, P>
   // 搜索按钮后面的扩展按钮
-  headerExtra?: React.ReactNode
+  headerExtra?: HeaderExtraRenderer<T, P>
   footer?: FooterRenderer<T, P>
   // 用于获取自定义的请求参数, 即form之外的请求参数
   getExtraParams?: () => Partial<P>

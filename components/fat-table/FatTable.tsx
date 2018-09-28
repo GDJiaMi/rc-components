@@ -79,7 +79,13 @@ export default class FatTableInner<T, P extends object>
   ) {
     if (props.onChange && props.value && props.value !== state.dataSource) {
       // 同步value 和 dataSource
-      return { dataSource: props.value }
+      return {
+        dataSource: props.value,
+        pagination: {
+          ...state.pagination,
+          total: props.value ? props.value.length : 0,
+        },
+      }
     }
     return null
   }
@@ -198,6 +204,17 @@ export default class FatTableInner<T, P extends object>
     )
   }
 
+  public removeSelected() {
+    const ids = this.getSelectedIds()
+    if (ids.length) {
+      this.remove(ids)
+    }
+  }
+
+  public handleRemoveSelected = () => {
+    this.removeSelected()
+  }
+
   /**
    * 移除元素
    */
@@ -258,6 +275,14 @@ export default class FatTableInner<T, P extends object>
     return index < total - 1
   }
 
+  public shiftUp(id: any) {
+    return this.shift(id, 'up')
+  }
+
+  public shiftDown(id: any) {
+    this.shift(id, 'down')
+  }
+
   /**
    * 移动元素
    */
@@ -288,13 +313,13 @@ export default class FatTableInner<T, P extends object>
       dataSource[toIndex] = current
       dataSource[indexInCurrentPage] = to
       // persist if need
-      this.handleShift(current, dir, () => {
+      this.handleShift(current, to, dir, () => {
         // 触发更新
         this.setDataSource(dataSource)
       })
     } else {
       // shift remote
-      this.handleShift(dataSource[indexInCurrentPage], dir, () => {
+      this.handleShift(dataSource[indexInCurrentPage], null, dir, () => {
         // 重新加载数据
         // TODO: 可能要跟随
         this.search(false, false)
@@ -379,10 +404,10 @@ export default class FatTableInner<T, P extends object>
       this.search(false, false)
     }
 
-    this.removeSelected(ids)
+    this.removeSelectedKeys(ids)
   }
 
-  private removeSelected(ids: any[]) {
+  private removeSelectedKeys(ids: any[]) {
     const idKey = this.props.idKey as string
     const keys = [...this.state.selected.keys]
     const rows = [...this.state.selected.rows]
@@ -428,7 +453,9 @@ export default class FatTableInner<T, P extends object>
               {searchText}
             </Button>
           </Form.Item>
-          {headerExtra}
+          {!!headerExtra && typeof headerExtra === 'function'
+            ? headerExtra(form, defaultValues, this)
+            : headerExtra}
         </Form>
       )
     }
@@ -480,7 +507,7 @@ export default class FatTableInner<T, P extends object>
           pagination={enablePagination ? pagination : undefined}
           rowSelection={rowSelection}
           dataSource={dataSource}
-          footer={this.renderFooter}
+          footer={this.renderFooter()}
         />
       </>
     )
@@ -488,9 +515,11 @@ export default class FatTableInner<T, P extends object>
 
   private renderFooter = () => {
     if (this.props.footer) {
-      return this.props.footer(this)
+      return () => {
+        return this.props.footer!(this)
+      }
     }
-    return null
+    return undefined
   }
 
   private enhanceColumns = (): ColumnProps<T>[] => {
@@ -665,6 +694,7 @@ export default class FatTableInner<T, P extends object>
 
   private async handleShift(
     from: T,
+    to: T | null,
     dir: 'up' | 'down',
     onSuccess: () => void,
   ) {
@@ -675,7 +705,7 @@ export default class FatTableInner<T, P extends object>
 
     try {
       this.setState({ loading: true })
-      await this.props.onShift(from, dir)
+      await this.props.onShift(from, to, dir)
       onSuccess()
     } catch (err) {
       message.error(err.message)
