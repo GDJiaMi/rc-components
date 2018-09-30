@@ -1,11 +1,12 @@
 import React from 'react'
 import Alert from 'antd/lib/alert'
-import { Action } from './type'
+import { Action, Role } from './type'
 import { Context } from './Provider'
 import Link from '../link'
 
 export interface AllowsProps {
-  action: Action[] | Action
+  action?: Action[] | Action
+  role?: Role[] | Role
   // 附加的and条件
   and?: boolean | (() => boolean)
   // 附加的or条件
@@ -26,9 +27,10 @@ export default class Allows extends React.Component<AllowsProps> {
   public render() {
     return (
       <Context.Consumer>
-        {({ allowsAll, allowsSome }) => {
+        {({ allowsAll, allowsSome, is }) => {
           const {
             action,
+            role,
             children,
             and,
             or,
@@ -36,14 +38,27 @@ export default class Allows extends React.Component<AllowsProps> {
             otherwise,
             ...props
           } = this.props
-          const actions = Array.isArray(action) ? action : [action]
-          const determiner = type === 'all' ? allowsAll : allowsSome
           const andCond =
             and == null ? true : typeof and === 'function' ? and() : !!and
+          let ok: boolean = false
+
+          if (andCond) {
+            if (action != null) {
+              const actions = Array.isArray(action) ? action : [action]
+              const determiner = type === 'all' ? allowsAll : allowsSome
+              ok = determiner(...actions)
+            } else if (role != null) {
+              const roles = Array.isArray(role) ? role : [role]
+              ok = is(...roles)
+            } else {
+              throw TypeError('Must provide action or role')
+            }
+          }
+
           const orCond =
             or == null ? false : typeof or === 'function' ? or() : !!or
 
-          return (determiner(...actions) && andCond) || orCond
+          return (andCond && ok) || orCond
             ? children && React.isValidElement(children)
               ? React.cloneElement(children, props)
               : children

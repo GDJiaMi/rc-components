@@ -32,6 +32,8 @@ export interface SearchableSelectProps<T> {
 
 interface Props<T> extends SearchableSelectProps<T> {}
 interface State<T> {
+  // 全部数据就绪，启动本地搜索模式
+  allReady?: boolean
   loading?: boolean
   error?: Error
   list?: T[]
@@ -51,7 +53,7 @@ export default class SearchableSelect<
   }
 
   public render() {
-    const { loading, list, error } = this.state
+    const { loading, list, error, allReady } = this.state
     const {
       value,
       allowClear,
@@ -74,6 +76,7 @@ export default class SearchableSelect<
           mode={multiple ? 'multiple' : undefined}
           placeholder={placeholder}
           filterOption={false}
+          optionFilterProp={allReady ? 'children' : undefined}
           allowClear={allowClear}
           notFoundContent={
             loading ? (
@@ -104,14 +107,22 @@ export default class SearchableSelect<
   }
 
   private handleBlur = () => {
-    this.setState({ query: '', error: undefined }, this.fetchList)
+    this.setState({ query: '', error: undefined }, () => {
+      if (!this.state.allReady) {
+        this.fetchList()
+      }
+    })
     if (this.props.onBlur) {
       this.props.onBlur()
     }
   }
 
   private handleSearch = debounce((query: string) => {
-    this.setState({ query }, this.fetchList)
+    this.setState({ query }, () => {
+      if (!this.state.allReady) {
+        this.fetchList()
+      }
+    })
   }, 500)
 
   private handleChange = (
@@ -138,6 +149,7 @@ export default class SearchableSelect<
       const res = await this.props.onFetch(this.state.query, 1, PageSize)
       this.setState({
         list: res.items,
+        allReady: res.total === res.items.length,
       })
     } catch (error) {
       this.setState({ error, list: [] })
