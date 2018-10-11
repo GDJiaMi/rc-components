@@ -11,7 +11,7 @@ export interface PaginationInfo {
   pageSize: number
 }
 
-export type ColumnType<T, P> = Omit<ColumnProps<T>, 'render'> & {
+export type ColumnType<T, P = {}> = Omit<ColumnProps<T>, 'render'> & {
   render?: (
     record: T,
     index: number,
@@ -19,7 +19,7 @@ export type ColumnType<T, P> = Omit<ColumnProps<T>, 'render'> & {
   ) => React.ReactNode
 }
 
-export type ColumnsType<T, P> = ColumnType<T, P>[]
+export type ColumnsType<T, P = {}> = ColumnType<T, P>[]
 
 export interface ListInfo<T> {
   // 数据总条目数
@@ -30,7 +30,7 @@ export interface ListInfo<T> {
 /**
  * FatTable 可用操作
  */
-export interface IFatTable<T, P> {
+export interface IFatTable<T, P = {}> {
   fetch(validate?: boolean, resetPage?: boolean, extraParams?: Partial<P>): void
   getSelected(): T[]
   getSelectedIds(): any[]
@@ -51,12 +51,14 @@ export interface IFatTable<T, P> {
   canShiftDown(id: string): boolean
   updateItems(updator: (list: T[]) => T[]): void
   updateItem(item: T): void
+  scrollToLastPage(): void
+  scrollToFirstPage(): void
 }
 
 /**
  * 渲染器类型声明
  */
-export type FatTableRenderer<T, P> = ((
+export type FatTableRenderer<T, P = {}> = ((
   form: FormProps,
   defaultValues: Partial<P>,
   slots: {
@@ -66,15 +68,17 @@ export type FatTableRenderer<T, P> = ((
   instance: IFatTable<T, P>,
 ) => React.ReactNode)
 
-export type HeaderRenderer<T, P> = (
+export type HeaderRenderer<T, P = {}> = (
   form: FormProps,
   defaultValues: Partial<P>,
   instance: IFatTable<T, P>,
 ) => React.ReactNode
 
-export type HeaderExtraRenderer<T, P> = HeaderRenderer<T, P> | React.ReactNode
+export type HeaderExtraRenderer<T, P = {}> =
+  | HeaderRenderer<T, P>
+  | React.ReactNode
 
-export type FooterRenderer<T, P> = (
+export type FooterRenderer<T, P = {}> = (
   instance: IFatTable<T, P>,
 ) => React.ReactNode
 
@@ -82,33 +86,33 @@ export type FooterRenderer<T, P> = (
  * 处理器类型声明
  */
 // onInit
-export type InitHandler<T, P> = ((query: QueryGetter) => Partial<P>)
+export type InitHandler<T, P = {}> = ((query: QueryGetter) => Partial<P>)
 
 // onFetch
-export type FetchHandler<T, P> = (
+export type FetchHandler<T, P = {}> = (
   params: P & PaginationInfo,
 ) => Promise<ListInfo<T>>
 
 // onShift
-export type ShiftHandler<T, P> = (
+export type ShiftHandler<T, P = {}> = (
   from: T,
   to: T | null,
   type: 'up' | 'down',
 ) => Promise<void>
 
 // onRemove
-export type RemoveHandler<T, P> = (ids: any[]) => Promise<void>
+export type RemoveHandler<T, P = {}> = (ids: any[]) => Promise<void>
 
 // onChange
-export type ChangeHandler<T, P> = (list: T[]) => void
+export type ChangeHandler<T, P = {}> = (list: T[]) => void
 
 // onPersist
-export type PersistHandler<T, P> = (params: P & PaginationInfo) => object
+export type PersistHandler<T, P = {}> = (params: P & PaginationInfo) => object
 
 /**
  * 参数
  */
-export interface FatTableProps<T, P extends object> {
+export interface FatTableProps<T, P extends object = {}> {
   /**
    * 检索相关
    */
@@ -169,8 +173,10 @@ export interface FatTableProps<T, P extends object> {
   // 在删除时显示确认
   confirmOnRemove?: boolean
   // 上移下移操作
+  // 开发者只负责接口请求，不需要操作数据源
   onShift?: ShiftHandler<T, P>
   // 删除操作
+  // 开发者只负责接口请求，不需要操作数据源
   onRemove?: RemoveHandler<T, P>
   // URL持久化钩子, 返回需要被持久化的对象
   onPersist?: PersistHandler<T, P>

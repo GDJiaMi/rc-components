@@ -3,6 +3,7 @@
  * TODO: 增强column的功能，支持nowrap，排序等功能
  * TODO: 处理Table onChange 事件，完善排序，过滤状态的处理
  * TODO: 性能优化
+ * TODO: 受控模式支持分页等请求
  */
 import React from 'react'
 import Form, { FormComponentProps } from 'antd/lib/form'
@@ -360,6 +361,37 @@ export default class FatTableInner<T, P extends object>
       dataSource.splice(index, 1, item)
       this.setDataSource(dataSource)
     }
+  }
+
+  /**
+   * 滚动到第一页
+   */
+  public scrollToFirstPage() {
+    this.setState({
+      pagination: {
+        ...this.state.pagination,
+        current: 1,
+      },
+    })
+  }
+
+  /**
+   * 滚动到最后一页
+   */
+  public scrollToLastPage() {
+    const { total = 0, pageSize = 15, current } = this.state.pagination
+    const lastPage = Math.ceil(total / pageSize) || 1
+
+    if (current === lastPage) {
+      return
+    }
+
+    this.setState({
+      pagination: {
+        ...this.state.pagination,
+        current: lastPage,
+      },
+    })
   }
 
   /**

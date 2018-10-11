@@ -22,6 +22,8 @@ export interface SearchableSelectProps<T> {
   selectClassName?: string
   selectStyle?: React.CSSProperties
   notFoundContent?: React.ReactNode
+  // 隐藏不在option列表中的项
+  hideUntrackedItems?: boolean
   formatter: (value: T) => string
   onFetch: (
     query: string,
@@ -38,14 +40,39 @@ interface State<T> {
   error?: Error
   list?: T[]
   query: string
+  value?: string[]
 }
 
 export default class SearchableSelect<
   T extends { id: string }
-> extends React.Component<Props<T>, State<T>> {
+> extends React.PureComponent<Props<T>, State<T>> {
   public state: State<T> = {
     loading: false,
     query: '',
+  }
+
+  // TODO: 性能优化
+  public static getDerivedStateFromProps<T extends { id: string }>(
+    props: Props<T>,
+    state: State<T>,
+  ) {
+    const { value, hideUntrackedItems } = props
+    const { list } = state
+    if (value == null || value.length === 0) {
+      return { value: undefined }
+    }
+
+    if (hideUntrackedItems) {
+      if (list) {
+        return {
+          value: value
+            .filter(({ id }) => list.findIndex(i => i.id === id) !== -1)
+            .map(i => i.id),
+        }
+      }
+    }
+
+    return { value: value.map(i => i.id) }
   }
 
   public componentDidMount() {
@@ -53,9 +80,7 @@ export default class SearchableSelect<
   }
 
   public render() {
-    const { loading, list, error, allReady } = this.state
     const {
-      value,
       allowClear,
       multiple,
       placeholder,
@@ -66,13 +91,14 @@ export default class SearchableSelect<
       selectStyle,
       notFoundContent,
     } = this.props
+    const { loading, list, error, allReady, value } = this.state
     return (
       <div className={`jm-user-search ${className || ''}`} style={style}>
         <Select
           showSearch
           className={selectClassName}
           style={selectStyle}
-          value={value && value.map(i => i.id)}
+          value={value}
           mode={multiple ? 'multiple' : undefined}
           placeholder={placeholder}
           filterOption={false}

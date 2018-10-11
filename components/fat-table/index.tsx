@@ -16,7 +16,7 @@ export { QueryGetter, Actions, Action }
 // FIXME: 避免使用any
 const FatTableWithForm = Form.create()(FatTableInner as any)
 
-export default class FatTable<T, P extends object> extends React.Component<
+export default class FatTable<T, P extends object = {}> extends React.Component<
   FatTableProps<T, P> & {
     wrappedComponentRef?: React.Ref<IFatTable<T, P>>
   }
