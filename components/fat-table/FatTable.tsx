@@ -405,12 +405,13 @@ export default class FatTableInner<T, P extends object>
     const total = this.state.pagination.total || currentPageLength
     const onlyOnePage = total <= pageSize && total === currentPageLength
     // 水平线，低于这个水平线就需要更新了
-    const lowLine = pageSize / 2 || 7
+    // const lowLine = pageSize / 2 || 7
 
     if (
       this.state.allReady || // 前端分页模式
-      onlyOnePage || // 只有一页，不需要考虑下一页补全问题
-      currentPageLength - ids.length > lowLine // 删除后高于水平线
+      onlyOnePage // 只有一页，不需要考虑下一页补全问题
+      // 暂时不考虑，每次删除都刷新
+      // currentPageLength - ids.length > lowLine // 删除后高于水平线
     ) {
       // remove in replace
       let dirty = false
