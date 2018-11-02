@@ -34,6 +34,7 @@ export interface AdminLayoutProps {
 
 interface State {
   collapsed: boolean
+  openKeys: string[]
 }
 
 export default class AdminLayout extends React.Component<
@@ -51,6 +52,7 @@ export default class AdminLayout extends React.Component<
 
   public state: State = {
     collapsed: false,
+    openKeys: [],
   }
   public render() {
     const {
@@ -66,7 +68,7 @@ export default class AdminLayout extends React.Component<
       freeze,
       children,
     } = this.props
-    const { collapsed } = this.state
+    const { collapsed, openKeys } = this.state
 
     return (
       <div className="jm-layout">
@@ -94,6 +96,15 @@ export default class AdminLayout extends React.Component<
               inlineCollapsed={collapsed}
               mode="inline"
               selectedKeys={path != null ? [path] : undefined}
+              defaultOpenKeys={
+                !!menus && !!menus.length && path != null && !openKeys.length
+                  ? this.resolveOpenKeys(menus, path)
+                  : openKeys
+              }
+              // openKeys={openKeys}
+              onOpenChange={(openKeys: string[]) => {
+                this.setState({ openKeys })
+              }}
             >
               {!!menus && !!menus.length && this.renderMenu(menus)}
             </Menu>
@@ -115,6 +126,41 @@ export default class AdminLayout extends React.Component<
         </main>
       </div>
     )
+  }
+
+  private resolveOpenKeys = (menus: MenuConfig[], path: string) => {
+    const tmpKeys: string[] = []
+    const parentKeys: string[] = []
+    this._resolveOpenKeys(menus, parentKeys, tmpKeys, path)
+    return tmpKeys.length ? tmpKeys : [path]
+  }
+
+  private _resolveOpenKeys = (
+    menus: MenuConfig[],
+    parentKeys: string[],
+    openKeys: string[],
+    path: string,
+  ) => {
+    menus.forEach(menu => {
+      if (!openKeys.length) {
+        if (menu.path === path) {
+          if (parentKeys.length < 1) {
+            openKeys.push(menu.path)
+          } else {
+            parentKeys.forEach(key => {
+              openKeys.push(key)
+            })
+          }
+        }
+        if (menu.children && menu.children.length) {
+          const tmpMenuPath = [...parentKeys]
+          if (menu.path) {
+            tmpMenuPath.push(menu.path)
+          }
+          this._resolveOpenKeys(menu.children, tmpMenuPath, openKeys, path)
+        }
+      }
+    })
   }
 
   private renderMenu = (menus: MenuConfig[]): React.ReactNode[] => {

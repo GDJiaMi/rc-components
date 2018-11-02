@@ -40,6 +40,7 @@ const menu = [
   {
     title: '统计',
     icon: 'bar-chart',
+    path: '/stat',
     children: [
       {
         path: '/stat/a',
@@ -58,7 +59,7 @@ class App extends React.Component {
     path: string
     showError?: boolean
   } = {
-    path: '/',
+    path: '/stat/b',
     showError: true,
   }
   public render() {
@@ -69,9 +70,9 @@ class App extends React.Component {
         siteName="exmaple"
         title="hello world"
         logo={require('./icon.png')}
-        error={
-          this.state.showError ? new Error('会话失效, 请重新登录') : undefined
-        }
+        // error={
+        //   this.state.showError ? new Error('会话失效, 请重新登录') : undefined
+        // }
         menus={menu}
         path={this.state.path}
         after={
