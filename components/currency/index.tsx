@@ -18,7 +18,9 @@ export default class Currency extends React.PureComponent<CurrencyProps> {
     return (
       <span {...other}>
         {(prefix || '') +
-          value.toFixed(precision || 2).replace(ThousandRegex, '$&,') +
+          value
+            .toFixed(precision != null ? precision : 2)
+            .replace(ThousandRegex, '$&,') +
           (suffix || '')}
       </span>
     )
