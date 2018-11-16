@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "description": "Jiami React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -76,11 +76,11 @@
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "4.1.1",
     "tslint-react": "3.2.0",
-    "typescript": "^3.0.1"
+    "typescript": "^3.0.1",
+    "parcel": "^1.10.3"
   },
   "dependencies": {
     "classnames": "^2.2.6",
-    "parcel": "^1.10.3",
     "qs": "^6.5.2",
     "react-custom-scrollbars": "^4.2.1",
     "react-split-pane": "^0.1.82"
