@@ -98,9 +98,9 @@ export function allowsInner(
                 />
               )
             }
-          >
-            <Target {...this.props} />
-          </Allows>
+            // @ts-ignore
+            children={<Target {...this.props} />}
+          />
         )
       }
     }

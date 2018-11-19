@@ -289,7 +289,8 @@ export class Route extends React.Component<ExtendedRouteProps> {
               key={remountOnChange ? props.location.pathname : undefined}
             >
               {component != null
-                ? React.createElement(component, props)
+                ? // @ts-ignore
+                  React.createElement(component, props)
                 : render != null
                   ? render(props)
                   : typeof children === 'function'

@@ -28,6 +28,7 @@ export function Action(
   }
 
   if (to != null) {
+    // @ts-ignore
     return <Link to={to} {...commonProps} />
   }
   return <a {...commonProps} />

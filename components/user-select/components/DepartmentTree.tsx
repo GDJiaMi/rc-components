@@ -6,7 +6,7 @@ import Spin from 'antd/lib/spin'
 import Alert from 'antd/lib/alert'
 import Input from 'antd/lib/input'
 import Icon from 'antd/lib/icon'
-import Tree, { AntTreeNodeEvent } from 'antd/lib/tree'
+import Tree, { AntTreeNodeCheckedEvent } from 'antd/lib/tree'
 import memoize from 'lodash/memoize'
 import debounce from 'lodash/debounce'
 import withProvider from '../withProvider'
@@ -219,7 +219,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
    */
   private handleTreeCheck = (
     keys: (string[]) | { checked: string[] },
-    evt: AntTreeNodeEvent,
+    evt: AntTreeNodeCheckedEvent,
   ) => {
     const checkStrictly = this.props.checkStrictly
     const checkedTree: Array<{ pos: string; id: string }> = []
