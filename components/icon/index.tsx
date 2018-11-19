@@ -16,6 +16,9 @@ export interface IconProps extends React.SVGProps<any> {
   spinning?: boolean
 }
 
+/**
+ * @deprecated 现在直接使用svgr转换为React组件
+ */
 export default class Icon extends React.PureComponent<IconProps, {}> {
   public render() {
     const { src, className, spinning, ...other } = this.props

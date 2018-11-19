@@ -8,7 +8,6 @@ import Upload from 'antd/lib/upload'
 import { UploadChangeParam } from 'antd/lib/upload'
 import { delay } from '../utils/common'
 import { Showable } from '../type'
-import './style.css'
 
 export { Showable }
 
