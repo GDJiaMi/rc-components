@@ -2,6 +2,10 @@
   margin-bottom: 0.5em;
 }
 
+.jm-table .matched {
+  background: yellow;
+}
+
 .jm-table-actions {}
 
 .jm-table-actions>a:not(:first-child) {

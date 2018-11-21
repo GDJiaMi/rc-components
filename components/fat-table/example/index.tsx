@@ -7,6 +7,7 @@ import './style.css'
 import Base from './Base'
 import CustomLayout from './CustomLayout'
 import Operation from './Select'
+import Tree from './Tree'
 
 const menus = [
   {
@@ -24,6 +25,10 @@ const menus = [
   {
     path: '/operation',
     title: '常用操作',
+  },
+  {
+    path: '/tree',
+    title: '树形结构',
   },
 ]
 
@@ -46,6 +51,7 @@ class App extends React.Component {
                   <Route path="/base" component={Base} />
                   <Route path="/custom-layout" component={CustomLayout} />
                   <Route path="/operation" component={Operation} />
+                  <Route path="/tree" component={Tree} />
                 </Switch>
               </AdminLayout.View>
             </AdminLayout>

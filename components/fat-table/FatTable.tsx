@@ -14,6 +14,7 @@ import Modal from 'antd/lib/modal'
 import { PaginationProps } from 'antd/lib/pagination'
 import message from 'antd/lib/message'
 import { DefaultPagination } from './constants'
+import { getExpandKeyByLevel, filterDataSource } from './utils'
 import { QueryComponentProps, QueryGetter } from '../query'
 import {
   FatTableProps,
@@ -40,6 +41,10 @@ interface State<T> {
   }
   pagination: PaginationProps
   dataSource: T[]
+  // 经过过滤的数据源
+  filteredDataSource?: T[]
+  // 受控展开状态
+  expandedKeys?: string[]
 }
 
 export default class FatTableInner<T, P extends object>
@@ -69,9 +74,12 @@ export default class FatTableInner<T, P extends object>
       onShowSizeChange: this.handleShowSizeChange.bind(this),
       onChange: this.handlePageChange.bind(this),
     },
+    expandedKeys: [],
   }
 
   private query: QueryGetter
+  // 默认展开
+  private defaultExpandedKeys?: string[]
   private defaultValues: Partial<P> = {}
 
   public static getDerivedStateFromProps<T, P extends object>(
@@ -97,9 +105,32 @@ export default class FatTableInner<T, P extends object>
   }
 
   public componentDidMount() {
+    if (this.state.dataSource) {
+      this.defaultExpandedKeys = this.genDefaultExpandedKeys(
+        this.state.dataSource,
+      )
+      this.updateFilterStatus()
+    }
+
     // 初始化加载列表
     if (this.props.fetchOnMount && this.props.onChange == null) {
       this.search(false, false)
+    }
+  }
+
+  public componentDidUpdate(prevProps: Props<T, P>, prevState: State<T>) {
+    if (this.state.dataSource !== prevState.dataSource) {
+      this.defaultExpandedKeys = this.genDefaultExpandedKeys(
+        this.state.dataSource,
+      )
+    }
+
+    if (
+      this.state.dataSource !== prevState.dataSource ||
+      prevProps.filterKey !== this.props.filterKey ||
+      prevProps.filterValue !== this.props.filterValue
+    ) {
+      this.updateFilterStatus()
     }
   }
 
@@ -123,7 +154,7 @@ export default class FatTableInner<T, P extends object>
    */
   public submit = (evt: React.FormEvent<void>) => {
     evt.preventDefault()
-    this.search(true)
+    this.search(true, undefined, undefined, true)
   }
 
   /**
@@ -466,7 +497,7 @@ export default class FatTableInner<T, P extends object>
   private defaultRenderer = () => {
     const { className, style } = this.props
     return (
-      <div className={className} style={style}>
+      <div className={`jm-table ${className || ''}`} style={style}>
         {this.renderHeader()}
         {this.renderBody()}
       </div>
@@ -506,9 +537,11 @@ export default class FatTableInner<T, P extends object>
       enableSelect,
       size,
       borderred,
+      filterKey,
+      filterValue,
     } = this.props
     const { pagination, loading, selected, error } = this.state
-    const { dataSource } = this.state
+    const { dataSource, filteredDataSource } = this.state
     const rowSelection = enableSelect
       ? {
           selectedRowKeys: selected.keys,
@@ -539,7 +572,11 @@ export default class FatTableInner<T, P extends object>
           loading={loading}
           pagination={enablePagination ? pagination : undefined}
           rowSelection={rowSelection}
-          dataSource={dataSource}
+          dataSource={
+            !!filterKey && !!filterValue ? filteredDataSource : dataSource
+          }
+          onExpand={this.handleTreeExpand}
+          expandedRowKeys={this.state.expandedKeys}
           footer={this.renderFooter()}
         />
       </>
@@ -660,6 +697,36 @@ export default class FatTableInner<T, P extends object>
   }
 
   /**
+   * 处理树展开和关闭
+   */
+  private handleTreeExpand = (expanded: boolean, record: T) => {
+    const expandedKeys = this.state.expandedKeys
+    const idKey = this.props.idKey || 'id'
+    const key = record[idKey]
+    if (expanded) {
+      if (expandedKeys == null) {
+        this.setState({
+          expandedKeys: [key],
+        })
+      } else {
+        this.setState({
+          expandedKeys: [...expandedKeys, key],
+        })
+      }
+    } else {
+      if (expandedKeys != null) {
+        const index = expandedKeys.indexOf(key)
+        if (index !== -1) {
+          expandedKeys.splice(index, 1)
+          this.setState({
+            expandedKeys,
+          })
+        }
+      }
+    }
+  }
+
+  /**
    * 单选
    */
   private handleSelect = (record: T, selected: boolean) => {
@@ -766,6 +833,65 @@ export default class FatTableInner<T, P extends object>
     }
   }
 
+  private updateFilterStatus() {
+    const { dataSource, expandedKeys } = this.filterAndGetExpandedKeys(
+      this.props,
+      this.state.dataSource,
+    )
+
+    this.setState({
+      filteredDataSource: dataSource,
+      expandedKeys,
+    })
+  }
+
+  private filterAndGetExpandedKeys<T, P extends object>(
+    props: Props<T, P>,
+    list: T[],
+  ) {
+    if (list == null || list.length === 0) {
+      return {
+        dataSource: undefined,
+        expandedKeys: [],
+      }
+    }
+
+    const { idKey, filterKey, filterValue } = props
+
+    if (!filterKey || !filterValue) {
+      return {
+        dataSource: undefined,
+        expandedKeys: [...this.defaultExpandedKeys],
+      }
+    }
+
+    let dataSource = list
+    let expandedKeys: string[] = []
+    const data = filterDataSource(
+      list,
+      idKey || 'id',
+      filterKey,
+      filterValue,
+      expandedKeys,
+    )
+    dataSource = data
+
+    return { dataSource, expandedKeys }
+  }
+
+  private genDefaultExpandedKeys(list: T[]) {
+    const { defaultExpandedLevel, idKey } = this.props
+    if (
+      defaultExpandedLevel &&
+      defaultExpandedLevel > 0 &&
+      list &&
+      list.length
+    ) {
+      return getExpandKeyByLevel(list, defaultExpandedLevel, idKey || 'id')
+    }
+    return []
+  }
+
   /**
    * 搜索
    * @param validate 开启验证
@@ -775,8 +901,15 @@ export default class FatTableInner<T, P extends object>
     validate: boolean = false,
     resetPage: boolean = true,
     immediatedExtraParams?: Partial<P>,
+    triggerBySubmit?: boolean,
   ) => {
     const doit = (values: any) => {
+      if (triggerBySubmit && this.props.onSubmit) {
+        if (!this.props.onSubmit(values)) {
+          return
+        }
+      }
+
       if (resetPage) {
         this.setState({
           pagination: {

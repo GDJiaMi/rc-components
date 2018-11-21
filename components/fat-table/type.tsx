@@ -93,6 +93,8 @@ export type FetchHandler<T, P = {}> = (
   params: P & PaginationInfo,
 ) => Promise<ListInfo<T>>
 
+export type SubmitHandler<T, P = {}> = (params: P) => boolean
+
 // onShift
 export type ShiftHandler<T, P = {}> = (
   from: T,
@@ -133,6 +135,7 @@ export interface FatTableProps<T, P extends object = {}> {
   onFetch?: FetchHandler<T, P>
   // 在组件挂载时进行fetch，在非受控模式下有效。默认为true
   fetchOnMount?: boolean
+  onSubmit?: SubmitHandler<T, P>
 
   // 头部，用于渲染通用的搜索表单
   header?: HeaderRenderer<T, P>
@@ -161,6 +164,14 @@ export interface FatTableProps<T, P extends object = {}> {
   columns: ColumnsType<T, P>
   size?: 'default' | 'middle' | 'small'
   borderred?: boolean
+
+  /**
+   * 树形表格相关
+   */
+  defaultExpandedLevel?: number
+  // 过滤
+  filterKey?: string
+  filterValue?: string
 
   // id主键，默认为id
   idKey?: string
