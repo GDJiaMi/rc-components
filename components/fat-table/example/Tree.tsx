@@ -33,6 +33,11 @@ export default class Base extends React.Component {
       title: '生日',
       dataIndex: 'birthday',
     },
+    {
+      title: '不存在',
+      dataIndex: 'unknow',
+      showHrWhenEmpty: true,
+    },
   ]
   public state = {
     filterValue: '',

@@ -12,6 +12,8 @@ export interface PaginationInfo {
 }
 
 export type ColumnType<T, P = {}> = Omit<ColumnProps<T>, 'render'> & {
+  // 在无数据时显示空白
+  showHrWhenEmpty?: boolean
   render?: (
     record: T,
     index: number,

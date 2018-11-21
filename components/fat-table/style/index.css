@@ -6,6 +6,14 @@
   background: yellow;
 }
 
+.jm-table__empty-column {
+  height: 1px;
+  background-color: #afafaf;
+  display: inline-block;
+  width: 50px;
+  vertical-align: middle;
+}
+
 .jm-table-actions {}
 
 .jm-table-actions>a:not(:first-child) {

@@ -8,6 +8,7 @@ export interface HelperProps<T = HTMLDivElement>
 
 export const Actions = createComponent('jm-table-actions jm-nowrap')
 export const Nowrap = createComponent('jm-nowrap')
+export const EmptyColumn = createComponent('jm-table__empty-column')
 
 /**
  * 表格行操作项

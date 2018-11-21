@@ -603,7 +603,15 @@ export default class FatTableInner<T, P extends object>
           },
         }
       } else {
-        return column
+        return {
+          ...column,
+          render: (text: any, record: T, index: number) => {
+            if ((text == null || text === '') && column.showHrWhenEmpty) {
+              return <div className="jm-table__empty-column" />
+            }
+            return text
+          },
+        }
       }
     })
   }
