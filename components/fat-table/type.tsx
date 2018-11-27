@@ -84,6 +84,13 @@ export type FooterRenderer<T, P = {}> = (
   instance: IFatTable<T, P>,
 ) => React.ReactNode
 
+export type ExpandedRowRenderer<T, P = {}> = (
+  record: T,
+  index: number,
+  indent: any,
+  expanded: boolean,
+) => React.ReactNode
+
 /**
  * 处理器类型声明
  */
@@ -164,6 +171,7 @@ export interface FatTableProps<T, P extends object = {}> {
    * 展示相关
    */
   columns: ColumnsType<T, P>
+  expandedRowRender?: ExpandedRowRenderer<T, P>
   size?: 'default' | 'middle' | 'small'
   borderred?: boolean
 

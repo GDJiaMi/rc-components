@@ -72,6 +72,9 @@ export default class Base extends React.Component {
             </>
           )}
           headerExtra={<Form.Item>header extra here</Form.Item>}
+          expandedRowRender={r => {
+            return r.birthday + 'expanded'
+          }}
         />
       </AdminLayout.Body>
     )
