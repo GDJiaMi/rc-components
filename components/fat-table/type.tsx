@@ -193,6 +193,8 @@ export interface FatTableProps<T, P extends object = {}> {
    */
   // 在删除时显示确认
   confirmOnRemove?: boolean
+  // 删除的提示语
+  removeConfirmText?: string
   // 上移下移操作
   // 开发者只负责接口请求，不需要操作数据源
   onShift?: ShiftHandler<T, P>

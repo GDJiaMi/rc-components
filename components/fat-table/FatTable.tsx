@@ -258,7 +258,7 @@ export default class FatTableInner<T, P extends object>
     if (this.props.confirmOnRemove) {
       Modal.confirm({
         title: '提示',
-        content: '确认删除?',
+        content: this.props.removeConfirmText || '确认删除?',
         onOk: () => this.handleRemove(ids),
         okText: '确认',
         cancelText: '取消',
