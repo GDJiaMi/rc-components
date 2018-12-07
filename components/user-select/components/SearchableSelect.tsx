@@ -160,8 +160,8 @@ export default class SearchableSelect<
         value == null
           ? []
           : Array.isArray(option)
-            ? option.map(op => op.props['data-value'] as T)
-            : [option.props['data-value'] as T]
+          ? option.map(op => op.props['data-value'] as T)
+          : [option.props['data-value'] as T]
       this.props.onChange(newValue)
     }
   }

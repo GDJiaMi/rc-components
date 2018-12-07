@@ -426,8 +426,8 @@ class UserSelectInner extends React.Component<Props, State>
     return value == null
       ? Infinity
       : typeof value === 'number'
-        ? value
-        : parseInt(value)
+      ? value
+      : parseInt(value)
   })
 }
 

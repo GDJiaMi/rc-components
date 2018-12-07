@@ -87,17 +87,17 @@ export default class Export extends React.Component<ExportProps, State>
                 status == EXPORT_FAIL
                   ? 'exception'
                   : status == EXPORTED
-                    ? 'success'
-                    : 'active'
+                  ? 'success'
+                  : 'active'
               }
               format={() =>
                 status == INIT
                   ? '点击导出'
                   : status == EXPORTING
-                    ? '正在导出'
-                    : status == EXPORT_FAIL
-                      ? '导出失败'
-                      : '点击下载'
+                  ? '正在导出'
+                  : status == EXPORT_FAIL
+                  ? '导出失败'
+                  : '点击下载'
               }
             />
           </div>

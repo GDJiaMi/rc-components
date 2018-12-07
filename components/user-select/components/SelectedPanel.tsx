@@ -193,8 +193,8 @@ export default class SelectedPanel extends React.PureComponent<
       type === 'department'
         ? this.formatDepartment(value)
         : type === 'user'
-          ? this.formatUser(value as UserDesc)
-          : defaultLabel
+        ? this.formatUser(value as UserDesc)
+        : defaultLabel
 
     if (this.props.formatter) {
       const labelFormatter = this.props.formatter[type + 'Label']

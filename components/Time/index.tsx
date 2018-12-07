@@ -32,10 +32,10 @@ function formatTime(date: Date): string {
   return isYesterDay(date)
     ? `昨天 ${hour}:${min}`
     : isToday(date)
-      ? `今天 ${hour}:${min}`
-      : atLeastOneYear(date)
-        ? `${date.getFullYear()}-${month}-${day} ${hour}:${min}`
-        : `${month}-${day} ${hour}:${min}`
+    ? `今天 ${hour}:${min}`
+    : atLeastOneYear(date)
+    ? `${date.getFullYear()}-${month}-${day} ${hour}:${min}`
+    : `${month}-${day} ${hour}:${min}`
 }
 
 export interface TimeProps {

@@ -126,8 +126,8 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
                     status == UPLOAD_FAILED
                       ? `重试`
                       : status == UPLOADING
-                        ? '上传中'
-                        : `点击上传`
+                      ? '上传中'
+                      : `点击上传`
                   }
                 />
               </Upload>
@@ -141,17 +141,17 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
                     status == IMPORT_FAILED
                       ? 'exception'
                       : status == UPLOADED || status == IMPORTED
-                        ? 'success'
-                        : 'active'
+                      ? 'success'
+                      : 'active'
                   }
                   format={() =>
                     status == UPLOADED
                       ? '点击开始导入'
                       : status == IMPORTING
-                        ? '导入中'
-                        : status == IMPORT_FAILED
-                          ? '重试'
-                          : '确定'
+                      ? '导入中'
+                      : status == IMPORT_FAILED
+                      ? '重试'
+                      : '确定'
                   }
                 />
               </div>

@@ -61,7 +61,7 @@ export default class Query {
     return key in this.obj
       ? moment(this.obj[key], format)
       : typeof defaultVal === 'string'
-        ? moment(defaultVal, format)
-        : defaultVal
+      ? moment(defaultVal, format)
+      : defaultVal
   }
 }

@@ -164,15 +164,14 @@ export default class AdminLayout extends React.Component<
   }
 
   private renderMenu = (menus: MenuConfig[]): React.ReactNode[] => {
-    return menus.map(
-      menu =>
-        menu.children && menu.children.length ? (
-          <Menu.SubMenu key={menu.path} title={this.renderMenuLink(menu)}>
-            {this.renderMenu(menu.children)}
-          </Menu.SubMenu>
-        ) : (
-          <Menu.Item key={menu.path}>{this.renderMenuLink(menu)}</Menu.Item>
-        ),
+    return menus.map(menu =>
+      menu.children && menu.children.length ? (
+        <Menu.SubMenu key={menu.path} title={this.renderMenuLink(menu)}>
+          {this.renderMenu(menu.children)}
+        </Menu.SubMenu>
+      ) : (
+        <Menu.Item key={menu.path}>{this.renderMenuLink(menu)}</Menu.Item>
+      ),
     )
   }
 
