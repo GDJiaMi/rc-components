@@ -253,7 +253,7 @@ class InnerTitle extends React.Component<InnerTitleProps> {
 
 export interface ExtendedRouteProps extends RouteProps {
   title?:
-    | React.ReactNode
+    | React.ReactChild
     | ((props: RouteComponentProps<any>) => React.ReactNode)
   remountOnChange?: boolean
 }
@@ -291,10 +291,12 @@ export class Route extends React.Component<ExtendedRouteProps> {
               {component != null
                 ? React.createElement(component as any, props)
                 : render != null
-                  ? render(props)
-                  : typeof children === 'function'
-                    ? children(props)
-                    : children}
+                ? render(props)
+                : typeof children === 'function'
+                ? (children as (props: ExtendedRouteProps) => React.ReactNode)(
+                    props,
+                  )
+                : children}
             </React.Fragment>
           </>
         )}

@@ -15,7 +15,7 @@ import { PaginationProps } from 'antd/lib/pagination'
 import message from 'antd/lib/message'
 import { DefaultPagination } from './constants'
 import { getExpandKeyByLevel, filterDataSource } from './utils'
-import { QueryComponentProps, QueryGetter } from '../query'
+import { QueryComponentProps } from '../query'
 import {
   FatTableProps,
   FatTableRenderer,
@@ -77,7 +77,6 @@ export default class FatTableInner<T, P extends object>
     expandedKeys: [],
   }
 
-  private query: QueryGetter
   // 默认展开
   private defaultExpandedKeys?: string[]
   private defaultValues: Partial<P> = {}
@@ -649,7 +648,7 @@ export default class FatTableInner<T, P extends object>
       this.state.allReady = true
     }
 
-    const query = (this.query = search.get(namespace))
+    const query = search.get(namespace)
     if (enablePersist) {
       // 初始化分页信息
       this.state.pagination.pageSize = query.getInt(

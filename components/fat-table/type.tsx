@@ -78,7 +78,7 @@ export type HeaderRenderer<T, P = {}> = (
 
 export type HeaderExtraRenderer<T, P = {}> =
   | HeaderRenderer<T, P>
-  | React.ReactNode
+  | React.ReactChild
 
 export type FooterRenderer<T, P = {}> = (
   instance: IFatTable<T, P>,
