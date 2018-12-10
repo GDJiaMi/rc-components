@@ -22,7 +22,7 @@ export interface LoginProps
   footer?: React.ReactNode
   background?: string
   indexRouter?: string
-  onSubmit: (value: Params) => Promise<void>
+  onSubmit: (value: Params) => Promise<string | void>
   onSuccess?: () => void
 }
 
@@ -96,9 +96,9 @@ export class Login extends React.Component<LoginProps> {
       }
       try {
         this.setState({ logining: true, error: undefined })
-        await this.props.onSubmit(value)
+        const url = await this.props.onSubmit(value)
         // 重定向
-        this.props.history.replace(this.getRedirectUrl())
+        this.props.history.replace(url || this.getRedirectUrl())
         if (this.props.onSuccess) {
           this.props.onSuccess()
         }

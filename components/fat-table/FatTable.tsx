@@ -534,11 +534,17 @@ export default class FatTableInner<T, P extends object>
       idKey,
       enablePagination,
       enableSelect,
-      size,
-      borderred,
       filterKey,
       filterValue,
       expandedRowRender,
+
+      showHeader,
+      title,
+      size,
+      bordered,
+      scroll,
+      locale,
+      indentSize,
     } = this.props
     const { pagination, loading, selected, error } = this.state
     const { dataSource, filteredDataSource } = this.state
@@ -565,8 +571,6 @@ export default class FatTableInner<T, P extends object>
           />
         )}
         <Table
-          size={size}
-          bordered={borderred}
           columns={this.enhanceColumns()}
           rowKey={idKey}
           loading={loading}
@@ -579,6 +583,7 @@ export default class FatTableInner<T, P extends object>
           expandedRowKeys={this.state.expandedKeys}
           expandedRowRender={expandedRowRender}
           footer={this.renderFooter()}
+          {...{ size, bordered, showHeader, title, scroll, locale, indentSize }}
         />
       </>
     )

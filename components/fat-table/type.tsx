@@ -1,6 +1,6 @@
 import { Omit } from '../utils/type-utils'
 import { PaginationProps } from 'antd/lib/pagination'
-import { ColumnProps, TableProps } from 'antd/lib/table'
+import { ColumnProps, TableProps, TableLocale } from 'antd/lib/table'
 import { FormComponentProps } from 'antd/lib/form'
 import { CSSProperties } from 'react'
 import { QueryGetter } from '../query'
@@ -172,8 +172,6 @@ export interface FatTableProps<T, P extends object = {}> {
    */
   columns: ColumnsType<T, P>
   expandedRowRender?: ExpandedRowRenderer<T, P>
-  size?: 'default' | 'middle' | 'small'
-  borderred?: boolean
 
   /**
    * 树形表格相关
@@ -203,4 +201,15 @@ export interface FatTableProps<T, P extends object = {}> {
   onRemove?: RemoveHandler<T, P>
   // URL持久化钩子, 返回需要被持久化的对象
   onPersist?: PersistHandler<T, P>
+
+  /**
+   * 转发给Table
+   */
+  showHeader?: boolean
+  title?: TableProps<T>['title']
+  size?: 'default' | 'middle' | 'small'
+  bordered?: boolean
+  scroll?: { x?: number | true; y?: number }
+  locale?: TableLocale
+  indentSize?: number
 }

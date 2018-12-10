@@ -35,33 +35,35 @@ export function filterDataSource<T extends { children?: T[]; parent?: T }>(
   value: string,
   expandedKeys: string[],
 ) {
-  // @ts-ignore: 进行一遍浅复制
-  return data
-    .map<T>(i => ({ ...i }))
-    .filter(current => {
-      let findit = false
-      if (current[key].indexOf(value) !== -1) {
-        findit = true
-        current[key] = current[key].replace(
-          value,
-          `<span class="matched">${value}</span>`,
-        )
-      }
-
-      if (current.children) {
-        current.children = filterDataSource(
-          current.children,
-          idKey,
-          key,
-          value,
-          expandedKeys,
-        )
-        if (current.children.length) {
+  return (
+    data
+      // @ts-ignore: 进行一遍浅复制
+      .map<T>(i => ({ ...i }))
+      .filter(current => {
+        let findit = false
+        if (current[key].indexOf(value) !== -1) {
           findit = true
-          expandedKeys.push(current[idKey])
+          current[key] = current[key].replace(
+            value,
+            `<span class="matched">${value}</span>`,
+          )
         }
-      }
 
-      return findit
-    })
+        if (current.children) {
+          current.children = filterDataSource(
+            current.children,
+            idKey,
+            key,
+            value,
+            expandedKeys,
+          )
+          if (current.children.length) {
+            findit = true
+            expandedKeys.push(current[idKey])
+          }
+        }
+
+        return findit
+      })
+  )
 }
