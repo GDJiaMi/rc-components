@@ -6,22 +6,25 @@
  * TODO: 受控模式支持分页等请求
  */
 import React from 'react'
-import Form, { FormComponentProps } from 'antd/lib/form'
-import Button from 'antd/lib/button'
-import Table, { ColumnProps } from 'antd/lib/table'
-import Alert from 'antd/lib/alert'
-import Modal from 'antd/lib/modal'
-import { PaginationProps } from 'antd/lib/pagination'
-import message from 'antd/lib/message'
+import { FormComponentProps } from 'antd/es/form'
+import Table, { ColumnProps } from 'antd/es/table'
+import Alert from 'antd/es/alert'
+import Modal from 'antd/es/modal'
+import { PaginationProps } from 'antd/es/pagination'
+import message from 'antd/es/message'
+import memoize from 'lodash/memoize'
+import { QueryComponentProps } from '../query'
+
 import { DefaultPagination } from './constants'
 import { getExpandKeyByLevel, filterDataSource } from './utils'
-import { QueryComponentProps } from '../query'
 import {
   FatTableProps,
   FatTableRenderer,
   IFatTable,
   PaginationInfo,
 } from './type'
+import TableRow from './TableRow'
+import Header from './Header'
 
 interface Props<T, P extends object>
   extends FatTableProps<T, P>,
@@ -45,8 +48,23 @@ interface State<T> {
   filteredDataSource?: T[]
   // 受控展开状态
   expandedKeys?: string[]
-  // 档期编辑id
+  // 编辑
+  /**
+   * 当前编辑id
+   */
   editing?: any
+  /**
+   * snapshot, 用于保存编辑状态
+   */
+  snapshot?: T
+  /**
+   * 保存错误
+   */
+  saveError?: Error
+}
+
+const components = {
+  body: { row: TableRow },
 }
 
 export default class FatTableInner<T, P extends object>
@@ -153,11 +171,81 @@ export default class FatTableInner<T, P extends object>
   public setEditing = (id: any) => {
     this.setState({
       editing: id,
+      snapshot: undefined,
+      saveError: undefined,
     })
   }
 
   public cancelEdit = () => {
-    this.setState({ editing: undefined })
+    this.setState({
+      editing: undefined,
+      snapshot: undefined,
+      saveError: undefined,
+    })
+  }
+
+  /**
+   * 将编辑数据保存到临时空间
+   */
+  public saveEditSnapshot = (setter: (prevValue: T) => T) => {
+    const { idKey } = this.props
+    if (this.state.editing == null) {
+      throw new Error('[fat-table] saveEditSnapshot 只能在当前编辑的行中使用')
+    }
+
+    const prevValue =
+      this.state.snapshot ||
+      this.state.dataSource.find(i => i[idKey!] === this.state.editing)
+
+    if (prevValue == null) {
+      throw new Error(
+        `[fat-table] saveEditSnapshot 未找到指定 ${idKey} 为 ${
+          this.state.editing
+        } 的行`,
+      )
+    }
+
+    // @ts-ignore
+    const snapshot = setter({ ...prevValue })
+    this.setState({
+      snapshot,
+    })
+  }
+
+  public save = async () => {
+    const { onSave } = this.props
+    if (onSave == null) {
+      throw new Error('[fat-table] onSave prop 未定义')
+    }
+
+    if (this.state.editing == null) {
+      throw new Error('[fat-table] save 只能在当前编辑的行中使用')
+    }
+
+    // 未变动
+    if (this.state.snapshot == null) {
+      this.setState({
+        editing: undefined,
+        snapshot: undefined,
+        saveError: undefined,
+      })
+      return
+    }
+
+    try {
+      this.setState({ loading: true, saveError: undefined })
+      await onSave(this.state.snapshot)
+      // 保存成功
+      this.setState({
+        editing: undefined,
+        snapshot: undefined,
+      })
+    } catch (error) {
+      message.error(error.message)
+      this.setState({ saveError: error })
+    } finally {
+      this.setState({ loading: false })
+    }
   }
 
   /**
@@ -520,22 +608,19 @@ export default class FatTableInner<T, P extends object>
     const { header, headerExtra, searchText, form } = this.props
     const { loading } = this.state
     const { defaultValues } = this
-    if (header != null) {
-      return (
-        <Form className="jm-search-form" layout="inline" onSubmit={this.submit}>
-          {header(form, defaultValues, this)}
-          <Form.Item>
-            <Button loading={loading} type="primary" htmlType="submit">
-              {searchText}
-            </Button>
-          </Form.Item>
-          {!!headerExtra && typeof headerExtra === 'function'
-            ? headerExtra(form, defaultValues, this)
-            : headerExtra}
-        </Form>
-      )
-    }
-    return null
+    return (
+      <Header
+        {...{
+          header,
+          headerExtra,
+          searchText,
+          form,
+          loading,
+          defaultValues,
+          table: this,
+        }}
+      />
+    )
   }
 
   /**
@@ -584,6 +669,7 @@ export default class FatTableInner<T, P extends object>
           />
         )}
         <Table
+          components={components}
           columns={this.enhanceColumns()}
           rowKey={idKey}
           loading={loading}
@@ -593,6 +679,7 @@ export default class FatTableInner<T, P extends object>
             !!filterKey && !!filterValue ? filteredDataSource : dataSource
           }
           onExpand={this.handleTreeExpand}
+          onRow={this.onRow}
           expandedRowKeys={this.state.expandedKeys}
           expandedRowRender={expandedRowRender}
           footer={this.renderFooter()}
@@ -611,34 +698,50 @@ export default class FatTableInner<T, P extends object>
     return undefined
   }
 
-  private enhanceColumns = (): ColumnProps<T>[] => {
-    const { idKey } = this.props
-    return this.props.columns.map(column => {
-      if (column.render) {
-        const org = column.render
-        return {
-          ...column,
-          render: (text: any, record: T, index: number) => {
-            return org(
-              record,
-              index,
-              this,
-              record[idKey!] === this.state.editing,
-            )
-          },
+  /**
+   * 扩展column的功能
+   */
+  private enhanceColumns = memoize(
+    (): ColumnProps<T>[] => {
+      const { idKey } = this.props
+      return this.props.columns.map(column => {
+        if (column.render) {
+          const org = column.render
+          return {
+            ...column,
+            render: (text: any, record: T, index: number) => {
+              // snapshot 优先
+              const { snapshot, editing } = this.state
+              const r =
+                snapshot && record[idKey!] === editing ? snapshot : record
+              return org(r, index, this, record[idKey!] === this.state.editing)
+            },
+          }
+        } else {
+          return {
+            ...column,
+            render: (text: any, record: T, index: number) => {
+              if ((text == null || text === '') && column.showHrWhenEmpty) {
+                return <div className="jm-table__empty-column" />
+              }
+              return text
+            },
+          }
         }
-      } else {
-        return {
-          ...column,
-          render: (text: any, record: T, index: number) => {
-            if ((text == null || text === '') && column.showHrWhenEmpty) {
-              return <div className="jm-table__empty-column" />
-            }
-            return text
-          },
-        }
-      }
-    })
+      })
+    },
+  )
+
+  private onRow = (record: T, index: number) => {
+    if (
+      this.state.saveError &&
+      this.state.editing &&
+      this.state.editing === record[this.props.idKey!]
+    ) {
+      return { error: this.state.saveError }
+    }
+
+    return {}
   }
 
   /**

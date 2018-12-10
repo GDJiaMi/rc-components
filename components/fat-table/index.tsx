@@ -2,7 +2,7 @@
  * FatTable 抽象常用的后台表格使用场景
  */
 import React from 'react'
-import Form from 'antd/lib/form'
+import Form from 'antd/es/form'
 import Query, { QueryGetter } from '../query'
 import FatTableInner from './FatTable'
 import { FatTableProps } from './type'

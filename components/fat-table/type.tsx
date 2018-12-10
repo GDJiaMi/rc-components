@@ -1,7 +1,7 @@
 import { Omit } from '../utils/type-utils'
-import { PaginationProps } from 'antd/lib/pagination'
-import { ColumnProps, TableProps, TableLocale } from 'antd/lib/table'
-import { FormComponentProps } from 'antd/lib/form'
+import { PaginationProps } from 'antd/es/pagination'
+import { ColumnProps, TableProps, TableLocale } from 'antd/es/table'
+import { FormComponentProps } from 'antd/es/form'
 import { CSSProperties } from 'react'
 import { QueryGetter } from '../query'
 
@@ -42,8 +42,6 @@ export interface IFatTable<T, P = {}> {
   getList(): T[]
   getDefaultValues(): Partial<P>
   setList(list: T[]): void
-  setEditing(id: any): void
-  cancelEdit(): void
   remove(ids: any[]): void
   removeSelected(): void
   // handle* 可以直接用于事件绑定
@@ -58,6 +56,16 @@ export interface IFatTable<T, P = {}> {
   updateItem(item: T): void
   scrollToLastPage(): void
   scrollToFirstPage(): void
+  /**
+   * 设置当前编辑的行id
+   */
+  setEditing(id: any): void
+  /**
+   * 取消编辑
+   */
+  cancelEdit(): void
+  save(): void
+  saveEditSnapshot(setter: (prevValue: T) => T): void
 }
 
 /**
@@ -119,6 +127,9 @@ export type RemoveHandler<T, P = {}> = (ids: any[]) => Promise<void>
 
 // onChange
 export type ChangeHandler<T, P = {}> = (list: T[]) => void
+
+// onSave
+export type SaveHandler<T, P = {}> = (snapshot: T) => Promise<void>
 
 // onPersist
 export type PersistHandler<T, P = {}> = (params: P & PaginationInfo) => object
@@ -204,6 +215,7 @@ export interface FatTableProps<T, P extends object = {}> {
   onRemove?: RemoveHandler<T, P>
   // URL持久化钩子, 返回需要被持久化的对象
   onPersist?: PersistHandler<T, P>
+  onSave?: SaveHandler<T, P>
 
   /**
    * 转发给Table

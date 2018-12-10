@@ -9,7 +9,7 @@ import Input from 'antd/es/input'
 import 'antd/es/date-picker/style/css'
 import FatTable, { ColumnsType, FetchHandler, HeaderRenderer } from '../index'
 import moment, { Moment } from 'moment'
-import { InitHandler, PersistHandler } from '../type'
+import { InitHandler, PersistHandler, SaveHandler } from '../type'
 
 const FORMAT = 'YYYY-MM-DD'
 
@@ -22,6 +22,7 @@ interface Order {
   id: string
   name: string
   createdDate: number
+  note: string
 }
 
 export default class CustomLayout extends React.Component {
@@ -30,6 +31,44 @@ export default class CustomLayout extends React.Component {
     {
       title: '创建时间',
       dataIndex: 'createdDate',
+    },
+    {
+      title: '备注',
+      dataIndex: 'note',
+      render: (r, _, t, editing) => {
+        return editing ? (
+          <Input
+            value={r.note}
+            onChange={evt =>
+              t.saveEditSnapshot(d => {
+                d.note = evt.target.value
+                return d
+              })
+            }
+          />
+        ) : (
+          <span>{r.note}</span>
+        )
+      },
+    },
+    {
+      title: '操作',
+      render: (r, _, t, editing) => {
+        return (
+          <FatTable.Actions>
+            {editing ? (
+              <>
+                <FatTable.Action onClick={t.save}>保存</FatTable.Action>
+                <FatTable.Action onClick={t.cancelEdit}>取消</FatTable.Action>
+              </>
+            ) : (
+              <FatTable.Action onClick={() => t.setEditing(r.id)}>
+                编辑
+              </FatTable.Action>
+            )}
+          </FatTable.Actions>
+        )
+      },
     },
   ]
   public render() {
@@ -40,6 +79,7 @@ export default class CustomLayout extends React.Component {
         onFetch={this.handleFetch}
         onPersist={this.handlerPersist}
         header={this.renderHeader}
+        onSave={this.handleSave}
       >
         {(form, defaultValues, slots, instance) => (
           <>
@@ -74,6 +114,11 @@ export default class CustomLayout extends React.Component {
     name: query.getStr('name'),
   })
 
+  private handleSave: SaveHandler<Order, Params> = async value => {
+    alert(value.note)
+    throw new Error('保存错误')
+  }
+
   private handlerPersist: PersistHandler<Order, Params> = ({
     range,
     ...other
@@ -101,6 +146,7 @@ export default class CustomLayout extends React.Component {
       list.push({
         id: `${params.current}+${i}`,
         name: `${params.current}+${i}+${params.name}`,
+        note: '',
         createdDate: Date.now(),
       })
     }

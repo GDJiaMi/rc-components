@@ -28,3 +28,35 @@
 .ant-table-thead th {
   white-space: nowrap;
 }
+
+@keyframes error {
+  0% {
+    background: #ffbfbf;
+    opacity: 1;
+  }
+
+  25% {
+    background: #ff3c3c;
+    opacity: 0.8;
+  }
+
+  50% {
+    background: #ffbfbf;
+    opacity: 1;
+  }
+
+  75% {
+    background: #ff3c3c;
+    opacity: 0.8;
+  }
+
+  100% {
+    background: #ffbfbf;
+    opacity: 1;
+  }
+}
+
+.jm-table__row.error {
+  animation: error 1s ease 0.5s;
+  background: #ffbfbf;
+}

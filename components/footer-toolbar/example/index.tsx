@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import FooterToolBar from '../index'
-import Button from 'antd/lib/button'
-import 'antd/lib/button/style/css'
+import Button from 'antd/es/button'
+import 'antd/es/button/style/css'
 import '../style/css'
 
 class App extends React.Component {
