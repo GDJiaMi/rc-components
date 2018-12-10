@@ -35,35 +35,37 @@ export function filterDataSource<T extends { children?: T[]; parent?: T }>(
   value: string,
   expandedKeys: string[],
 ) {
-  return (
-    data
-      // @ts-ignore: 进行一遍浅复制
-      .map<T>(i => ({ ...i }))
-      .filter(current => {
-        let findit = false
-        if (current[key].indexOf(value) !== -1) {
-          findit = true
-          current[key] = current[key].replace(
-            value,
-            `<span class="matched">${value}</span>`,
-          )
-        }
+  return data.map(org => {
+    // @ts-ignore: 进行一遍浅复制
+    const current = { ...org }
+    let findit = false
+    if (current[key].indexOf(value) !== -1) {
+      findit = true
+      current[key] = current[key].replace(
+        value,
+        `<span class="matched">${value}</span>`,
+      )
+    }
 
-        if (current.children) {
-          current.children = filterDataSource(
-            current.children,
-            idKey,
-            key,
-            value,
-            expandedKeys,
-          )
-          if (current.children.length) {
-            findit = true
-            expandedKeys.push(current[idKey])
-          }
-        }
+    if (current.children) {
+      let len = expandedKeys.length
+      current.children = filterDataSource(
+        current.children,
+        idKey,
+        key,
+        value,
+        expandedKeys,
+      )
 
-        return findit
-      })
-  )
+      if (!findit && len !== expandedKeys.length) {
+        findit = true
+      }
+    }
+
+    if (findit) {
+      expandedKeys.push(current[idKey])
+    }
+
+    return current
+  })
 }

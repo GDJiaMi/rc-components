@@ -80,7 +80,7 @@ export default class Base extends React.Component {
     for (let i = 0; i < pageSize; i++) {
       list.push({
         id: `${current + i}`,
-        name: `${current + i}${params.name}`,
+        name: `${current + i}${params.name}${Math.random()}`,
         birthday: `1995-12-12 12:12:${i}`,
         children: [1, 2, 3].map(index => ({
           id: `${current + i}-${index}`,
