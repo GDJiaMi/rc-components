@@ -38,6 +38,25 @@ export default class Base extends React.Component {
       dataIndex: 'unknow',
       showHrWhenEmpty: true,
     },
+    {
+      title: '操作',
+      render: (r, _, t, editing) => {
+        return (
+          <FatTable.Actions>
+            {editing ? (
+              <>
+                <FatTable.Action onClick={t.cancelEdit}>保存</FatTable.Action>
+                <FatTable.Action onClick={t.cancelEdit}>取消</FatTable.Action>
+              </>
+            ) : (
+              <FatTable.Action onClick={() => t.setEditing(r.id)}>
+                编辑
+              </FatTable.Action>
+            )}
+          </FatTable.Actions>
+        )
+      },
+    },
   ]
   public state = {
     filterValue: '',

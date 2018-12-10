@@ -18,6 +18,7 @@ export type ColumnType<T, P = {}> = Omit<ColumnProps<T>, 'render'> & {
     record: T,
     index: number,
     instance: IFatTable<T, P>,
+    editing: boolean,
   ) => React.ReactNode
 }
 
@@ -41,6 +42,8 @@ export interface IFatTable<T, P = {}> {
   getList(): T[]
   getDefaultValues(): Partial<P>
   setList(list: T[]): void
+  setEditing(id: any): void
+  cancelEdit(): void
   remove(ids: any[]): void
   removeSelected(): void
   // handle* 可以直接用于事件绑定

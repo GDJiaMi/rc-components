@@ -45,6 +45,8 @@ interface State<T> {
   filteredDataSource?: T[]
   // 受控展开状态
   expandedKeys?: string[]
+  // 档期编辑id
+  editing?: any
 }
 
 export default class FatTableInner<T, P extends object>
@@ -148,6 +150,16 @@ export default class FatTableInner<T, P extends object>
     )
   }
 
+  public setEditing = (id: any) => {
+    this.setState({
+      editing: id,
+    })
+  }
+
+  public cancelEdit = () => {
+    this.setState({ editing: undefined })
+  }
+
   /**
    * 处理表单提交
    */
@@ -218,6 +230,7 @@ export default class FatTableInner<T, P extends object>
     const { defaultPagination, namespace, search } = this.props
     // 初始化表单默认值
     this.props.form.resetFields()
+    this.cancelEdit()
     this.clearSelected()
     this.setState(
       {
@@ -599,13 +612,19 @@ export default class FatTableInner<T, P extends object>
   }
 
   private enhanceColumns = (): ColumnProps<T>[] => {
+    const { idKey } = this.props
     return this.props.columns.map(column => {
       if (column.render) {
         const org = column.render
         return {
           ...column,
           render: (text: any, record: T, index: number) => {
-            return org(record, index, this)
+            return org(
+              record,
+              index,
+              this,
+              record[idKey!] === this.state.editing,
+            )
           },
         }
       } else {
