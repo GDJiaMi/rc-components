@@ -4,9 +4,9 @@
 import React from 'react'
 import { Link as _Link } from 'react-router-dom'
 import classnames from 'classnames'
-import Alert from 'antd/lib/alert'
-import Menu from 'antd/lib/menu'
-import Icon from 'antd/lib/icon'
+import Alert from 'antd/es/alert'
+import Menu from 'antd/es/menu'
+import Icon from 'antd/es/icon'
 import { createComponent } from '../utils/common'
 
 export type LinkComponent = typeof _Link

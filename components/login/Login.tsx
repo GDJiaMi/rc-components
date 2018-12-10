@@ -5,9 +5,9 @@ import React from 'react'
 import qs from 'qs'
 import { withRouter, RouteComponentProps } from 'react-router'
 import Layout from './Layout'
-import Form, { FormComponentProps } from 'antd/lib/form'
-import Button from 'antd/lib/button'
-import Input from 'antd/lib/input'
+import Form, { FormComponentProps } from 'antd/es/form'
+import Button from 'antd/es/button'
+import Input from 'antd/es/input'
 
 export interface Params {
   account: string

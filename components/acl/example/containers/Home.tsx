@@ -1,7 +1,7 @@
 import React from 'react'
 import { observer } from 'mobx-react'
 import { observable } from 'mobx'
-import Checkbox from 'antd/lib/checkbox'
+import Checkbox from 'antd/es/checkbox'
 import AdminLayout from '../../../admin-layout'
 import store from '../store'
 import Acl from '../../index'

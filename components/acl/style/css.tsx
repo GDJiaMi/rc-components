@@ -1,2 +1,2 @@
 import '../../style'
-import 'antd/lib/alert/style/css'
+import 'antd/es/alert/style/css'

@@ -2,9 +2,9 @@
  * 可搜索下拉列表
  */
 import React from 'react'
-import Select, { SelectValue } from 'antd/lib/select'
-import Icon from 'antd/lib/icon'
-import Spin from 'antd/lib/spin'
+import Select, { SelectValue } from 'antd/es/select'
+import Icon from 'antd/es/icon'
+import Spin from 'antd/es/spin'
 import debounce from 'lodash/debounce'
 import { PageSize } from '../constants'
 

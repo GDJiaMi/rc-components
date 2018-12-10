@@ -5,7 +5,7 @@ import React from 'react'
 import { AdminLayout, Title, WindowTabs, Acl } from '@gdjiami/rc-components'
 import { AclInjectedProps } from '@gdjiami/rc-components/lib/acl'
 import { Dropdown, Menu } from 'antd'
-import { ClickParam } from 'antd/lib/menu'
+import { ClickParam } from 'antd/es/menu'
 import history from '@src/history'
 import menus from './menus'
 

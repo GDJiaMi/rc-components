@@ -5,7 +5,7 @@ import React from 'react'
 import { withRouter, RouteComponentProps, Link } from 'react-router-dom'
 import Scrollbars from 'react-custom-scrollbars'
 import memoize from 'lodash/memoize'
-import Icon from 'antd/lib/icon'
+import Icon from 'antd/es/icon'
 
 export interface TabsProps extends RouteComponentProps<{}> {
   persistOnSession?: boolean

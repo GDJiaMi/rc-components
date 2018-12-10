@@ -3,8 +3,8 @@
  * TODO: 性能优化
  */
 import React from 'react'
-import Modal from 'antd/lib/modal'
-import Button from 'antd/lib/button'
+import Modal from 'antd/es/modal'
+import Button from 'antd/es/button'
 import withProvider from './withProvider'
 import { Adaptor, UserDesc, DepartmentDesc, TenementDesc } from './Provider'
 import TenementSearch from './components/TenementSearchPanel'

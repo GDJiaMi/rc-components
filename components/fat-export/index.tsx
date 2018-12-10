@@ -1,7 +1,7 @@
 import React from 'react'
-import Modal from 'antd/lib/modal'
-import Progress from 'antd/lib/progress'
-import Radio, { RadioChangeEvent } from 'antd/lib/radio'
+import Modal from 'antd/es/modal'
+import Progress from 'antd/es/progress'
+import Radio, { RadioChangeEvent } from 'antd/es/radio'
 import { Showable } from '../type'
 import { delay } from '../utils/common'
 

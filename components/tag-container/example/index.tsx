@@ -4,8 +4,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import TagContainer from '../index'
-import Tag from 'antd/lib/tag'
-import 'antd/lib/tag/style/css'
+import Tag from 'antd/es/tag'
+import 'antd/es/tag/style/css'
 import { UserSelectProvider, IUserSelect } from '../../user-select'
 import DepartmentSelect, {
   DepartmentSelectValue,

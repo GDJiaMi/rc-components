@@ -6,10 +6,10 @@ import ReactDOM from 'react-dom'
 import AdminLayout from '../index'
 import '../style/css'
 import './style.css'
-import Icon from 'antd/lib/icon'
-import 'antd/lib/icon/style/css'
-import Dropdown from 'antd/lib/dropdown'
-import 'antd/lib/dropdown/style/css'
+import Icon from 'antd/es/icon'
+import 'antd/es/icon/style/css'
+import Dropdown from 'antd/es/dropdown'
+import 'antd/es/dropdown/style/css'
 
 /**
  * 定义菜单项，支持嵌套

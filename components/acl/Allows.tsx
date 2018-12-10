@@ -1,5 +1,5 @@
 import React from 'react'
-import Alert from 'antd/lib/alert'
+import Alert from 'antd/es/alert'
 import { Action, Role } from './type'
 import { Context } from './Provider'
 import Link from '../link'

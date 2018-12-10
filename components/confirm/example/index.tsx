@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Confirm from '../index'
-import Button from 'antd/lib/button'
+import Button from 'antd/es/button'
 import '../style/css'
 import './style.css'
 

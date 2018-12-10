@@ -5,9 +5,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import FatModal, { FatModalInner } from '../index'
 import '../style/css'
-import Form from 'antd/lib/form'
-import Input from 'antd/lib/input'
-import 'antd/lib/input/style/css'
+import Form from 'antd/es/form'
+import Input from 'antd/es/input'
+import 'antd/es/input/style/css'
 
 interface UserInfo {
   id?: string

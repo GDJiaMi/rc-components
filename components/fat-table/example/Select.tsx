@@ -3,8 +3,8 @@
  */
 import React from 'react'
 import FatTable, { ColumnsType, FetchHandler } from '../index'
-import Input from 'antd/lib/input'
-import Form from 'antd/lib/form'
+import Input from 'antd/es/input'
+import Form from 'antd/es/form'
 import AdminLayout from '../../admin-layout'
 import '../style/css'
 

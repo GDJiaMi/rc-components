@@ -1,4 +1,4 @@
-import 'antd/lib/message/style/css'
-import 'antd/lib/modal/style/css'
-import 'antd/lib/spin/style/css'
+import 'antd/es/message/style/css'
+import 'antd/es/modal/style/css'
+import 'antd/es/spin/style/css'
 import '../../style'

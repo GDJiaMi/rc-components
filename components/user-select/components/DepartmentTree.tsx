@@ -2,11 +2,11 @@
  * 部门树
  */
 import React from 'react'
-import Spin from 'antd/lib/spin'
-import Alert from 'antd/lib/alert'
-import Input from 'antd/lib/input'
-import Icon from 'antd/lib/icon'
-import Tree, { AntTreeNodeCheckedEvent } from 'antd/lib/tree'
+import Spin from 'antd/es/spin'
+import Alert from 'antd/es/alert'
+import Input from 'antd/es/input'
+import Icon from 'antd/es/icon'
+import Tree, { AntTreeNodeCheckedEvent } from 'antd/es/tree'
 import memoize from 'lodash/memoize'
 import debounce from 'lodash/debounce'
 import withProvider from '../withProvider'

@@ -2,11 +2,11 @@
  * 用户待选区
  */
 import React from 'react'
-import Spin from 'antd/lib/spin'
-import Alert from 'antd/lib/alert'
-import Checkbox, { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import List from 'antd/lib/list'
-import Pagination, { PaginationProps } from 'antd/lib/pagination'
+import Spin from 'antd/es/spin'
+import Alert from 'antd/es/alert'
+import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
+import List from 'antd/es/list'
+import Pagination, { PaginationProps } from 'antd/es/pagination'
 import { Adaptor, UserDesc, DepartmentDesc } from '../Provider'
 import withProvider from '../withProvider'
 import { PageSize } from '../constants'

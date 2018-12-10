@@ -1,5 +1,5 @@
-import 'antd/lib/modal/style/css'
-import 'antd/lib/upload/style/css'
-import 'antd/lib/progress/style/css'
+import 'antd/es/modal/style/css'
+import 'antd/es/upload/style/css'
+import 'antd/es/progress/style/css'
 import '../../style'
 import './index.css'

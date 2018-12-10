@@ -2,7 +2,7 @@
  * 多行省略组件
  */
 import React from 'react'
-import Tooltip from 'antd/lib/tooltip'
+import Tooltip from 'antd/es/tooltip'
 
 const supportLineClamp = 'webkitLineClamp' in document.body.style
 const EXTRA_HEIGHT = 18

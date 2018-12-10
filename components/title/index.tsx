@@ -3,7 +3,7 @@
  */
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Breadcrumb, { BreadcrumbProps } from 'antd/lib/breadcrumb'
+import Breadcrumb, { BreadcrumbProps } from 'antd/es/breadcrumb'
 import {
   Route as IRoute,
   RouteProps,

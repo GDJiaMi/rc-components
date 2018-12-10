@@ -3,11 +3,11 @@
  * 适用于大部分场景下的
  */
 import React from 'react'
-import Form, { FormComponentProps } from 'antd/lib/form'
-import Spin from 'antd/lib/spin'
-import Alert from 'antd/lib/alert'
-import Modal from 'antd/lib/modal'
-import message from 'antd/lib/message'
+import Form, { FormComponentProps } from 'antd/es/form'
+import Spin from 'antd/es/spin'
+import Alert from 'antd/es/alert'
+import Modal from 'antd/es/modal'
+import message from 'antd/es/message'
 
 export interface FatModalLocale {
   title: string

@@ -2,9 +2,9 @@
  * 确认框，用于实现常见的删除确认等场景
  */
 import React, { ReactNode } from 'react'
-import message from 'antd/lib/message'
-import Modal from 'antd/lib/modal'
-import Spin from 'antd/lib/spin'
+import message from 'antd/es/message'
+import Modal from 'antd/es/modal'
+import Spin from 'antd/es/spin'
 
 export interface ConfirmProps<T = any> {
   // 绑定自定义数据，将在回调中返回给调用者

@@ -2,10 +2,10 @@
  * 通用导入组件
  */
 import React from 'react'
-import Modal from 'antd/lib/modal'
-import Progress from 'antd/lib/progress'
-import Upload from 'antd/lib/upload'
-import { UploadChangeParam } from 'antd/lib/upload'
+import Modal from 'antd/es/modal'
+import Progress from 'antd/es/progress'
+import Upload from 'antd/es/upload'
+import { UploadChangeParam } from 'antd/es/upload'
 import { delay } from '../utils/common'
 import { Showable } from '../type'
 

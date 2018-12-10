@@ -3,8 +3,8 @@
  */
 import React from 'react'
 import FatTable, { ColumnsType, FetchHandler, IFatTable } from '../index'
-import Input from 'antd/lib/input'
-import Form from 'antd/lib/form'
+import Input from 'antd/es/input'
+import Form from 'antd/es/form'
 import AdminLayout from '../../admin-layout'
 import '../style/css'
 
@@ -16,6 +16,7 @@ interface Data {
   id: string
   name: string
   birthday: string
+  note: string
   children?: Data[]
 }
 
@@ -37,6 +38,25 @@ export default class Base extends React.Component {
       title: '不存在',
       dataIndex: 'unknow',
       showHrWhenEmpty: true,
+    },
+    {
+      title: '备注',
+      dataIndex: 'note',
+      render: (r, _, t, editing) => {
+        return editing ? (
+          <Input
+            value={r.note}
+            onChange={evt =>
+              t.saveEditSnapshot(d => {
+                d.note = evt.target.value
+                return d
+              })
+            }
+          />
+        ) : (
+          <span>{r.note}</span>
+        )
+      },
     },
     {
       title: '操作',
@@ -101,13 +121,16 @@ export default class Base extends React.Component {
         id: `${current + i}`,
         name: `${current + i}${params.name}${Math.random()}`,
         birthday: `1995-12-12 12:12:${i}`,
+        note: '',
         children: [1, 2, 3].map(index => ({
           id: `${current + i}-${index}`,
           name: `${current + i}-${index}-${params.name}`,
           birthday: `1995-12-12 12:12:${i}`,
+          note: '',
           children: [1, 2, 3].map(nestedIndex => ({
             id: `${current + i}-${index}-${nestedIndex}`,
             name: `${current + i}-${index}-${nestedIndex}-${params.name}`,
+            note: '',
             birthday: `1995-12-12 12:12:${i}`,
           })),
         })),

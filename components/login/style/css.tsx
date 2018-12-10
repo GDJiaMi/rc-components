@@ -1,5 +1,5 @@
-import 'antd/lib/form/style/css'
-import 'antd/lib/button/style/css'
-import 'antd/lib/input/style/css'
+import 'antd/es/form/style/css'
+import 'antd/es/button/style/css'
+import 'antd/es/input/style/css'
 import '../../style'
 import './index.css'

@@ -1,3 +1,3 @@
-import 'antd/lib/tooltip/style/css'
+import 'antd/es/tooltip/style/css'
 import '../../style'
 import './index.css'

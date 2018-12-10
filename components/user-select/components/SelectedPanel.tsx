@@ -2,8 +2,8 @@
  * 已选状态区
  */
 import React from 'react'
-import Tag from 'antd/lib/tag'
-import Popover from 'antd/lib/popover'
+import Tag from 'antd/es/tag'
+import Popover from 'antd/es/popover'
 import Group from './Group'
 import { TenementDesc, DepartmentDesc, UserDesc } from '../Provider'
 
