@@ -175,7 +175,7 @@ export default class SearchableSelect<
       const res = await this.props.onFetch(this.state.query, 1, PageSize)
       this.setState({
         list: res.items,
-        allReady: res.total === res.items.length,
+        allReady: res.total > 0 && res.total === res.items.length,
       })
     } catch (error) {
       this.setState({ error, list: [] })
