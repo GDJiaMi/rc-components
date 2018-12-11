@@ -238,12 +238,15 @@ export default class FatTableInner<T extends object, P extends object>
 
     try {
       this.setState({ loading: true, saveError: undefined })
-      await onSave(this.state.snapshot)
+      const snapshot = this.state.snapshot
+      await onSave(snapshot)
       // 保存成功
       this.setState({
         editing: undefined,
         snapshot: undefined,
       })
+      // 保存到dataSource
+      this.updateItem(snapshot)
     } catch (error) {
       message.error(error.message)
       this.setState({ saveError: error })
@@ -677,7 +680,7 @@ export default class FatTableInner<T extends object, P extends object>
           columns={this.enhanceColumns()}
           rowKey={idKey}
           loading={loading}
-          pagination={enablePagination ? pagination : undefined}
+          pagination={enablePagination ? pagination : false}
           rowSelection={rowSelection}
           dataSource={
             !!filterKey && !!filterValue ? filteredDataSource : dataSource
