@@ -33,6 +33,7 @@ export interface DepartmentSelectProps {
   tenementSearchPlaceholder?: string
   header?: React.ReactNode
   footer?: React.ReactNode
+  onlyAllowCheckLeaf?: boolean
   wrappedComponentRef?: React.Ref<IUserSelect>
 }
 

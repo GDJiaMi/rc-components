@@ -34,6 +34,8 @@ class BaseUse extends React.Component {
     userSearchable: boolean
     userSelectable: boolean
     platformMode: boolean
+    checkStrictly: boolean
+    onlyAllowCheckLeaf: boolean
   } = {
     value: {},
     keepValue: false,
@@ -43,6 +45,8 @@ class BaseUse extends React.Component {
     userSearchable: true,
     userSelectable: true,
     platformMode: true,
+    checkStrictly: false,
+    onlyAllowCheckLeaf: false,
   }
 
   public render() {
@@ -55,6 +59,8 @@ class BaseUse extends React.Component {
       userSearchable,
       userSelectable,
       platformMode,
+      checkStrictly,
+      onlyAllowCheckLeaf,
     } = this.state
     return (
       <div>
@@ -72,6 +78,8 @@ class BaseUse extends React.Component {
           departmentSelectable={departmentSelectable}
           userSearchable={userSearchable}
           userSelectable={userSelectable}
+          checkStrictly={checkStrictly}
+          onlyAllowCheckLeaf={onlyAllowCheckLeaf}
         />
         <Checkbox
           checked={keepValue}
@@ -84,6 +92,20 @@ class BaseUse extends React.Component {
           onChange={e => this.setState({ setMax: e.target.checked })}
         >
           max(设置max，maxDepartment, maxTenement为5)
+        </Checkbox>
+        <Checkbox
+          checked={onlyAllowCheckLeaf}
+          onChange={e =>
+            this.setState({ onlyAllowCheckLeaf: e.target.checked })
+          }
+        >
+          onlyAllowCheckLeaf
+        </Checkbox>
+        <Checkbox
+          checked={checkStrictly}
+          onChange={e => this.setState({ checkStrictly: e.target.checked })}
+        >
+          checkStrictly
         </Checkbox>
         <Checkbox
           checked={tenementSelectable}
@@ -151,8 +173,9 @@ class Department extends React.Component {
           value={value}
           onChange={value => this.setState({ value })}
           wrappedComponentRef={this.departmentSelect}
+          onlyAllowCheckLeaf
           max="5"
-          locale={{ tip: '最多选择5个部门' }}
+          locale={{ tip: '最多选择5个部门, 只允许选择叶子节点' }}
         />
         <a
           onClick={() => {

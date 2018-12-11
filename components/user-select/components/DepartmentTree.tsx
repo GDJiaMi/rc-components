@@ -26,6 +26,8 @@ export interface DepartmentTreeProps {
   value?: DepartmentDesc[]
   onChange?: (value: DepartmentDesc[]) => void
   checkStrictly?: boolean
+  // 只允许选择叶子节点
+  onlyAllowCheckLeaf?: boolean
   orgValue?: DepartmentDesc[]
   keepValue?: boolean
 }
@@ -35,6 +37,7 @@ interface Props extends Adaptor, DepartmentTreeProps {}
 interface State {
   loading?: boolean
   error?: Error
+  searchKey?: string
   filter?: string
   dataSource?: DepartmentDesc
   dataSourceById?: { [key: string]: DepartmentDesc }
@@ -65,13 +68,15 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       <div className="jm-us-container">
         <Spin spinning={!!loading}>
           {!!dataSource && (
-            <Input
-              className="jm-department-filter"
-              prefix={<Icon type="filter" />}
-              onChange={this.handleFilterChange}
-              size="small"
-              placeholder="筛选部门"
-            />
+            <form onSubmit={this.handleSubmit}>
+              <Input
+                className="jm-department-filter"
+                prefix={<Icon type="filter" />}
+                onChange={this.handleFilterChange}
+                size="small"
+                placeholder="筛选部门"
+              />
+            </form>
           )}
           {!!error && (
             <Alert
@@ -107,7 +112,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   private renderTree = () => {
-    const { checkStrictly } = this.props
+    const { checkStrictly, onlyAllowCheckLeaf } = this.props
     const { dataSource, expandedKeys } = this.state
 
     if (dataSource == null) {
@@ -121,9 +126,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return (
       <Tree
         key={tenementId}
-        checkStrictly={checkStrictly}
+        checkStrictly={checkStrictly || onlyAllowCheckLeaf}
         checkable={selectable}
-        autoExpandParent
         checkedKeys={checkedKeys}
         selectedKeys={selectedKeys}
         expandedKeys={expandedKeys}
@@ -140,7 +144,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
    * 渲染树节点
    */
   private renderTreeNode = (tree: DepartmentDesc) => {
-    const { selectable, keepValue, orgValue } = this.props
+    const { selectable, keepValue, orgValue, onlyAllowCheckLeaf } = this.props
     const disabled =
       selectable &&
       keepValue &&
@@ -166,7 +170,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
     return tree.children != null && tree.children.length !== 0 ? (
       <Tree.TreeNode
-        disableCheckbox={disabled}
+        disableCheckbox={onlyAllowCheckLeaf || disabled}
         title={title}
         key={tree.id}
         // @ts-ignore
@@ -185,30 +189,38 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     )
   }
 
-  private handleFilterChange = (evt: React.ChangeEvent<{ value: string }>) => {
+  private handleSubmit = (evt: React.FormEvent) => {
+    evt.preventDefault()
+    if (this.state.searchKey === this.state.filter) {
+      return
+    }
+
     this.setState(
       {
-        filter: evt.target.value,
+        filter: this.state.searchKey,
       },
       this.regenerateExpandedKeys,
     )
   }
 
+  private handleFilterChange = (evt: React.ChangeEvent<{ value: string }>) => {
+    this.setState({
+      searchKey: evt.target.value,
+    })
+  }
+
   private regenerateExpandedKeys = debounce(() => {
     let newExpandedKeys: string[] = []
     const { dataSource, dataSourceById, filter = '' } = this.state
-    if (dataSourceById == null || filter.trim() === '') {
+    if (dataSource == null || dataSourceById == null || filter.trim() === '') {
       newExpandedKeys =
         dataSource == null ? [] : DepartmentTree.getExpandedKeys(dataSource)
     } else {
-      newExpandedKeys = Object.keys(dataSourceById)
-        .map(key => {
-          if (dataSourceById[key].name.indexOf(filter) !== -1) {
-            return dataSourceById[key].id
-          }
-          return null
-        })
-        .filter(i => !!i) as string[]
+      // 获取匹配节点的expandedKeys
+      newExpandedKeys = DepartmentTree.genExpandedKeysForFilter(
+        dataSource,
+        filter,
+      )
     }
     this.setState({ expandedKeys: newExpandedKeys })
   }, 500)
@@ -221,7 +233,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     keys: (string[]) | { checked: string[] },
     evt: AntTreeNodeCheckedEvent,
   ) => {
-    const checkStrictly = this.props.checkStrictly
+    const checkStrictly =
+      this.props.checkStrictly || this.props.onlyAllowCheckLeaf
     const checkedTree: Array<{ pos: string; id: string }> = []
     keys = Array.isArray(keys) ? keys : keys.checked
     if (!checkStrictly) {
@@ -359,9 +372,9 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   private static getExpandedKeys = memoize((res: DepartmentDesc) => {
-    const expanedKeys: string[] = []
-    DepartmentTree.genExpandedKeys(res, expanedKeys)
-    return expanedKeys
+    const expandedKeys: string[] = []
+    DepartmentTree.genExpandedKeys(res, expandedKeys)
+    return expandedKeys
   })
 
   private static genExpandedKeys = (
@@ -375,10 +388,35 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       return
     }
     if (tree.children != null && tree.children.length !== 0) {
-      tree.children.forEach(subnode =>
-        DepartmentTree.genExpandedKeys(subnode, keys, level + 1),
+      tree.children.forEach(subNode =>
+        DepartmentTree.genExpandedKeys(subNode, keys, level + 1),
       )
     }
+  }
+
+  private static genExpandedKeysForFilter(res: DepartmentDesc, filter: string) {
+    const expandedKeys: string[] = []
+    const iter = (node: DepartmentDesc) => {
+      let findIt = false
+      if (node.name.indexOf(filter) !== -1) {
+        findIt = true
+      } else if (node.children) {
+        for (let subNode of node.children) {
+          if (iter(subNode)) {
+            findIt = true
+          }
+        }
+      }
+
+      if (findIt) {
+        expandedKeys.unshift(node.id)
+      }
+
+      return findIt
+    }
+
+    iter(res)
+    return expandedKeys
   }
 }
 

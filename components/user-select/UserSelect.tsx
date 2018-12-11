@@ -48,6 +48,8 @@ export interface UserSelectProps {
   userSearchable?: boolean
   // 部门节点选择完全受控，父子节点选中状态不再关联
   checkStrictly?: boolean
+  // 只允许选择叶子节点
+  onlyAllowCheckLeaf?: boolean
   // 最多可选中用户, 默认不限制
   max?: number | string
   // 最多可选中部门
@@ -193,6 +195,7 @@ class UserSelectInner extends React.Component<Props, State>
       tenementSearchPlaceholder,
       userSelectable,
       checkStrictly,
+      onlyAllowCheckLeaf,
       userSearchPlaceholder,
       renderUserSearchItem,
     } = this.props
@@ -241,6 +244,7 @@ class UserSelectInner extends React.Component<Props, State>
               tenementId={currentTenementId}
               tenement={currentTenement}
               selectable={departmentSelectable}
+              onlyAllowCheckLeaf={onlyAllowCheckLeaf}
               selected={currentDepartmentId}
               onSelect={this.handleDepartmentSelect}
               value={selectedDepartments}
