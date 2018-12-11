@@ -22,6 +22,7 @@ import {
   FatTableRenderer,
   IFatTable,
   PaginationInfo,
+  Setter,
 } from './type'
 import TableRow from './TableRow'
 import Header from './Header'
@@ -67,7 +68,7 @@ const components = {
   body: { row: TableRow },
 }
 
-export default class FatTableInner<T, P extends object>
+export default class FatTableInner<T extends object, P extends object>
   extends React.Component<Props<T, P>, State<T>>
   implements IFatTable<T, P> {
   public static defaultProps = {
@@ -187,7 +188,7 @@ export default class FatTableInner<T, P extends object>
   /**
    * 将编辑数据保存到临时空间
    */
-  public saveEditSnapshot = (setter: (prevValue: T) => T) => {
+  public setSnapshot = (setter: Setter<T>) => {
     const { idKey } = this.props
     if (this.state.editing == null) {
       throw new Error('[fat-table] saveEditSnapshot 只能在当前编辑的行中使用')
@@ -205,10 +206,13 @@ export default class FatTableInner<T, P extends object>
       )
     }
 
-    // @ts-ignore
-    const snapshot = setter({ ...prevValue })
+    const snapshot = typeof setter === 'function' ? setter(prevValue) : setter
     this.setState({
-      snapshot,
+      snapshot: {
+        ...(this.state.snapshot || {}),
+        // @ts-ignore
+        ...(snapshot || {}),
+      },
     })
   }
 

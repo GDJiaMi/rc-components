@@ -39,12 +39,7 @@ export default class CustomLayout extends React.Component {
         return editing ? (
           <Input
             value={r.note}
-            onChange={evt =>
-              t.saveEditSnapshot(d => {
-                d.note = evt.target.value
-                return d
-              })
-            }
+            onChange={evt => t.setSnapshot({ note: evt.target.value })}
           />
         ) : (
           <span>{r.note}</span>

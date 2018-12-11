@@ -30,6 +30,8 @@ export interface ListInfo<T> {
   list: T[]
 }
 
+export type Setter<T> = Partial<T> | ((prev: T) => Partial<T>)
+
 /**
  * FatTable 可用操作
  */
@@ -65,7 +67,7 @@ export interface IFatTable<T, P = {}> {
    */
   cancelEdit(): void
   save(): void
-  saveEditSnapshot(setter: (prevValue: T) => T): void
+  setSnapshot(setter: Setter<T>): void
 }
 
 /**
