@@ -57,7 +57,7 @@ export default class CustomLayout extends React.Component {
                 <FatTable.Action onClick={t.cancelEdit}>取消</FatTable.Action>
               </>
             ) : (
-              <FatTable.Action onClick={() => t.setEditing(r.id)}>
+              <FatTable.Action onClick={() => t.setEditing(r)}>
                 编辑
               </FatTable.Action>
             )}
@@ -111,7 +111,9 @@ export default class CustomLayout extends React.Component {
 
   private handleSave: SaveHandler<Order, Params> = async value => {
     alert(value.note)
-    throw new Error('保存错误')
+    if (value.note === 'error') {
+      throw new Error('保存错误')
+    }
   }
 
   private handlerPersist: PersistHandler<Order, Params> = ({

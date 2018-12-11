@@ -1,3 +1,5 @@
+import immer from 'immer'
+
 /**
  * 根据展开级别获取所有需要展开的key
  */
@@ -67,5 +69,32 @@ export function filterDataSource<T extends { children?: T[]; parent?: T }>(
     }
 
     return current
+  })
+}
+
+export function findAndReplace<T extends { children?: T[] }>(
+  data: T[],
+  newData: T,
+  idKey: string,
+) {
+  const _findAndReplace = (data: T[], newData: T, idKey: string) => {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i][idKey] === newData[idKey]) {
+        data.splice(i, 1, newData)
+        return true
+      }
+
+      if (data[i].children != null) {
+        if (_findAndReplace(data[i].children!, newData, idKey)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  return immer(data, state => {
+    _findAndReplace(state as T[], newData, idKey)
   })
 }

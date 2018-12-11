@@ -16,7 +16,7 @@ import memoize from 'lodash/memoize'
 import { QueryComponentProps } from '../query'
 
 import { DefaultPagination } from './constants'
-import { getExpandKeyByLevel, filterDataSource } from './utils'
+import { getExpandKeyByLevel, filterDataSource, findAndReplace } from './utils'
 import {
   FatTableProps,
   FatTableRenderer,
@@ -53,7 +53,7 @@ interface State<T> {
   /**
    * 当前编辑id
    */
-  editing?: any
+  editing?: T
   /**
    * snapshot, 用于保存编辑状态
    */
@@ -169,9 +169,9 @@ export default class FatTableInner<T extends object, P extends object>
     )
   }
 
-  public setEditing = (id: any) => {
+  public setEditing = (record: T) => {
     this.setState({
-      editing: id,
+      editing: record,
       snapshot: undefined,
       saveError: undefined,
     })
@@ -189,28 +189,19 @@ export default class FatTableInner<T extends object, P extends object>
    * 将编辑数据保存到临时空间
    */
   public setSnapshot = (setter: Setter<T>) => {
-    const { idKey } = this.props
     if (this.state.editing == null) {
       throw new Error('[fat-table] saveEditSnapshot 只能在当前编辑的行中使用')
     }
 
-    const prevValue =
-      this.state.snapshot ||
-      this.state.dataSource.find(i => i[idKey!] === this.state.editing)
+    const prevValue = this.state.snapshot || this.state.editing
 
-    if (prevValue == null) {
-      throw new Error(
-        `[fat-table] saveEditSnapshot 未找到指定 ${idKey} 为 ${
-          this.state.editing
-        } 的行`,
-      )
-    }
-
+    // @ts-ignore
     const snapshot = typeof setter === 'function' ? setter(prevValue) : setter
+
     this.setState({
       snapshot: {
-        ...(this.state.snapshot || {}),
         // @ts-ignore
+        ...(prevValue || {}),
         ...(snapshot || {}),
       },
     })
@@ -474,29 +465,26 @@ export default class FatTableInner<T extends object, P extends object>
     if (items.length === 0) {
       return
     }
+
     const idKey = this.props.idKey as string
-    const dataSource = [...this.state.dataSource]
+
+    let dataSource = this.state.dataSource
     for (const item of items) {
-      const index = dataSource.findIndex(i => i[idKey] === item[idKey])
-      if (index !== -1) {
-        dataSource.splice(index, 1, item)
-      }
+      dataSource = findAndReplace(dataSource, item, idKey)
     }
-    this.setDataSource(dataSource)
+
+    if (dataSource !== this.state.dataSource) {
+      this.setDataSource(dataSource)
+    }
   }
 
   /**
    * 更新单个元素
    */
   public updateItem = (item: T) => {
-    const dataSource = [...this.state.dataSource]
     const { idKey } = this.props
-    const index = dataSource.findIndex(
-      i => i[idKey as string] === item[idKey as string],
-    )
-
-    if (index !== -1) {
-      dataSource.splice(index, 1, item)
+    const dataSource = findAndReplace(this.state.dataSource, item, idKey!)
+    if (dataSource !== this.state.dataSource) {
       this.setDataSource(dataSource)
     }
   }
@@ -719,9 +707,9 @@ export default class FatTableInner<T extends object, P extends object>
             render: (text: any, record: T, index: number) => {
               // snapshot 优先
               const { snapshot, editing } = this.state
-              const r =
-                snapshot && record[idKey!] === editing ? snapshot : record
-              return org(r, index, this, record[idKey!] === this.state.editing)
+              const isEditing = editing && record[idKey!] === editing[idKey!]
+              const r = snapshot && isEditing ? snapshot : record
+              return org(r, index, this, !!isEditing)
             },
           }
         } else {
@@ -743,7 +731,7 @@ export default class FatTableInner<T extends object, P extends object>
     if (
       this.state.saveError &&
       this.state.editing &&
-      this.state.editing === record[this.props.idKey!]
+      this.state.editing[this.props.idKey!] === record[this.props.idKey!]
     ) {
       return { error: this.state.saveError }
     }

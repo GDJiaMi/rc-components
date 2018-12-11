@@ -61,7 +61,7 @@ export interface IFatTable<T, P = {}> {
   /**
    * 设置当前编辑的行id
    */
-  setEditing(id: any): void
+  setEditing(record: T): void
   /**
    * 取消编辑
    */
