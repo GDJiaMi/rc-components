@@ -85,7 +85,6 @@ export default class SearchableSelect<
       allowClear,
       multiple,
       placeholder,
-      formatter,
       style,
       className,
       selectClassName,
@@ -121,15 +120,23 @@ export default class SearchableSelect<
           onChange={this.handleChange}
           onSearch={this.handleSearch}
         >
-          {!!list &&
-            list.map(i => (
-              <Select.Option key={i.id} value={i.id} data-value={i}>
-                {formatter(i)}
-              </Select.Option>
-            ))}
+          {!!list && list.map(this.renderItem)}
+          {(list == null || list.length === 0) &&
+            !this.state.query &&
+            !!this.props.value &&
+            this.props.value.map(this.renderItem)}
         </Select>
         {!!loading && <Icon type="loading" />}
       </div>
+    )
+  }
+
+  private renderItem = (i: T) => {
+    const { formatter } = this.props
+    return (
+      <Select.Option key={i.id} value={i.id} data-value={i}>
+        {formatter(i)}
+      </Select.Option>
     )
   }
 

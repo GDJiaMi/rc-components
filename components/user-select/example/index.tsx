@@ -191,7 +191,7 @@ class Department extends React.Component {
 
 class UserSearchTest extends React.Component {
   state = {
-    value: [] as UserDesc[],
+    value: [{ id: '1', name: 'test', mobile: '120' }] as UserDesc[],
   }
   public render() {
     return (
@@ -201,6 +201,10 @@ class UserSearchTest extends React.Component {
           value={this.state.value}
           onChange={value => this.setState({ value })}
           multiple
+        />
+        <UserSearch
+          value={this.state.value}
+          onChange={value => this.setState({ value })}
         />
       </div>
     )
