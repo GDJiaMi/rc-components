@@ -49,6 +49,7 @@ export default class SearchableSelect<
   public state: State<T> = {
     loading: false,
     query: '',
+    list: this.props.value ? this.props.value : [],
   }
 
   // TODO: 性能优化
