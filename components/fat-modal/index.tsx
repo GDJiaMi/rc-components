@@ -15,15 +15,22 @@ export interface FatModalLocale {
   cancelText: string
 }
 
+export type HandleModalSubmit<T> = (
+  values: T,
+  defaultValue: Partial<T>,
+) => Promise<string | void>
+
+export type ModalRenderer<T> = (
+  form: FormComponentProps['form'],
+  defaultValue: Partial<T>,
+) => React.ReactNode
+
 export interface FatModalProps<T> extends Partial<FatModalLocale> {
   // 传入form和defaultValue用于渲染表单
-  children: (
-    form: FormComponentProps['form'],
-    defaultValue: Partial<T>,
-  ) => React.ReactNode
+  children: ModalRenderer<T>
   // 表单提交。回调需要返回一个promise，如果出现异常，modal会显示异常信息；
   // 也可以返回字符串，表示成功提示语
-  onSubmit: (values: T, defaultValue: Partial<T>) => Promise<string | void>
+  onSubmit: HandleModalSubmit<T>
   // 是否在关闭后重置表单
   resetAfterHide?: boolean
   width?: string
