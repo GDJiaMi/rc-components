@@ -234,5 +234,4 @@ export interface FatTableProps<T, P extends object = {}> {
   locale?: TableLocale
   indentSize?: number
   defaultExpandAllRows?: boolean
-  defaultExpandedRowKeys?: string[]
 }

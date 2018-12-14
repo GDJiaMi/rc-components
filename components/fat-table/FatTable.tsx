@@ -651,8 +651,6 @@ export default class FatTableInner<T extends object, P extends object>
       scroll,
       locale,
       indentSize,
-      defaultExpandAllRows,
-      defaultExpandedRowKeys,
     } = this.props
     const { pagination, loading, selected, error } = this.state
     const { dataSource, filteredDataSource } = this.state
@@ -701,8 +699,6 @@ export default class FatTableInner<T extends object, P extends object>
             scroll,
             locale,
             indentSize,
-            defaultExpandAllRows,
-            defaultExpandedRowKeys,
           }}
         />
       </>
@@ -1114,6 +1110,10 @@ export default class FatTableInner<T extends object, P extends object>
     }
   }
 
+  private getIds(list: T[]) {
+    return list.map(i => i[this.props.idKey!])
+  }
+
   /**
    * 获取列表
    */
@@ -1123,7 +1123,13 @@ export default class FatTableInner<T extends object, P extends object>
       return
     }
 
-    const { onFetch, onPersist, namespace, enablePersist } = this.props
+    const {
+      onFetch,
+      onPersist,
+      namespace,
+      enablePersist,
+      defaultExpandAllRows,
+    } = this.props
     const { page, current, pageSize } = this.getPagination()
 
     const paramsToSerial = {
@@ -1153,6 +1159,7 @@ export default class FatTableInner<T extends object, P extends object>
           },
           dataSource: list,
           allReady: total === list.length,
+          expandedKeys: defaultExpandAllRows ? this.getIds(list) : undefined,
         },
         () => {
           // 页码纠正
