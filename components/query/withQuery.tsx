@@ -7,6 +7,7 @@ export default function withQuery<P extends QueryComponentProps>(
 ): React.ComponentClass<Omit<P, keyof QueryComponentProps>> {
   return class extends React.Component<Omit<P, keyof QueryComponentProps>> {
     public render() {
+      // @ts-ignore
       return <Query>{props => <Component {...props} {...this.props} />}</Query>
     }
   }

@@ -247,6 +247,19 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   /**
+   * 获取当前请求参数
+   */
+  public getParams() {
+    const value = this.props.form.getFieldsValue() as P
+    const { current, pageSize } = this.getPagination()
+    return {
+      ...value,
+      current,
+      pageSize,
+    }
+  }
+
+  /**
    * 处理表单提交
    */
   public submit = (evt: React.FormEvent<void>) => {
@@ -1073,32 +1086,38 @@ export default class FatTableInner<T extends object, P extends object>
     }
   }
 
+  private getPagination() {
+    const { offsetMode } = this.props
+    const { pagination } = this.state
+    let { current = 1, pageSize = 15 } = pagination
+    let page = current
+    if (offsetMode) {
+      current = (current - 1) * pageSize
+    }
+
+    return {
+      current,
+      pageSize,
+      page,
+    }
+  }
+
   /**
    * 获取列表
    */
   private fetchList = async (extraParams: Partial<P> = {}) => {
-    const { loading, pagination } = this.state
+    const { loading } = this.state
     if (loading || this.props.onFetch == null) {
       return
     }
 
-    const {
-      offsetMode,
-      onFetch,
-      onPersist,
-      namespace,
-      enablePersist,
-    } = this.props
-    let { current = 1, pageSize = 15 } = pagination
+    const { onFetch, onPersist, namespace, enablePersist } = this.props
+    const { page, current, pageSize } = this.getPagination()
 
     const paramsToSerial = {
-      current,
+      current: page,
       pageSize,
       ...(extraParams as object),
-    }
-
-    if (offsetMode) {
-      current = (current - 1) * pageSize
     }
 
     const params = {

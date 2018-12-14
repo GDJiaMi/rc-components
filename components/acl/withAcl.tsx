@@ -25,8 +25,8 @@ export default function withAcl<P extends ContextValue>(
       return (
         <Context.Consumer>
           {props => {
-            // @ts-ignore 后续typescript的升级优化
             const { wrappedComponentRef, ...other } = this.props
+            // @ts-ignore
             return <Target {...other} {...props} ref={wrappedComponentRef} />
           }}
         </Context.Consumer>

@@ -16,8 +16,8 @@ export default function withProvider<P extends Adaptor>(
       return (
         <Context.Consumer>
           {props => {
-            // @ts-ignore
             const { wrappedComponentRef, ...other } = this.props
+            // @ts-ignore
             return <Target {...props} {...other} ref={wrappedComponentRef} />
           }}
         </Context.Consumer>

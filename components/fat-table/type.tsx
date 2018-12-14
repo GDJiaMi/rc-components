@@ -41,6 +41,10 @@ export interface IFatTable<T, P = {}> {
   getSelectedIds(): any[]
   clearSelected(): void
   clearForm(): void
+  /**
+   * 获取查询参数， 可以用于导出
+   */
+  getParams(): P & PaginationInfo
   getList(): T[]
   getDefaultValues(): Partial<P>
   setList(list: T[]): void

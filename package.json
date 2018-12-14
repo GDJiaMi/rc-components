@@ -1,7 +1,7 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.40",
-  "description": "Jiami React Components",
+  "version": "0.1.42",
+  "description": "mygzb.com React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
   "typings": "lib/index.d.ts",
@@ -76,7 +76,7 @@
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "4.1.1",
     "tslint-react": "3.2.0",
-    "typescript": "3.1.4"
+    "typescript": "3.2.2"
   },
   "dependencies": {
     "classnames": "^2.2.6",
