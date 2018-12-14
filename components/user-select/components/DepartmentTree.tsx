@@ -272,6 +272,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       .map(id => {
         return this.state.dataSourceById![id]
       })
+      .filter(i => !!i)
       .concat(this.preservedValue)
 
     if (this.props.onChange) {
