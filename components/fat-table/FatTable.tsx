@@ -651,6 +651,8 @@ export default class FatTableInner<T extends object, P extends object>
       scroll,
       locale,
       indentSize,
+      defaultExpandAllRows,
+      defaultExpandedRowKeys,
     } = this.props
     const { pagination, loading, selected, error } = this.state
     const { dataSource, filteredDataSource } = this.state
@@ -691,7 +693,17 @@ export default class FatTableInner<T extends object, P extends object>
           expandedRowKeys={this.state.expandedKeys}
           expandedRowRender={expandedRowRender}
           footer={this.renderFooter()}
-          {...{ size, bordered, showHeader, title, scroll, locale, indentSize }}
+          {...{
+            size,
+            bordered,
+            showHeader,
+            title,
+            scroll,
+            locale,
+            indentSize,
+            defaultExpandAllRows,
+            defaultExpandedRowKeys,
+          }}
         />
       </>
     )

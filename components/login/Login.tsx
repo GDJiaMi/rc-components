@@ -54,7 +54,7 @@ export class Login extends React.Component<LoginProps> {
                     message: '请输入账号',
                   },
                 ],
-              })(<Input placeholder="账号" size="large" />)}
+              })(<Input placeholder="账号" size="large" autoFocus />)}
             </Form.Item>
             <Form.Item>
               {getFieldDecorator('password', {

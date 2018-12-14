@@ -233,4 +233,6 @@ export interface FatTableProps<T, P extends object = {}> {
   scroll?: { x?: number | true; y?: number }
   locale?: TableLocale
   indentSize?: number
+  defaultExpandAllRows?: boolean
+  defaultExpandedRowKeys?: string[]
 }
