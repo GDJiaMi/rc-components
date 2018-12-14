@@ -16,7 +16,12 @@ import memoize from 'lodash/memoize'
 import { QueryComponentProps } from '../query'
 
 import { DefaultPagination } from './constants'
-import { getExpandKeyByLevel, filterDataSource, findAndReplace } from './utils'
+import {
+  getExpandKeyByLevel,
+  filterDataSource,
+  findAndReplace,
+  isTree,
+} from './utils'
 import {
   FatTableProps,
   FatTableRenderer,
@@ -1032,7 +1037,11 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   private genDefaultExpandedKeys(list: T[]) {
-    const { defaultExpandedLevel, idKey } = this.props
+    const { defaultExpandedLevel, idKey, defaultExpandAllRows } = this.props
+    if (!isTree(list) && defaultExpandAllRows) {
+      return this.getIds(list)
+    }
+
     if (
       defaultExpandedLevel &&
       defaultExpandedLevel > 0 &&
@@ -1123,13 +1132,7 @@ export default class FatTableInner<T extends object, P extends object>
       return
     }
 
-    const {
-      onFetch,
-      onPersist,
-      namespace,
-      enablePersist,
-      defaultExpandAllRows,
-    } = this.props
+    const { onFetch, onPersist, namespace, enablePersist } = this.props
     const { page, current, pageSize } = this.getPagination()
 
     const paramsToSerial = {
@@ -1159,7 +1162,6 @@ export default class FatTableInner<T extends object, P extends object>
           },
           dataSource: list,
           allReady: total === list.length,
-          expandedKeys: defaultExpandAllRows ? this.getIds(list) : undefined,
         },
         () => {
           // 页码纠正

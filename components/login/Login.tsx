@@ -98,7 +98,9 @@ export class Login extends React.Component<LoginProps> {
         this.setState({ logining: true, error: undefined })
         const url = await this.props.onSubmit(value)
         // 重定向
-        this.props.history.replace(url || this.getRedirectUrl())
+        setTimeout(() => {
+          this.props.history.replace(url || this.getRedirectUrl())
+        }, 100)
         if (this.props.onSuccess) {
           this.props.onSuccess()
         }

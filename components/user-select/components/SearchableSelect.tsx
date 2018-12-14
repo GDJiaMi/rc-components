@@ -25,6 +25,7 @@ export interface SearchableSelectProps<T> {
   // 隐藏不在option列表中的项
   hideUntrackedItems?: boolean
   formatter: (value: T) => string
+  optionFilterProp?: 'children'
   onFetch: (
     query: string,
     page: number,
@@ -35,7 +36,6 @@ export interface SearchableSelectProps<T> {
 interface Props<T> extends SearchableSelectProps<T> {}
 interface State<T> {
   // 全部数据就绪，启动本地搜索模式
-  allReady?: boolean
   loading?: boolean
   error?: Error
   list?: T[]
@@ -90,8 +90,9 @@ export default class SearchableSelect<
       selectClassName,
       selectStyle,
       notFoundContent,
+      optionFilterProp,
     } = this.props
-    const { loading, list, error, allReady, value } = this.state
+    const { loading, list, error, value } = this.state
     return (
       <div className={`jm-user-search ${className || ''}`} style={style}>
         <Select
@@ -102,7 +103,7 @@ export default class SearchableSelect<
           mode={multiple ? 'multiple' : undefined}
           placeholder={placeholder}
           filterOption={false}
-          optionFilterProp={allReady ? 'children' : undefined}
+          optionFilterProp={optionFilterProp}
           allowClear={allowClear}
           notFoundContent={
             loading ? (
@@ -142,9 +143,7 @@ export default class SearchableSelect<
 
   private handleBlur = () => {
     this.setState({ query: '', error: undefined }, () => {
-      if (!this.state.allReady) {
-        this.fetchList()
-      }
+      this.fetchList()
     })
     if (this.props.onBlur) {
       this.props.onBlur()
@@ -153,9 +152,7 @@ export default class SearchableSelect<
 
   private handleSearch = debounce((query: string) => {
     this.setState({ query }, () => {
-      if (!this.state.allReady) {
-        this.fetchList()
-      }
+      this.fetchList()
     })
   }, 500)
 
@@ -183,7 +180,6 @@ export default class SearchableSelect<
       const res = await this.props.onFetch(this.state.query, 1, PageSize)
       this.setState({
         list: res.items,
-        allReady: res.total > 0 && res.total === res.items.length,
       })
     } catch (error) {
       this.setState({ error, list: [] })

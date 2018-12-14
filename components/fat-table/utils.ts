@@ -30,6 +30,10 @@ export function getExpandKeyByLevel<T extends { children?: T[] }>(
   return keys
 }
 
+export function isTree<T extends { children?: T[] }>(data: T[]) {
+  return data.some(i => i.children != null)
+}
+
 export function filterDataSource<T extends { children?: T[]; parent?: T }>(
   data: T[],
   idKey: string,
