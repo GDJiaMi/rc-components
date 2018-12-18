@@ -67,7 +67,7 @@ class App extends React.Component {
     return (
       <AdminLayout
         Link={Link as any}
-        siteName="exmaple"
+        siteName="Example"
         title="hello world"
         logo={require('./icon.png')}
         // error={

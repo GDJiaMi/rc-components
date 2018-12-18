@@ -107,7 +107,7 @@ export default class AdminLayout extends React.Component<
               to={indexLink}
             >
               {!!logo && <img alt="logo" src={logo} />}
-              <span>{siteName}</span>
+              <span title={siteName}>{siteName}</span>
             </Link>
             <Menu
               className="jm-layout__nav-menu"
