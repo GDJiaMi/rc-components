@@ -12,7 +12,7 @@ import { createComponent } from '../utils/common'
 export type LinkComponent = typeof _Link
 export interface MenuConfig {
   path?: string
-  icon?: string
+  icon?: string | React.ReactElement<any>
   title: string
   children?: MenuConfig[]
 }
@@ -30,12 +30,18 @@ export interface AdminLayoutProps {
   path?: string
   Link?: LinkComponent
   after?: React.ReactNode
+  /**
+   * 是否记住折叠状态
+   */
+  persistCollapsed?: boolean
 }
 
 interface State {
   collapsed: boolean
   openKeys: string[]
 }
+
+const COLLAPSED_KEY = '__admin_layout__collapsed'
 
 export default class AdminLayout extends React.Component<
   AdminLayoutProps,
@@ -49,11 +55,24 @@ export default class AdminLayout extends React.Component<
   public static Avatar = createComponent<
     React.ImgHTMLAttributes<HTMLImageElement>
   >('jm-layout__avatar', 'img')
+  public static defaultProps = {
+    persistCollapsed: true,
+  }
 
   public state: State = {
     collapsed: false,
     openKeys: [],
   }
+
+  public componentDidMount() {
+    if (this.props.persistCollapsed) {
+      const collapsed = window.localStorage.getItem(COLLAPSED_KEY)
+      if (collapsed === 'true') {
+        this.setState({ collapsed: true })
+      }
+    }
+  }
+
   public render() {
     const {
       Link = _Link,
@@ -115,7 +134,7 @@ export default class AdminLayout extends React.Component<
                 <Icon
                   className="jm-layout__trigger"
                   type={collapsed ? 'menu-unfold' : 'menu-fold'}
-                  onClick={this.toggleCollaspsed}
+                  onClick={this.toggleCollapsed}
                 />
                 <span className="jm-layout__title">{title}</span>
               </div>
@@ -177,26 +196,36 @@ export default class AdminLayout extends React.Component<
 
   private renderMenuLink = (menu: MenuConfig) => {
     const { Link = _Link } = this.props
+    const icon =
+      typeof menu.icon === 'string' ? <Icon type={menu.icon} /> : menu.icon
+
     if (menu.path == null) {
       return (
         <span>
-          {!!menu.icon && <Icon type={menu.icon} />}
+          {!!icon && icon}
           <span>{menu.title}</span>
         </span>
       )
     } else {
       return (
         <Link to={menu.path}>
-          {!!menu.icon && <Icon type={menu.icon} />}
+          {!!icon && icon}
           <span>{menu.title}</span>
         </Link>
       )
     }
   }
 
-  private toggleCollaspsed = () => {
-    this.setState({
-      collapsed: !this.state.collapsed,
-    })
+  private toggleCollapsed = () => {
+    this.setState(
+      {
+        collapsed: !this.state.collapsed,
+      },
+      () => {
+        if (this.props.persistCollapsed) {
+          window.localStorage.setItem(COLLAPSED_KEY, '' + this.state.collapsed)
+        }
+      },
+    )
   }
 }
