@@ -4,10 +4,8 @@
 import React from 'react'
 import qs from 'qs'
 import { withRouter, RouteComponentProps } from 'react-router'
-import Layout from './Layout'
+import Layout, { Input, Button } from '../login-layout'
 import Form, { FormComponentProps } from 'antd/es/form'
-import Button from 'antd/es/button'
-import Input from 'antd/es/input'
 
 export interface Params {
   account: string
@@ -54,7 +52,7 @@ export class Login extends React.Component<LoginProps> {
                     message: '请输入账号',
                   },
                 ],
-              })(<Input placeholder="账号" size="large" autoFocus />)}
+              })(<Input placeholder="账号" autoFocus />)}
             </Form.Item>
             <Form.Item>
               {getFieldDecorator('password', {
@@ -64,23 +62,13 @@ export class Login extends React.Component<LoginProps> {
                     message: '请输入密码',
                   },
                 ],
-              })(<Input placeholder="密码" size="large" type="password" />)}
+              })(<Input placeholder="密码" type="password" />)}
             </Form.Item>
             <Form.Item>
-              <Button
-                type="primary"
-                size="large"
-                style={{ width: '100%', marginTop: '1em' }}
-                htmlType="submit"
-                loading={this.state.logining}
-              >
-                登录
-              </Button>
+              <Button loading={this.state.logining}>登录</Button>
             </Form.Item>
             {!!this.state.error && (
-              <div className="jm-login__alert" style={{ marginTop: '-17px' }}>
-                {this.state.error.message}
-              </div>
+              <div className="jm-login__alert">{this.state.error.message}</div>
             )}
           </Form>
         </div>

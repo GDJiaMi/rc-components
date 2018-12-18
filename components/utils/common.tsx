@@ -1,5 +1,10 @@
 import React, { HTMLAttributes } from 'react'
 
+/**
+ * 创建组件，并固定className
+ * @param cls
+ * @param elm
+ */
 export function createComponent<T = HTMLAttributes<HTMLDivElement>>(
   cls: string,
   elm: string = 'div',
@@ -11,6 +16,20 @@ export function createComponent<T = HTMLAttributes<HTMLDivElement>>(
       ...other,
     })
   }
+}
+
+/**
+ * 预定义组件的一些props值
+ * @param Comp
+ * @param overrideProps
+ */
+export function overrideComponent<P, T = any>(
+  Comp: React.ComponentClass<P> | React.FC<P>,
+  overrideProps: Partial<P>,
+) {
+  return React.forwardRef<T, P>((props, ref) => {
+    return <Comp {...overrideProps} {...props} ref={ref} />
+  })
 }
 
 export function delay(time: number) {
