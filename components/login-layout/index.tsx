@@ -35,6 +35,9 @@ export const Button = overrideComponent(AButton, {
 
 export default class Layout extends React.PureComponent<LayoutProps> {
   public static Alert = Alert
+  public static Input = Input
+  public static Button = Button
+
   public render() {
     const props = this.props
     return (
