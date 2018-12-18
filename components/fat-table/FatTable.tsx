@@ -1037,8 +1037,16 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   private genDefaultExpandedKeys(list: T[]) {
-    const { defaultExpandedLevel, idKey, defaultExpandAllRows } = this.props
-    if (!isTree(list) && defaultExpandAllRows) {
+    const {
+      defaultExpandedLevel,
+      idKey,
+      defaultExpandAllRows,
+      defaultExpandedRows,
+    } = this.props
+
+    if (defaultExpandedRows) {
+      return defaultExpandedRows(list)
+    } else if (!isTree(list) && defaultExpandAllRows) {
       return this.getIds(list)
     }
 

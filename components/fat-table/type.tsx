@@ -109,6 +109,13 @@ export type ExpandedRowRenderer<T, P = {}> = (
 ) => React.ReactNode
 
 /**
+ * generate default expanded rows
+ */
+export type ExpandedRowsGenerator<T, P = {}> = (
+  dataSource: T[],
+) => Array<string | number>
+
+/**
  * 处理器类型声明
  */
 // onInit
@@ -194,9 +201,20 @@ export interface FatTableProps<T, P extends object = {}> {
   expandedRowRender?: ExpandedRowRenderer<T, P>
 
   /**
-   * 树形表格相关
+   * 展开相关
+   */
+  /**
+   * 默认展开深度，支持树形结构
    */
   defaultExpandedLevel?: number
+  /**
+   * 是否默认展开所有行，支持非树形结构
+   */
+  defaultExpandAllRows?: boolean
+  /**
+   * 通过回调生成，默认展开的行. 返回需要展开的id数组
+   */
+  defaultExpandedRows?: ExpandedRowsGenerator<T, P>
   // 过滤
   filterKey?: string
   filterValue?: string
@@ -233,5 +251,4 @@ export interface FatTableProps<T, P extends object = {}> {
   scroll?: { x?: number | true; y?: number }
   locale?: TableLocale
   indentSize?: number
-  defaultExpandAllRows?: boolean
 }

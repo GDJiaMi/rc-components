@@ -75,6 +75,11 @@ export default class Base extends React.Component {
           expandedRowRender={r => {
             return r.birthday + 'expanded'
           }}
+          // 定义默认展开的行
+          defaultExpandedRows={list => {
+            // 默认展开偶数
+            return list.filter(i => parseInt(i.id) % 2 === 0).map(i => i.id)
+          }}
         />
       </AdminLayout.Body>
     )
