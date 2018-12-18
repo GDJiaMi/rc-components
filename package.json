@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.47",
+  "version": "0.1.48",
   "description": "mygzb.com React Components",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -16,7 +16,7 @@
     "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
     "prettier": "prettier --config .prettierrc --write \"components/**/*.ts?(x)\"",
     "precommit": "lint-staged",
-    "parcel": "parcel"
+    "doc": "docz dev"
   },
   "lint-staged": {
     "*.ts?(x)": [
@@ -61,6 +61,8 @@
     "@types/react-router-dom": "^4.3.0",
     "antd": "3.8.4",
     "cpx": "^1.5.0",
+    "docz": "^0.13.4",
+    "docz-theme-default": "^0.13.4",
     "husky": "^0.14.3",
     "jh-tslint": "^1.0.0",
     "lint-staged": "^7.2.0",

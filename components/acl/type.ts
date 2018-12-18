@@ -11,3 +11,4 @@ export type Rules = {
  */
 export type Action = string | number | '*'
 export type Role = string | number
+export type MaybeArray<T> = T[] | T
