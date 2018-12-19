@@ -90,7 +90,7 @@ export default class LoginPage extends React.Component {
 }
 ```
 
-## Doc
+## 定位
 
 rc-components 是基于 antd 组件库之上的高层组件库，旨在抽象重复的业务场景， 减少代码重复。其中耦合的东西有：
 
@@ -106,24 +106,6 @@ rc-components 是基于 antd 组件库之上的高层组件库，旨在抽象重
 - 状态管理库，如 mobx，redux.
 - Ajax 请求库
 - 前端路由类型
-
-**其他**
-
-- [工作宝 web 应用开发规范](style-guide.md)
-
-### 组件列表
-
-- [`AdminLayout`](components/AdminLayout/README.md) 后台布局组件
-- [`BackBar`](components/BackBar/README.md) 二级页面返回栏
-- [`Title`](components/Title/README.md) 标题设置和展示，支持面包屑
-
-### 运行实例
-
-每个组件目录下都有一个 example 目录，可以直接通过`parcel`命令进行执行，例如:
-
-```shell
-yarn parcel -- components/AdminLayout/example/index.html
-```
 
 ## License
 

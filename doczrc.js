@@ -1,5 +1,6 @@
 module.exports = {
-  src: './components',
+  src: './',
+  files: '**/*.{md,markdown,mdx}',
   title: 'rc-components',
   description: 'MYGZB.com 中后台业务组件',
   typescript: true,
