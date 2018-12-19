@@ -1,8 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Router, Switch } from "react-router";
-import { Link } from "react-router-dom";
-import { createHashHistory } from "history";
+import { Link, HashRouter } from "react-router-dom";
 import { Icon, Dropdown } from "antd";
 import { Title, AdminLayout, BackBar, Route } from "@gdjiami/rc-components";
 import "antd/dist/antd.css";
@@ -25,7 +24,7 @@ const menus = [
 class App extends React.Component {
   render() {
     return (
-      <Router history={createHashHistory()}>
+      <HashRouter>
         <Title.Provider debug>
           <AdminLayout
             siteName="example"
@@ -73,7 +72,7 @@ class App extends React.Component {
             </AdminLayout.View>
           </AdminLayout>
         </Title.Provider>
-      </Router>
+      </HashRouter>
     );
   }
 }

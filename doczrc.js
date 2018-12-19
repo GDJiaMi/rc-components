@@ -13,7 +13,6 @@ module.exports = {
         tsconfigPath: 'tsconfig.json'
       }
     }
-    console.log(rule)
     return config
   }
 }
