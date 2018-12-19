@@ -1,24 +1,11 @@
-/**
- * run: yarn parcel -- ./components/Title/example/index.html
- */
-import React from 'react'
+import React, { SFC } from 'react'
 import ReactDOM from 'react-dom'
 import { Router, Switch, RouteComponentProps } from 'react-router'
 import { Link } from 'react-router-dom'
 import { createHashHistory } from 'history'
-import Icon from 'antd/es/icon'
-import 'antd/es/icon/style/css'
-import Dropdown from 'antd/es/dropdown'
-import 'antd/es/dropdown/style/css'
-import Title from '../index'
-import AdminLayout from '../../admin-layout'
-import '../../admin-layout/style/css'
-import BackBar from '../../back-bar'
-import '../../back-bar/style/css'
-import '../style/css'
+import { Icon, Dropdown } from 'antd'
+import { Title, AdminLayout, BackBar } from '@gdjiami/rc-components'
 import './style.css'
-import WindowsTabs from '../../window-tabs'
-import '../../window-tabs/style/css'
 
 const Route = Title.Route
 const menus = [
@@ -33,7 +20,7 @@ const menus = [
 ]
 
 class App extends React.Component {
-  public render() {
+  render() {
     return (
       <Router history={createHashHistory()}>
         <Title.Provider debug>
@@ -45,7 +32,6 @@ class App extends React.Component {
                 style={{ display: 'inline', fontSize: '16px' }}
               />
             }
-            logo={require('../../admin-layout/example/icon.png')}
             menus={menus}
             after={
               <>
@@ -56,23 +42,28 @@ class App extends React.Component {
                   <Icon type="question" />
                 </AdminLayout.Action>
                 <Dropdown overlay={<div>dropdown</div>}>
-                  <AdminLayout.Action>
-                    <AdminLayout.Avatar
-                      src={require('../../admin-layout/example/icon.png')}
-                    />
-                    管理员
-                  </AdminLayout.Action>
+                  <AdminLayout.Action>管理员</AdminLayout.Action>
                 </Dropdown>
               </>
             }
           >
             <AdminLayout.View>
-              <WindowsTabs />
               <Title link="/">首页</Title>
               <Switch>
-                <Route path="/" exact component={Dashboard} title="控制台" />
+                <Route
+                  path="/"
+                  exact
+                  // @ts-ignore
+                  component={Dashboard}
+                  title="控制台"
+                />
                 <Route path="/orders" title="订单">
-                  <Route path="/orders" exact component={Orders} />
+                  <Route
+                    path="/orders"
+                    exact
+                    // @ts-ignore
+                    component={Orders}
+                  />
                   <Route path="/orders/:id" component={Order} remountOnChange />
                 </Route>
               </Switch>
@@ -84,7 +75,7 @@ class App extends React.Component {
   }
 }
 
-function Dashboard(props: {}) {
+const Dashboard: SFC<{}> = () => {
   return (
     <AdminLayout.Body>
       <h1>Dashboard</h1>
@@ -92,7 +83,7 @@ function Dashboard(props: {}) {
   )
 }
 
-function Orders(props: {}) {
+const Orders: SFC<{}> = () => {
   return (
     <AdminLayout.Body>
       <ul>
@@ -111,18 +102,17 @@ function Orders(props: {}) {
 }
 
 class Order extends React.Component<RouteComponentProps<{ id: string }>> {
-  public state = {
+  state = {
     name: '',
   }
-  public componentDidMount() {
+  componentDidMount() {
     this.setState({
       name: this.props.match.params.id,
     })
   }
-  public render() {
-    const id = parseInt(this.props.match.params.id, 10)
+  render() {
     return (
-      <>
+      <div>
         <BackBar>
           hello world <a>你好</a>
         </BackBar>
@@ -136,7 +126,7 @@ class Order extends React.Component<RouteComponentProps<{ id: string }>> {
           <h1>{this.state.name}</h1>
           <p>balbalaba</p>
         </AdminLayout.Body>
-      </>
+      </div>
     )
   }
 }
