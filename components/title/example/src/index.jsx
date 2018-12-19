@@ -1,23 +1,26 @@
-import React, { SFC } from 'react'
-import ReactDOM from 'react-dom'
-import { Router, Switch, RouteComponentProps } from 'react-router'
-import { Link } from 'react-router-dom'
-import { createHashHistory } from 'history'
-import { Icon, Dropdown } from 'antd'
-import { Title, AdminLayout, BackBar } from '@gdjiami/rc-components'
-import './style.css'
+import React from "react";
+import ReactDOM from "react-dom";
+import { Router, Switch } from "react-router";
+import { Link } from "react-router-dom";
+import { createHashHistory } from "history";
+import { Icon, Dropdown } from "antd";
+import { Title, AdminLayout, BackBar, Route } from "@gdjiami/rc-components";
+import "antd/dist/antd.css";
+import "@gdjiami/rc-components/lib/title/style/css";
+import "@gdjiami/rc-components/lib/admin-layout/style/css";
+import "@gdjiami/rc-components/lib/back-bar/style/css";
+import "./styles.css";
 
-const Route = Title.Route
 const menus = [
   {
-    title: 'Dashboard',
-    path: '/',
+    title: "Dashboard",
+    path: "/"
   },
   {
-    title: '订单',
-    path: '/orders',
-  },
-]
+    title: "订单",
+    path: "/orders"
+  }
+];
 
 class App extends React.Component {
   render() {
@@ -29,12 +32,12 @@ class App extends React.Component {
             title={
               <Title.Display
                 breadcrumb
-                style={{ display: 'inline', fontSize: '16px' }}
+                style={{ display: "inline", fontSize: "16px" }}
               />
             }
             menus={menus}
             after={
-              <>
+              <React.Fragment>
                 <AdminLayout.Action>
                   <Icon type="search" />
                 </AdminLayout.Action>
@@ -44,7 +47,7 @@ class App extends React.Component {
                 <Dropdown overlay={<div>dropdown</div>}>
                   <AdminLayout.Action>管理员</AdminLayout.Action>
                 </Dropdown>
-              </>
+              </React.Fragment>
             }
           >
             <AdminLayout.View>
@@ -71,19 +74,19 @@ class App extends React.Component {
           </AdminLayout>
         </Title.Provider>
       </Router>
-    )
+    );
   }
 }
 
-const Dashboard: SFC<{}> = () => {
+const Dashboard = () => {
   return (
     <AdminLayout.Body>
       <h1>Dashboard</h1>
     </AdminLayout.Body>
-  )
-}
+  );
+};
 
-const Orders: SFC<{}> = () => {
+const Orders = () => {
   return (
     <AdminLayout.Body>
       <ul>
@@ -98,17 +101,20 @@ const Orders: SFC<{}> = () => {
         </li>
       </ul>
     </AdminLayout.Body>
-  )
-}
+  );
+};
 
-class Order extends React.Component<RouteComponentProps<{ id: string }>> {
-  state = {
-    name: '',
+class Order extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: ""
+    };
   }
   componentDidMount() {
     this.setState({
-      name: this.props.match.params.id,
-    })
+      name: this.props.match.params.id
+    });
   }
   render() {
     return (
@@ -127,8 +133,8 @@ class Order extends React.Component<RouteComponentProps<{ id: string }>> {
           <p>balbalaba</p>
         </AdminLayout.Body>
       </div>
-    )
+    );
   }
 }
 
-ReactDOM.render(<App />, document.getElementById('root'))
+ReactDOM.render(<App />, document.getElementById("root"));

@@ -1,45 +1,24 @@
 {
-  "name": "example",
-  "version": "0.1.0",
-  "private": true,
+  "name": "rc-component-example",
+  "version": "1.0.0",
+  "description": "@gdjiami/rc-component base example",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
   "dependencies": {
     "@gdjiami/rc-components": "*",
-    "antd": "3.8.4",
-    "react": "16.4.2",
-    "react-dom": "16.4.2",
+    "antd": "latest",
+    "react": "16.6.3",
+    "react-dom": "latest",
+    "react-router": "4.3.1",
+    "react-router-dom": "4.3.1",
     "tslib": "1.9.3"
   },
   "devDependencies": {
-    "@gdjiami/cli": "*",
-    "@types/react": "16.4.13",
-    "@types/react-dom": "16.0.7",
-    "@types/webpack-env": "^1.13.6",
-    "@types/react-router": "^4.4.3",
-    "@types/react-router-dom": "^4.3.1"
+    "@babel/core": "7.2.0",
+    "parcel-bundler": "^1.6.1"
   },
-  "scripts": {
-    "start": "jm start",
-    "build": "jm build"
-  },
-  "jm": {
-    "proxy": {},
-    "importPlugin": [{
-        "libraryName": "antd",
-        "libraryDirectory": "es",
-        "style": "css"
-      },
-      {
-        "libraryName": "antd-mobile",
-        "libraryDirectory": "es",
-        "style": "css"
-      },
-      {
-        "libraryName": "@gdjiami/rc-components",
-        "libraryDirectory": "es",
-        "style": "css"
-      }
-    ]
-  },
-  "browsers": "last 2 versions",
-  "optionalDependencies": {}
+  "keywords": []
 }
