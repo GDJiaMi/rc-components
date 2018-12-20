@@ -226,4 +226,5 @@ export class WindowTabs extends React.Component<TabsProps, State> {
   }
 }
 
+// @ts-ignore
 export default withRouter(WindowTabs)

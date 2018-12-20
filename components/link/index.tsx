@@ -20,6 +20,7 @@ export default class Link extends React.Component<LinkProps> {
 }
 
 const Goback = withRouter(
+  // @ts-ignore
   class Goback extends React.Component<LinkProps & RouteComponentProps<{}>> {
     public render() {
       const { className, style, children } = this.props

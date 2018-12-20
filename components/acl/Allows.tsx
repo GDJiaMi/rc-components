@@ -19,8 +19,9 @@ export interface AllowsProps {
   or?: boolean | (() => boolean)
   /**
    * 指定检查的类型:
-   * + all 必须具备所有actions权限
-   * + some 具备其中一个action权限，默认值
+   * all 必须具备所有actions权限;
+   * some 具备其中一个action权限，默认值
+   * @default 'some'
    */
   type?: 'all' | 'some'
   /**

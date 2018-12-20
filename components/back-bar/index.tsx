@@ -42,4 +42,5 @@ class BackBar extends React.Component<BackBarProps> {
   }
 }
 
+// @ts-ignore
 export default withRouter(BackBar)

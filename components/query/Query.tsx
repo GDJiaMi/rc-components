@@ -176,4 +176,5 @@ function filterNamespace(namespace: string | undefined, query: object): object {
   return res
 }
 
+// @ts-ignore
 export default withRouter(Query)

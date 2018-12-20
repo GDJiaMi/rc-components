@@ -51,7 +51,6 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@gdjiami/rc-components": "*",
     "@types/classnames": "^2.2.4",
     "@types/lodash": "^4.14.113",
     "@types/node": "^10.9.4",

@@ -110,4 +110,5 @@ export class Login extends React.Component<LoginProps> {
   }
 }
 
+// @ts-ignore
 export default withRouter(Form.create()(Login))

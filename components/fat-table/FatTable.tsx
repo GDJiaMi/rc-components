@@ -32,7 +32,7 @@ import {
 import TableRow from './TableRow'
 import Header from './Header'
 
-interface Props<T, P extends object>
+export interface Props<T, P extends object>
   extends FatTableProps<T, P>,
     FormComponentProps,
     QueryComponentProps {}

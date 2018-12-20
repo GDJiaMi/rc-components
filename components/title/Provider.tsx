@@ -127,6 +127,7 @@ export class InnerProvider extends React.Component<
   }
 }
 
+// @ts-ignore
 const InnerProviderWithRouter = withRouter(InnerProvider)
 
 export default function Provider(props: ProviderProps) {
