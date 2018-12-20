@@ -1,0 +1,35 @@
+---
+name: Login
+menu: Components
+---
+
+import { PropsTable, Playground } from 'docz'
+import Login from './index'
+import './style/css'
+
+# Login
+
+通用的登录组件
+
+## 示例
+
+<Playground>
+  {() => (
+    <div style={{ position: 'relative', minHeight: 700 }}>
+      <Login
+        title="标题"
+        footer="自定义底部"
+        rememberAccount
+        onSubmit={params => {
+          console.log(params)
+          return '/components-login-readme'
+        }}
+        onSuccess={() => alert('登录成功')}
+      />
+    </div>
+  )}
+</Playground>
+
+## Props
+
+<PropsTable of={Login} />

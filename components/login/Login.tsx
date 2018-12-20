@@ -6,38 +6,84 @@ import qs from 'qs'
 import { withRouter, RouteComponentProps } from 'react-router'
 import Layout, { Input, Button } from '../login-layout'
 import Form, { FormComponentProps } from 'antd/es/form'
+import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 
 export interface Params {
   account: string
   password: string
 }
 
-export interface LoginProps
-  extends FormComponentProps,
-    RouteComponentProps<void> {
+export interface LoginProps {
+  /**
+   * 标题
+   * @default '登录'
+   */
   title?: string
+  /**
+   * logo, 图片rul
+   */
   logo?: string
+  /**
+   * 自定义底部
+   */
   footer?: React.ReactNode
+  /**
+   * 自定义背景图片
+   */
   background?: string
+  /**
+   * 自定义根路径，登录成功后将自动跳转到该路径。如果存在ref查询字符串属性，将优先跳转到ref指定的路由
+   * @default '/'
+   */
   indexRouter?: string
+  /**
+   * 处理提交。在这个事件处理器中进行用户名、密码检查。可选返回一个跳转地址.
+   * 如果抛出错误，Login将展示错误信息
+   */
   onSubmit: (value: Params) => Promise<string | void>
+  /**
+   * 登录成功后, 这个回调将被触发
+   */
   onSuccess?: () => void
+  /**
+   * 是否显示记住账号选项
+   */
+  rememberAccount?: boolean
 }
 
-export class Login extends React.Component<LoginProps> {
+export interface Props
+  extends LoginProps,
+    FormComponentProps,
+    RouteComponentProps<void> {}
+
+const RememberAccountKey = '__login.account__'
+
+export class LoginInner extends React.Component<Props> {
   public static Layout = Layout
   public state: {
     logining: boolean
     error?: Error
+    account?: string
+    rememberAccount?: boolean
   } = {
     logining: false,
+    rememberAccount: false,
   }
+
+  public componentDidMount() {
+    const rememberAccount = window.localStorage.getItem(RememberAccountKey)
+    if (rememberAccount) {
+      this.setState({ account: rememberAccount, rememberAccount: true })
+    }
+  }
+
   public render() {
     const {
       title = '登录',
       logo,
       footer,
       background,
+      rememberAccount,
       form: { getFieldDecorator },
     } = this.props
     return (
@@ -52,6 +98,7 @@ export class Login extends React.Component<LoginProps> {
                     message: '请输入账号',
                   },
                 ],
+                initialValue: this.state.account,
               })(<Input placeholder="账号" autoFocus />)}
             </Form.Item>
             <Form.Item>
@@ -63,6 +110,15 @@ export class Login extends React.Component<LoginProps> {
                   },
                 ],
               })(<Input placeholder="密码" type="password" />)}
+              {!!rememberAccount && (
+                <Checkbox
+                  checked={this.state.rememberAccount}
+                  onChange={this.handleChange}
+                  className="jm-login__checkbox"
+                >
+                  记住帐号
+                </Checkbox>
+              )}
             </Form.Item>
             <Form.Item>
               <Button loading={this.state.logining}>登录</Button>
@@ -76,9 +132,17 @@ export class Login extends React.Component<LoginProps> {
     )
   }
 
+  private handleChange = (e: CheckboxChangeEvent) => {
+    const checked = e.target.checked
+    this.setState({ rememberAccount: checked })
+    if (!checked) {
+      window.localStorage.removeItem(RememberAccountKey)
+    }
+  }
+
   private handleSubmit = async (evt: React.FormEvent<void>) => {
     evt.preventDefault()
-    this.props.form.validateFields(async (errors, value) => {
+    this.props.form.validateFields(async (errors, value: Params) => {
       if (errors != null) {
         return
       }
@@ -89,8 +153,13 @@ export class Login extends React.Component<LoginProps> {
         setTimeout(() => {
           this.props.history.replace(url || this.getRedirectUrl())
         }, 100)
+
         if (this.props.onSuccess) {
           this.props.onSuccess()
+        }
+
+        if (this.state.rememberAccount) {
+          window.localStorage.setItem(RememberAccountKey, value.account)
         }
       } catch (err) {
         this.setState({ error: err })
@@ -111,4 +180,8 @@ export class Login extends React.Component<LoginProps> {
 }
 
 // @ts-ignore
-export default withRouter(Form.create()(Login))
+const LoginInnerWrapped = withRouter(Form.create()(LoginInner))
+
+export default function Login(props: LoginProps) {
+  return <LoginInnerWrapped {...props} />
+}
