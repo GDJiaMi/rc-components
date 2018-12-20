@@ -130,7 +130,7 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   public componentDidMount() {
-    if (this.state.dataSource) {
+    if (this.state.dataSource && this.canExpand(this.state.dataSource)) {
       this.defaultExpandedKeys = this.genDefaultExpandedKeys(
         this.state.dataSource,
       )
@@ -144,14 +144,21 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   public componentDidUpdate(prevProps: Props<T, P>, prevState: State<T>) {
-    if (this.state.dataSource !== prevState.dataSource) {
+    const dataSourceChange =
+      this.state.dataSource !== prevState.dataSource &&
+      this.canExpand(this.state.dataSource) &&
+      this.isStructuralChange(this.state.dataSource, prevState.dataSource)
+
+    if (dataSourceChange) {
+      // 对于结构性变动需要重新生成默认展开keys
       this.defaultExpandedKeys = this.genDefaultExpandedKeys(
         this.state.dataSource,
       )
     }
 
+    // 树形表格过滤
     if (
-      this.state.dataSource !== prevState.dataSource ||
+      dataSourceChange ||
       prevProps.filterKey !== this.props.filterKey ||
       prevProps.filterValue !== this.props.filterValue
     ) {
@@ -990,6 +997,9 @@ export default class FatTableInner<T extends object, P extends object>
     }
   }
 
+  /**
+   * 树过滤
+   */
   private updateFilterStatus() {
     const { dataSource, expandedKeys } = this.filterAndGetExpandedKeys(
       this.props,
@@ -1036,6 +1046,28 @@ export default class FatTableInner<T extends object, P extends object>
     return { dataSource, expandedKeys }
   }
 
+  /**
+   * 是否支持展开
+   */
+  private canExpand(dataSource: T[]) {
+    return !!this.props.expandedRowRender || isTree(dataSource)
+  }
+
+  /**
+   * 结构性变动
+   */
+  private isStructuralChange(a: T[], b: T[]) {
+    const idKey = this.props.idKey!
+    if (a == null || b == null || a.length === 0 || b.length === 0) {
+      return true
+    }
+
+    return a[0][idKey] !== b[0][idKey]
+  }
+
+  /**
+   * 生成默认展开的keys
+   */
   private genDefaultExpandedKeys(list: T[]) {
     const {
       defaultExpandedLevel,

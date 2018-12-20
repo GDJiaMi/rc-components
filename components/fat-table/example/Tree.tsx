@@ -39,6 +39,39 @@ export default class Base extends React.Component {
       dataIndex: 'unknow',
       showHrWhenEmpty: true,
     },
+    {
+      title: '备注',
+      dataIndex: 'note',
+      render: (r, _, t, editing) => {
+        return editing ? (
+          <Input
+            value={r.note}
+            onChange={evt => t.setSnapshot({ note: evt.target.value })}
+          />
+        ) : (
+          <span>{r.note}</span>
+        )
+      },
+    },
+    {
+      title: '操作',
+      render: (r, _, t, editing) => {
+        return (
+          <FatTable.Actions>
+            {editing ? (
+              <>
+                <FatTable.Action onClick={t.save}>保存</FatTable.Action>
+                <FatTable.Action onClick={t.cancelEdit}>取消</FatTable.Action>
+              </>
+            ) : (
+              <FatTable.Action onClick={() => t.setEditing(r)}>
+                编辑
+              </FatTable.Action>
+            )}
+          </FatTable.Actions>
+        )
+      },
+    },
   ]
   public state = {
     filterValue: '',
@@ -66,6 +99,7 @@ export default class Base extends React.Component {
               </Form.Item>
             </>
           )}
+          onSave={async () => {}}
           headerExtra={<Form.Item>header extra here</Form.Item>}
           defaultExpandedLevel={1}
           wrappedComponentRef={this.table}
@@ -78,7 +112,7 @@ export default class Base extends React.Component {
     console.log('fetching...', { ...params })
     const { pageSize, current } = params
     const list: Data[] = []
-    for (let i = 0; i < pageSize; i++) {
+    for (let i = 0; i < 3; i++) {
       list.push({
         id: `${current + i}`,
         name: `${current + i}${params.name}${Math.random()}`,
