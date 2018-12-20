@@ -26,6 +26,7 @@ export interface SearchableSelectProps<T> {
   hideUntrackedItems?: boolean
   formatter: (value: T) => string
   optionFilterProp?: 'children'
+  defaultPageSize?: number
   onFetch: (
     query: string,
     page: number,
@@ -177,7 +178,11 @@ export default class SearchableSelect<
     }
     try {
       this.setState({ loading: true, error: undefined })
-      const res = await this.props.onFetch(this.state.query, 1, PageSize)
+      const res = await this.props.onFetch(
+        this.state.query,
+        1,
+        this.props.defaultPageSize || PageSize,
+      )
       this.setState({
         list: res.items,
       })
