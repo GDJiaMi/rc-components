@@ -34,6 +34,8 @@ export function isTree<T extends { children?: T[] }>(data: T[]) {
   return data.some(i => i.children != null)
 }
 
+export function searchAndMatch(value: string, q: string) {}
+
 export function filterDataSource<T extends { children?: T[]; parent?: T }>(
   data: T[],
   idKey: string,
@@ -42,15 +44,20 @@ export function filterDataSource<T extends { children?: T[]; parent?: T }>(
   expandedKeys: string[],
 ) {
   return data.map(org => {
-    // @ts-ignore: 进行一遍浅复制
+    let findIt = false
     const current = { ...org }
-    let findit = false
-    if (current[key].indexOf(value) !== -1) {
-      findit = true
-      current[key] = current[key].replace(
-        value,
-        `<span class="matched">${value}</span>`,
-      )
+    const content: string = current[key]
+    const q = new RegExp(value, 'i')
+    const index = content.search(q)
+    if (index !== -1) {
+      findIt = true
+      current[key] =
+        content.substring(0, index) +
+        `<span class="matched">${content.substring(
+          index,
+          index + value.length,
+        )}</span>` +
+        content.substring(index + value.length)
     }
 
     if (current.children) {
@@ -63,12 +70,12 @@ export function filterDataSource<T extends { children?: T[]; parent?: T }>(
         expandedKeys,
       )
 
-      if (!findit && len !== expandedKeys.length) {
-        findit = true
+      if (!findIt && len !== expandedKeys.length) {
+        findIt = true
       }
     }
 
-    if (findit) {
+    if (findIt) {
       expandedKeys.push(current[idKey])
     }
 

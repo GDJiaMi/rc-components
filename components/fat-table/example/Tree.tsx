@@ -112,10 +112,11 @@ export default class Base extends React.Component {
     console.log('fetching...', { ...params })
     const { pageSize, current } = params
     const list: Data[] = []
+
     for (let i = 0; i < 3; i++) {
       list.push({
         id: `${current + i}`,
-        name: `${current + i}${params.name}${Math.random()}`,
+        name: `${current + i}AbCdEfG${Math.random()}`,
         birthday: `1995-12-12 12:12:${i}`,
         note: '',
         children: [1, 2, 3].map(index => ({
