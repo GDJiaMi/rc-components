@@ -35,3 +35,12 @@ export function overrideComponent<P, T = any>(
 export function delay(time: number) {
   return new Promise(res => window.setTimeout(res, time))
 }
+
+export function clamp(n: number, min: number, max: number) {
+  if (n < min) {
+    return min
+  } else if (n > max) {
+    return max
+  }
+  return n
+}
