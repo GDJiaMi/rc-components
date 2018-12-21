@@ -179,7 +179,7 @@
 }
 
 .jm-user-search__error {
-  color:#ff4444;
+  color: #ff4444;
   text-align: center;
 }
 
@@ -187,10 +187,22 @@
   margin-right: 0.5em;
 }
 
-.jm-department-filter .anticon{
+.jm-department-filter__wrapper {
+  display: flex;
+}
+
+.jm-department-filter {
+  flex: 1
+}
+
+.jm-department-filter__button {
+  margin-left: 1em;
+}
+
+.jm-department-filter .anticon {
   color: #c1c1c1;
 }
- 
+
 .jm-department-filter .ant-input {
   border: none;
   border-radius: 0;

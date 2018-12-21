@@ -5,6 +5,7 @@ import React from 'react'
 import Spin from 'antd/es/spin'
 import Alert from 'antd/es/alert'
 import Input from 'antd/es/input'
+import Button from 'antd/es/button'
 import Icon from 'antd/es/icon'
 import Tree, { AntTreeNodeCheckedEvent } from 'antd/es/tree'
 import memoize from 'lodash/memoize'
@@ -68,7 +69,10 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       <div className="jm-us-container">
         <Spin spinning={!!loading}>
           {!!dataSource && (
-            <form onSubmit={this.handleSubmit}>
+            <form
+              onSubmit={this.handleSubmit}
+              className="jm-department-filter__wrapper"
+            >
               <Input
                 className="jm-department-filter"
                 prefix={<Icon type="filter" />}
@@ -76,6 +80,13 @@ class DepartmentTree extends React.PureComponent<Props, State> {
                 size="small"
                 placeholder="筛选部门"
               />
+              <Button
+                size="small"
+                htmlType="submit"
+                className="jm-department-filter__button"
+              >
+                筛选
+              </Button>
             </form>
           )}
           {!!error && (
@@ -191,6 +202,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
   private handleSubmit = (evt: React.FormEvent) => {
     evt.preventDefault()
+    evt.stopPropagation()
     if (this.state.searchKey === this.state.filter) {
       return
     }
