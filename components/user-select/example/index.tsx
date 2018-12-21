@@ -201,6 +201,7 @@ class UserSearchTest extends React.Component {
           value={this.state.value}
           onChange={value => this.setState({ value })}
           multiple
+          ignoreEmpty
         />
         <UserSearch
           value={this.state.value}

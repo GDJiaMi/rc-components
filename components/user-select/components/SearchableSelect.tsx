@@ -27,6 +27,7 @@ export interface SearchableSelectProps<T> {
   formatter: (value: T) => string
   optionFilterProp?: 'children'
   defaultPageSize?: number
+  ignoreEmpty?: boolean
   onFetch: (
     query: string,
     page: number,
@@ -47,6 +48,10 @@ interface State<T> {
 export default class SearchableSelect<
   T extends { id: string }
 > extends React.PureComponent<Props<T>, State<T>> {
+  public static defaultProps = {
+    ignoreEmpty: false,
+  }
+
   public state: State<T> = {
     loading: false,
     query: '',
@@ -78,7 +83,7 @@ export default class SearchableSelect<
   }
 
   public componentDidMount() {
-    this.fetchList()
+    this.search()
   }
 
   public render() {
@@ -93,7 +98,8 @@ export default class SearchableSelect<
       notFoundContent,
       optionFilterProp,
     } = this.props
-    const { loading, list, error, value } = this.state
+    const { loading, list, error, value, query } = this.state
+    const listEmpty = list == null || list.length === 0
     return (
       <div className={`jm-user-search ${className || ''}`} style={style}>
         <Select
@@ -114,7 +120,7 @@ export default class SearchableSelect<
                 <Icon type="close-circle" />
                 {error.message}
               </div>
-            ) : (
+            ) : !query && listEmpty ? null : (
               notFoundContent
             )
           }
@@ -123,7 +129,8 @@ export default class SearchableSelect<
           onSearch={this.handleSearch}
         >
           {!!list && list.map(this.renderItem)}
-          {(list == null || list.length === 0) &&
+          {/* 确保能够正常显示已选项 */}
+          {listEmpty &&
             !this.state.query &&
             !!this.props.value &&
             this.props.value.map(this.renderItem)}
@@ -143,18 +150,15 @@ export default class SearchableSelect<
   }
 
   private handleBlur = () => {
-    this.setState({ query: '', error: undefined }, () => {
-      this.fetchList()
-    })
+    // 恢复默认值
+    this.search()
     if (this.props.onBlur) {
       this.props.onBlur()
     }
   }
 
   private handleSearch = debounce((query: string) => {
-    this.setState({ query }, () => {
-      this.fetchList()
-    })
+    this.search(query)
   }, 500)
 
   private handleChange = (
@@ -172,6 +176,17 @@ export default class SearchableSelect<
     }
   }
 
+  private search = (query: string = '') => {
+    this.setState({ query }, () => {
+      if (this.props.ignoreEmpty && this.state.query.trim() === '') {
+        this.setState({ list: undefined })
+        return
+      }
+
+      this.fetchList()
+    })
+  }
+
   private fetchList = async () => {
     if (this.state.loading) {
       return
@@ -187,7 +202,7 @@ export default class SearchableSelect<
         list: res.items,
       })
     } catch (error) {
-      this.setState({ error, list: [] })
+      this.setState({ error, list: undefined })
     } finally {
       this.setState({ loading: false })
     }

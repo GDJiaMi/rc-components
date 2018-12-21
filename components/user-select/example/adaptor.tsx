@@ -90,6 +90,13 @@ const adaptor: Adaptor = {
     if (page === 3 || query == '异常') {
       throw new Error('模拟抛出异常')
     }
+    if (query === 'notfound') {
+      return {
+        items: [],
+        total: 0,
+      }
+    }
+
     for (let i = 0; i < pageSize; i++) {
       list.push({
         id: `${query}-${page}-${i}`,
