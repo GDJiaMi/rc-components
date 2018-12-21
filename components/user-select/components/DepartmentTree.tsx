@@ -119,6 +119,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       dataSource: undefined,
       dataSourceById: undefined,
       expandedKeys: undefined,
+      filter: undefined,
+      searchKey: undefined,
     })
   }
 
@@ -163,16 +165,16 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       orgValue.findIndex(i => i.id === tree.id) !== -1
     const filter = this.state.filter || ''
     const userCount = tree.userCount != null ? ` (${tree.userCount})` : ''
-    const filterIndex = tree.name.indexOf(filter)
-    const beforeStr = tree.name.substr(0, filterIndex)
-    const afterStr = tree.name.substr(filterIndex + filter.length)
+    const filterIndex = tree.name.search(new RegExp(filter, 'i'))
 
     const title =
       filterIndex !== -1 ? (
         <span>
-          {beforeStr}
-          <span className="jm-matching">{filter}</span>
-          {afterStr}
+          {tree.name.substr(0, filterIndex)}
+          <span className="jm-matching">
+            {tree.name.substr(filterIndex, filterIndex + filter.length)}
+          </span>
+          {tree.name.substr(filterIndex + filter.length)}
           {userCount}
         </span>
       ) : (
@@ -231,7 +233,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       // 获取匹配节点的expandedKeys
       newExpandedKeys = DepartmentTree.genExpandedKeysForFilter(
         dataSource,
-        filter,
+        new RegExp(filter, 'i'),
       )
     }
     this.setState({ expandedKeys: newExpandedKeys })
@@ -407,11 +409,11 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
-  private static genExpandedKeysForFilter(res: DepartmentDesc, filter: string) {
+  private static genExpandedKeysForFilter(res: DepartmentDesc, filter: RegExp) {
     const expandedKeys: string[] = []
     const iter = (node: DepartmentDesc) => {
       let findIt = false
-      if (node.name.indexOf(filter) !== -1) {
+      if (node.name.search(filter) !== -1) {
         findIt = true
       } else if (node.children) {
         for (let subNode of node.children) {
