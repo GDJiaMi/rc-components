@@ -16,6 +16,7 @@ export interface ProviderProps {
    * @default false
    */
   debug?: boolean
+  children?: React.ReactNode
 }
 
 export interface InnerProviderProps
