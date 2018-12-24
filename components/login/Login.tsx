@@ -120,7 +120,7 @@ export class LoginInner extends React.Component<Props> {
                 </Checkbox>
               )}
             </Form.Item>
-            <Form.Item>
+            <Form.Item style={{ paddingTop: '0.5em' }}>
               <Button loading={this.state.logining}>登录</Button>
             </Form.Item>
             {!!this.state.error && (
