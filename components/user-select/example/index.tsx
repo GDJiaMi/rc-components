@@ -7,6 +7,7 @@ import Provider, { Adaptor, UserDesc, TenementDesc } from '../Provider'
 import UserSelect, { IUserSelect, UserSelectValue } from '../UserSelect'
 import DepartmentSelect, { DepartmentSelectValue } from '../DepartmentSelect'
 import UserSearch from '../UserSearch'
+import UserSearchComboBox from '../UserSearchComboBox'
 import TenementSearch from '../TenementSearch'
 import adaptor from './adaptor'
 
@@ -192,6 +193,7 @@ class Department extends React.Component {
 class UserSearchTest extends React.Component {
   state = {
     value: [{ id: '1', name: 'test', mobile: '120' }] as UserDesc[],
+    comboValue: 'xxx' as UserDesc | string,
   }
   public render() {
     return (
@@ -206,6 +208,12 @@ class UserSearchTest extends React.Component {
         <UserSearch
           value={this.state.value}
           onChange={value => this.setState({ value })}
+        />
+        <h4>comboBox 模式</h4>
+        <UserSearchComboBox
+          value={this.state.comboValue}
+          ignoreEmpty
+          onChange={value => this.setState({ comboValue: value })}
         />
       </div>
     )
@@ -230,4 +238,5 @@ class TenementSearchTest extends React.Component {
   }
 }
 
+// @ts-ignore
 ReactDOM.render(<App />, document.getElementById('root'))

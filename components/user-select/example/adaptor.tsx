@@ -85,11 +85,17 @@ const adaptor: Adaptor = {
       extra: null,
     }
   },
+
   async searchUser(query, page, pageSize) {
     const list: UserDesc[] = []
     if (page === 3 || query == '异常') {
       throw new Error('模拟抛出异常')
     }
+
+    if (query === 'error') {
+      throw new Error('模拟抛出异常')
+    }
+
     if (query === 'notfound') {
       return {
         items: [],

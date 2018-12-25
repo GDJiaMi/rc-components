@@ -219,3 +219,12 @@
   display: inline-block;
   background-color: #ffffa8;
 }
+
+.jm-user-combobox .ant-select-search__field {
+  border: none !important;
+}
+
+.jm-user-combobox .ant-select-selection__rendered {
+  margin-left: 0;
+  margin-right: 0;
+}

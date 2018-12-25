@@ -18,7 +18,7 @@ export function allowsInner(
   otherwise: React.ReactNode | undefined,
   ...actions: Action[]
 ) {
-  return function<T extends React.ComponentClass<any>>(Target: T): T {
+  return function<T extends React.ComponentType<any>>(Target: T): T {
     class AllowsWrapper extends React.Component {
       public render() {
         return (
