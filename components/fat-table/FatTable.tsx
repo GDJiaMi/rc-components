@@ -106,6 +106,7 @@ export default class FatTableInner<T extends object, P extends object>
   // 默认展开
   private defaultExpandedKeys?: string[]
   private defaultValues: Partial<P> = {}
+  private tableInstance = React.createRef<Table<T>>()
 
   public static getDerivedStateFromProps<T, P extends object>(
     props: Props<T, P>,
@@ -141,6 +142,12 @@ export default class FatTableInner<T extends object, P extends object>
     if (this.props.fetchOnMount && this.props.onChange == null) {
       this.search(false, false)
     }
+
+    // 监听组件大小变化，取消列固定
+    if (this.props.scroll && this.props.scroll.x) {
+      this.handleResize()
+      window.addEventListener('resize', this.handleResize)
+    }
   }
 
   public componentDidUpdate(prevProps: Props<T, P>, prevState: State<T>) {
@@ -166,19 +173,26 @@ export default class FatTableInner<T extends object, P extends object>
     }
   }
 
+  public componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize)
+  }
+
   public render() {
     const renderer: FatTableRenderer<T, P> =
       this.props.children || this.defaultRenderer
 
-    return renderer(
-      this.props.form,
-      this.defaultValues,
-      {
-        header: this.renderHeader,
-        body: this.renderBody,
-      },
-      this,
-    )
+    if (typeof renderer === 'function') {
+      return renderer(
+        this.props.form,
+        this.defaultValues,
+        {
+          header: this.renderHeader,
+          body: this.renderBody,
+        },
+        this,
+      )
+    }
+    return this.props.children
   }
 
   public setEditing = (record: T) => {
@@ -321,6 +335,14 @@ export default class FatTableInner<T extends object, P extends object>
    */
   public getList = () => {
     return this.state.dataSource
+  }
+
+  /**
+   * 获取数据源长度
+   */
+  public length = () => {
+    const list = this.getList()
+    return list ? list.length : 0
   }
 
   /**
@@ -689,6 +711,7 @@ export default class FatTableInner<T extends object, P extends object>
           />
         )}
         <Table
+          ref={this.tableInstance}
           components={components}
           columns={this.enhanceColumns()}
           rowKey={idKey}
@@ -994,6 +1017,22 @@ export default class FatTableInner<T extends object, P extends object>
       message.error(err.message)
     } finally {
       this.setState({ loading: false })
+    }
+  }
+
+  private handleResize = () => {
+    const tableWrapper =
+      this.tableInstance.current &&
+      this.tableInstance.current.getPopupContainer()
+    const scroll = this.props.scroll
+    if (tableWrapper && scroll && scroll.x) {
+      const { offsetWidth } = tableWrapper
+      const classList = tableWrapper.classList
+      if (offsetWidth >= scroll.x) {
+        classList.add('prevent-fixed')
+      } else {
+        classList.remove('prevent-fixed')
+      }
     }
   }
 

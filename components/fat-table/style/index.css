@@ -60,3 +60,8 @@
   animation: error 1s ease 0.5s;
   background: #ffbfbf;
 }
+
+.jm-table .prevent-fixed .ant-table-fixed-right,
+.jm-table .prevent-fixed .ant-table-fixed-left {
+  display: none;
+}

@@ -30,6 +30,8 @@ export default class Base extends React.Component {
     },
     {
       title: '操作',
+      width: 200,
+      fixed: 'right',
       render: (item, _, table) => {
         return (
           <FatTable.Actions>
@@ -80,6 +82,7 @@ export default class Base extends React.Component {
             // 默认展开偶数
             return list.filter(i => parseInt(i.id) % 2 === 0).map(i => i.id)
           }}
+          scroll={{ x: 1000 }}
         />
       </AdminLayout.Body>
     )

@@ -46,6 +46,7 @@ export interface IFatTable<T, P = {}> {
    */
   getParams(): P & PaginationInfo
   getList(): T[]
+  length(): number
   getDefaultValues(): Partial<P>
   setList(list: T[]): void
   remove(ids: any[]): void
