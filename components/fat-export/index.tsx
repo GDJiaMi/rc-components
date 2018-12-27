@@ -1,15 +1,24 @@
+/**
+ * 通用导出组件
+ */
 import React from 'react'
 import Modal from 'antd/es/modal'
 import Progress from 'antd/es/progress'
 import Radio, { RadioChangeEvent } from 'antd/es/radio'
-import { Showable } from '../type'
 import { delay } from '../utils/common'
 
-export { Showable }
+export interface Showable {
+  show(): void
+}
 
 export interface ProgressEvent {
+  success?: boolean
   progress: number
-  result: any
+  error?: Error
+  result: {
+    message: string
+    taskResult: any
+  }
 }
 
 export interface ExportProps {
@@ -43,6 +52,7 @@ interface State {
   status: ExportState
   error?: Error
   progress: number
+  message?: string
 }
 
 export default class Export extends React.Component<ExportProps, State>
@@ -66,7 +76,7 @@ export default class Export extends React.Component<ExportProps, State>
 
   public render() {
     const { title, footer, allText, currentText, showScope } = this.props
-    const { visible, status, progress, error } = this.state
+    const { visible, status, progress, error, message } = this.state
     const { INIT, EXPORTING, EXPORT_FAIL, EXPORTED } = ExportState
     return (
       <Modal
@@ -115,6 +125,7 @@ export default class Export extends React.Component<ExportProps, State>
               </Radio.Group>
             </div>
           )}
+          {!!message && <div className="jm-export-message">{message}</div>}
           {!!footer && <div className="jm-import-desc">{footer}</div>}
         </div>
       </Modal>
@@ -142,6 +153,7 @@ export default class Export extends React.Component<ExportProps, State>
         window.open(this.downloadUrl)
         this.handleCancel()
         break
+      default:
     }
   }
 
@@ -168,21 +180,37 @@ export default class Export extends React.Component<ExportProps, State>
 
   private handleCheckProgress = async () => {
     try {
-      for (;;) {
+      while (true) {
         // 已经退出
         if (this.state.status != ExportState.EXPORTING) {
           return
         }
-        const { progress, result } = await this.props.onProgress(this.taskId!)
-        this.setState({ progress })
-        if (progress === 100) {
-          this.downloadUrl = result
+
+        const {
+          success,
+          progress,
+          result,
+          error,
+        } = await this.props.onProgress(this.taskId!)
+        this.setState({
+          progress: success ? 100 : Math.min(99, progress),
+          message: result && result.message,
+        })
+
+        if (success) {
+          this.downloadUrl = result.taskResult
           break
         }
+
+        if (error != null) {
+          throw error
+        }
+
         await delay(1000)
       }
+
       // 导入成功
-      this.setState({ status: ExportState.EXPORTED })
+      this.setState({ status: ExportState.EXPORTED, message: undefined })
     } catch (error) {
       this.setState({
         status: ExportState.EXPORT_FAIL,
@@ -202,6 +230,7 @@ export default class Export extends React.Component<ExportProps, State>
       visible: false,
       status: ExportState.INIT,
       progress: 0,
+      message: undefined,
       error: undefined,
     })
   }

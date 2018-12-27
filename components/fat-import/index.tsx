@@ -7,13 +7,28 @@ import Progress from 'antd/es/progress'
 import Upload from 'antd/es/upload'
 import { UploadChangeParam } from 'antd/es/upload'
 import { delay } from '../utils/common'
-import { Showable } from '../type'
 
-export { Showable }
+export interface Showable {
+  show(): void
+}
+
+export interface ImportMessage {
+  summary: string
+  errors: Array<{
+    message: string
+    line: number
+  }>
+}
 
 export interface ProgressEvent {
+  success?: boolean
   progress: number
-  result: any
+  error?: Error
+  result: {
+    // 状态信息
+    message?: ImportMessage
+    taskResult?: any
+  }
 }
 
 export interface ImportProps<T> {
@@ -57,21 +72,22 @@ enum ImportState {
   IMPORT_FAILED,
 }
 
-interface State<T> {
+interface State {
   visible: boolean
   status: ImportState
   progress: number
+  message?: ImportMessage
   error?: Error
   action: string
 }
 
-export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
+export default class Import<T> extends React.Component<ImportProps<T>, State>
   implements Showable {
   public static defaultProps = {
     title: '导入',
   }
 
-  public state: State<T> = {
+  public state: State = {
     visible: false,
     status: ImportState.INIT,
     progress: 0,
@@ -83,7 +99,7 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
 
   public render() {
     const { title, accept, data, name, footer } = this.props
-    const { status, visible, action, progress, error } = this.state
+    const { status, visible, action, progress, error, message } = this.state
     const {
       INIT,
       UPLOAD_FAILED,
@@ -98,7 +114,7 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
         maskClosable={false}
         title={title}
         footer={null}
-        width="345px"
+        width="500px"
         visible={visible}
         onCancel={this.handleCancel}
       >
@@ -157,15 +173,38 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
               </div>
             )}
           </div>
+
           {(status == IMPORTED || status == UPLOADED) && (
             <div className="jm-import-desc success">
               {status == IMPORTED ? '导入成功' : '上传成功'}
             </div>
           )}
+
           {(status == UPLOAD_FAILED || status == IMPORT_FAILED) && (
             <div className="jm-import-desc error">
               {status == UPLOAD_FAILED ? '上传失败' : '导入失败'}:{' '}
               {error && error.message}
+            </div>
+          )}
+
+          {!!message && (
+            <div className="jm-import-message">
+              <header className="jm-import-message__summary">
+                {message.summary}
+              </header>
+              <main className="jm-import-message__items">
+                {!!message.errors &&
+                  message.errors.map(err => (
+                    <div className="jm-import-message__item" key={err.line}>
+                      <div className="jm-import-message__item-line">
+                        {err.line}
+                      </div>
+                      <div className="jm-import-message__item-msg">
+                        {err.message}
+                      </div>
+                    </div>
+                  ))}
+              </main>
             </div>
           )}
 
@@ -193,6 +232,7 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
         }
         this.handleCancel()
         break
+      default:
     }
   }
 
@@ -254,19 +294,34 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
 
   private handleCheckProgress = async () => {
     try {
-      for (;;) {
+      while (true) {
         if (this.state.status != ImportState.IMPORTING) {
           return
         }
 
-        const { progress } = await this.props.onProgress(this.taskId)
-        if (progress === 100) {
-          this.setState({ progress })
+        const {
+          progress,
+          success,
+          result,
+          error,
+        } = await this.props.onProgress(this.taskId)
+
+        this.setState({
+          progress: success ? 100 : Math.min(99, progress),
+          message: result && result.message,
+        })
+
+        if (success) {
           break
         }
-        this.setState({ progress })
+
+        if (error != null) {
+          throw error
+        }
+
         await delay(1000)
       }
+
       // 导入成功
       this.setState({ status: ImportState.IMPORTED })
     } catch (error) {
@@ -307,6 +362,7 @@ export default class Import<T> extends React.Component<ImportProps<T>, State<T>>
       status: ImportState.INIT,
       progress: 0,
       error: undefined,
+      message: undefined,
     })
   }
 }

@@ -34,3 +34,42 @@
 .jm-import-upload .ant-progress-text {
   font-size: 0.7em;
 }
+
+.jm-import-message {
+  width: 457px;
+  margin-top: 2em;
+  background-color: whitesmoke;
+  border-radius: 5px;
+}
+
+.jm-import-message__summary {
+  padding: 5px 10px;
+  font-size: 15px;
+  background-color: #e0e0e0;
+}
+
+.jm-import-message__items {
+  max-height: 500px;
+  overflow: auto;
+}
+
+.jm-import-message__item {
+  display: flex;
+  line-height: 2;
+}
+
+.jm-import-message__item:not(:last-child) {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.jm-import-message__item-line {
+  width: 48px;
+  padding: 0 10px;
+  color: #6d6d6d;
+  border-right: 1px solid #e2e2e2;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.jm-import-message__item-msg {
+}
