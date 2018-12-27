@@ -44,3 +44,5 @@ export function clamp(n: number, min: number, max: number) {
   }
   return n
 }
+
+export const noop = () => {}

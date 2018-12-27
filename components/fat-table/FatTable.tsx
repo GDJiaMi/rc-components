@@ -826,7 +826,7 @@ export default class FatTableInner<T extends object, P extends object>
       this.state.allReady = true
     }
 
-    const query = search.get(namespace)
+    const query = search.getter(namespace)
     if (enablePersist) {
       // 初始化分页信息
       this.state.pagination.pageSize = query.getInt(

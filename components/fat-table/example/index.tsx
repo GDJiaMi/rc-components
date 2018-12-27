@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { HashRouter, Route, Link, Switch } from 'react-router-dom'
 import AdminLayout from '../../admin-layout'
+import Query from '../../query'
 import '../../admin-layout/style/css'
 import '../style/css'
 import './style.css'
@@ -38,27 +39,29 @@ class App extends React.Component {
   public render() {
     return (
       <HashRouter>
-        <Route
-          render={({ location }) => (
-            <AdminLayout
-              siteName="FatTable"
-              menus={menus}
-              path={location.pathname}
-            >
-              <AdminLayout.View>
-                <Switch>
-                  <Route path="/" exact>
-                    <Link to="base">基础</Link>
-                  </Route>
-                  <Route path="/base" component={Base} />
-                  <Route path="/custom-layout" component={CustomLayout} />
-                  <Route path="/operation" component={Operation} />
-                  <Route path="/tree" component={Tree} />
-                </Switch>
-              </AdminLayout.View>
-            </AdminLayout>
-          )}
-        />
+        <Query.Provider>
+          <Route
+            render={({ location }) => (
+              <AdminLayout
+                siteName="FatTable"
+                menus={menus}
+                path={location.pathname}
+              >
+                <AdminLayout.View>
+                  <Switch>
+                    <Route path="/" exact>
+                      <Link to="base">基础</Link>
+                    </Route>
+                    <Route path="/base" component={Base} />
+                    <Route path="/custom-layout" component={CustomLayout} />
+                    <Route path="/operation" component={Operation} />
+                    <Route path="/tree" component={Tree} />
+                  </Switch>
+                </AdminLayout.View>
+              </AdminLayout>
+            )}
+          />
+        </Query.Provider>
       </HashRouter>
     )
   }

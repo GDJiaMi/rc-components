@@ -120,7 +120,6 @@ export default class AdminLayout extends React.Component<
                   ? this.resolveOpenKeys(menus, path)
                   : openKeys
               }
-              // openKeys={openKeys}
               onOpenChange={(openKeys: string[]) => {
                 this.setState({ openKeys })
               }}

@@ -30,7 +30,7 @@ interface State extends QueryComponentProps {
 }
 
 const noop = (...args: any[]): any => {
-  console.error('Query.Provider 未挂载')
+  throw new Error('Query.Provider 未挂载')
 }
 
 export const QueryContext = React.createContext<QueryContextValue>({

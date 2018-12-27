@@ -3,7 +3,7 @@
  */
 import React from 'react'
 import Form from 'antd/es/form'
-import Query, { QueryGetter, QueryComponentProps } from '../query'
+import Query, { QueryGetter } from '../query'
 import FatTableInner from './FatTable'
 import { FatTableProps } from './type'
 import { Actions, Action, Nowrap, EmptyColumn } from './components'
@@ -13,8 +13,7 @@ export * from './type'
 
 export { QueryGetter, Actions, Action }
 
-// FIXME: 避免使用any
-const FatTableWithForm = Form.create()(FatTableInner as any)
+const FatTableWithForm = Form.create()(FatTableInner)
 
 export default class FatTable<T, P extends object = {}> extends React.Component<
   FatTableProps<T, P> & {
@@ -28,11 +27,12 @@ export default class FatTable<T, P extends object = {}> extends React.Component<
   public static EmptyColumn = EmptyColumn
   public render() {
     return (
-      <Query>
-        {(queryProps: QueryComponentProps) => (
-          <FatTableWithForm {...this.props} {...queryProps} />
+      <Query.Context.Consumer>
+        {queryProps => (
+          // @ts-ignore
+          <FatTableWithForm {...this.props} search={queryProps} />
         )}
-      </Query>
+      </Query.Context.Consumer>
     )
   }
 }
