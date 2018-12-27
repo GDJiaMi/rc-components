@@ -35,26 +35,37 @@ export default class Ellipsis extends React.Component<EllipsisProps> {
       style = {},
       ...others
     } = this.props
-    const content = supportLineClamp ? (
-      <div
-        className={`jm-ellipsis-clamp ${className || ''}`}
-        {...others}
-        style={{ WebkitLineClamp: lines, ...style }}
-      >
-        {this.props.children}
-      </div>
-    ) : (
-      <div
-        ref={this.ele}
-        className={`jm-ellipsis ${className || ''}`}
-        style={{
-          height: lines * this.state.lineHeight + EXTRA_HEIGHT,
-          ...style,
-        }}
-      >
-        {this.props.children}
-      </div>
-    )
+
+    const content =
+      // 单行
+      lines === 1 ? (
+        <span
+          className={`jm-ellipsis-single-line ${className || ''}`}
+          style={style}
+        >
+          {this.props.children}
+        </span>
+      ) : supportLineClamp ? (
+        // chrome 支持多行省略
+        <div
+          className={`jm-ellipsis-clamp ${className || ''}`}
+          {...others}
+          style={{ WebkitLineClamp: lines, ...style }}
+        >
+          {this.props.children}
+        </div>
+      ) : (
+        <div
+          ref={this.ele}
+          className={`jm-ellipsis ${className || ''}`}
+          style={{
+            height: lines * this.state.lineHeight + EXTRA_HEIGHT,
+            ...style,
+          }}
+        >
+          {this.props.children}
+        </div>
+      )
 
     return tooltip ? (
       <Tooltip
