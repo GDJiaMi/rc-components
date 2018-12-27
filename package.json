@@ -1,22 +1,20 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.1.55",
+  "version": "0.2.0",
   "description": "mygzb.com React Components",
-  "main": "lib/index.js",
+  "main": "es/index.js",
   "module": "es/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "es/index.d.ts",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "rimraf lib es",
-    "build:es6": "tsc -d --outDir ./lib --module CommonJS ",
-    "postbuild:es6": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png|svg)\" ./lib",
+    "prebuild": "rimraf es",
     "postbuild:es6module": "cpx \"components/**/!(example)/*.+(css|jpg|jpeg|gif|png|svg)\" ./es",
     "build:es6module": "tsc -d --outDir ./es",
-    "build": "npm run build:es6 && npm run build:es6module",
+    "build": "npm run build:es6module",
     "lint": "tslint -c tslint.json \"components/**/*.ts?(x)\"",
     "prettier": "prettier --config .prettierrc --write \"components/**/*.ts?(x)\"",
     "precommit": "lint-staged",
@@ -46,7 +44,6 @@
   "author": "ivan",
   "license": "MIT",
   "peerDependencies": {
-    "antd": "^3.8.4",
     "lodash": "^4.17.10",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0",
@@ -76,10 +73,10 @@
     "mobx-react": "^5.2.3",
     "parcel-bundler": "^1.9.7",
     "prettier": "^1.14.2",
-    "react": "^16.0.0",
-    "react-dom": "^16.4.1",
-    "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.1",
+    "react": "^16.7.0-alpha.2",
+    "react-dom": "^16.7.0-alpha.2",
+    "react-router": "^4.4.0-beta.6",
+    "react-router-dom": "^4.4.0-beta.6",
     "rimraf": "^2.6.2",
     "style-loader": "^0.23.1",
     "tslint": "^5.10.0",
@@ -88,6 +85,7 @@
     "typescript": "3.2.2"
   },
   "dependencies": {
+    "antd": "3.8.4",
     "classnames": "^2.2.6",
     "immer": "^1.8.0",
     "qs": "^6.5.2",

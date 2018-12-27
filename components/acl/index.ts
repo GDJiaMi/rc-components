@@ -9,6 +9,7 @@ import Allows, { AllowsProps } from './Allows'
 import { allows, allowsAll, allowsSome, allowsInner } from './allowsHocs'
 import withAcl, { AclProps, AclInjectedProps } from './withAcl'
 import { Rules, Action, Role } from './type'
+import useAcl from './hook'
 
 export default {
   Provider,
@@ -22,6 +23,7 @@ export default {
   allowsInner,
   withAcl,
   Context,
+  useAcl,
 }
 
 export {

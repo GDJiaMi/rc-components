@@ -1,8 +1,4 @@
 [] tag container
 [] modal 支持以visible props显式控制
-[] 进度条 Spin
-[] FatExport，FatImport优化，从bms中测试抽离出来
 [] document
-[] 废弃lib目录, 采用直接导入的模式
-[] 锁定antd router等版本,
 [] withRouter 转换为useRouter
