@@ -1,5 +1,5 @@
 /**
- * 注入查询字符串，以及查询字符串相关方法
+ * 查询字符串相关操作
  */
 import React from 'react'
 import omit from 'lodash/omit'
@@ -7,34 +7,50 @@ import { withRouter, RouteComponentProps } from 'react-router'
 import qs from 'qs'
 import QueryGetter from './QueryGetter'
 
-export interface QueryComponentProps {
-  search: {
-    value: object
-    set(namespace: string, query: object, ...omited: string[]): void
-    set(query: object, ...omited: string[]): void
-    get(namespace?: string): QueryGetter
-    clear(namespace?: string): void
-  }
-}
-
-export interface QueryProps {
-  children: (props: QueryComponentProps) => React.ReactNode
-}
-
+export type QuerySetter = (key: string, value: any) => QuerySetter
 export { QueryGetter }
 
-interface Props extends QueryProps, RouteComponentProps<{}> {}
+export interface QueryContextValue {
+  value: any
+  set(namespace: string, query: object, ...omited: string[]): void
+  set(query: object, ...omited: string[]): void
+  get(namespace?: string): any
+  setter(namespace?: string): QuerySetter
+  getter(namespace?: string): QueryGetter
+  clear(namespace?: string): void
+}
+
+export interface QueryComponentProps {
+  search: QueryContextValue
+}
+
+interface Props extends RouteComponentProps<{}> {}
 interface State extends QueryComponentProps {
   rawSearch: string
 }
 
-export class Query extends React.PureComponent<Props, State> {
+const noop = (...args: any[]): any => {
+  console.error('Query.Provider 未挂载')
+}
+
+export const QueryContext = React.createContext<QueryContextValue>({
+  value: {},
+  set: noop,
+  get: noop,
+  setter: noop,
+  getter: noop,
+  clear: noop,
+})
+
+export class Provider extends React.PureComponent<Props, State> {
   public constructor(props: Props) {
     super(props)
     this.state = {
       search: {
         value: {},
         clear: this.clear.bind(this),
+        setter: this.setter.bind(this),
+        getter: this.getter.bind(this),
         get: this.get.bind(this),
         set: this.set.bind(this),
       },
@@ -56,7 +72,11 @@ export class Query extends React.PureComponent<Props, State> {
   }
 
   public render() {
-    return this.props.children(this.state as QueryComponentProps)
+    return (
+      <QueryContext.Provider value={this.state.search}>
+        {this.props.children}
+      </QueryContext.Provider>
+    )
   }
 
   private clear = (namespace?: string) => {
@@ -96,8 +116,20 @@ export class Query extends React.PureComponent<Props, State> {
   /**
    * 获取查询字符串
    */
-  private get(namespace?: string) {
+  private getter(namespace?: string) {
     return new QueryGetter(filterNamespace(namespace, this.state.search.value))
+  }
+
+  private get(namespace?: string) {
+    return filterNamespace(namespace, this.state.search.value)
+  }
+
+  private setter(namespace: string = '') {
+    const self = (key: string, value: any) => {
+      this.set(namespace, { [key]: value })
+      return self
+    }
+    return self
   }
 
   /**
@@ -177,4 +209,4 @@ function filterNamespace(namespace: string | undefined, query: object): object {
 }
 
 // @ts-ignore
-export default withRouter(Query)
+export default withRouter(Provider)

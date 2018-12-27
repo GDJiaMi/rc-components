@@ -1,4 +1,10 @@
-import Query from './Query'
-export { default as withQuery } from './withQuery'
-export * from './Query'
-export default Query
+import Provider from './Provider'
+import withQuery from './withQuery'
+import useQuery from './hook'
+export * from './Provider'
+
+export default {
+  Provider,
+  withQuery,
+  useQuery,
+}
