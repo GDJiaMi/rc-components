@@ -15,7 +15,7 @@ yarn add react react-dom tslib react-router react-router-dom
 
 ## Usage
 
-所有组件都在`lib`或`es`目录下，lib 目录使用 CommonJS 模块系统， 而 es 使用 ES6 模块系统，另外两个目录下面都有 Typescript 声明文件，所以支持类型检查，开发者可以按需导入需要的组件
+所有组件都在`es`目录下， es 使用 ES6 模块系统，另外每目录下面都有 Typescript 声明文件，所以支持类型检查，开发者可以按需导入需要的组件
 
 `rc-components` 支持类似于`antd`的按需加载方式，如果你使用 typescript 可以使用[`ts-import-plugin`](https://github.com/Brooooooklyn/ts-import-plugin) 插件, 例如：
 
@@ -38,13 +38,13 @@ module.exports = {
                 // 按需导入antd组件
                 {
                   libraryName: 'antd',
-                  libraryDirectory: 'lib',
+                  libraryDirectory: 'es',
                   style: 'css',
                 },
                 // 按需导入rc-components组件
                 {
                   libraryName: '@gdjiami/rc-components',
-                  libraryDirectory: 'lib',
+                  libraryDirectory: 'es',
                   style: 'css',
                 },
               ]),

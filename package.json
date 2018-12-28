@@ -32,7 +32,6 @@
     "url": "ssh://git@code.ejiahe.com:25522/WEB/jm-rc-components.git"
   },
   "files": [
-    "lib",
     "es",
     "README.md",
     "LICENSE"

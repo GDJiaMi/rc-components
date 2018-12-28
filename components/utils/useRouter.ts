@@ -7,7 +7,7 @@ import useForceUpdate from './useUpdate'
 /**
  * TODO: 将在官方提供useRouter之后移除
  */
-export default function useRouter<T = {}>() {
+export default function useRouter<T = {}>(): RouteComponentProps<T> {
   const forceUpdate = useForceUpdate()
   const routerContext: RouteComponentProps<T> = useContext(__RouterContext)
   if (!routerContext) {

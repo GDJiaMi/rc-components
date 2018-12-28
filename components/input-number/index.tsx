@@ -7,12 +7,16 @@ import InputNumber, { InputNumberProps as Props } from 'antd/es/input-number'
 
 export interface InputNumberProps extends Props {
   inline?: boolean
+  width?: string | number
 }
 
 export default function(props: InputNumberProps) {
-  const { inline, placeholder, className, ...other } = props
+  const { inline, placeholder, className, width, ...other } = props
   return (
-    <div className={`jm-inputnumber-wrapper ${(inline && 'inline') || ''}`}>
+    <div
+      className={`jm-inputnumber-wrapper ${(inline && 'inline') || ''}`}
+      style={{ width }}
+    >
       <InputNumber className={`jm-inputnumber ${className || ''}`} {...other} />
       <span className="placeholder">{placeholder}</span>
     </div>
