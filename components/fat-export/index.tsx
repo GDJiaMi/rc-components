@@ -23,9 +23,9 @@ export interface ProgressEvent {
 
 export interface ExportProps {
   title?: string
-  onStart: (scope: 'all' | 'current') => Promise<string>
+  onStart: (scope: ExportScope) => Promise<string>
   onProgress: (taskId: string) => Promise<ProgressEvent>
-  onSuccess?: () => {}
+  onSuccess?: (downloadUrl: string) => {}
   // 显示选择数据范围
   showScope?: boolean
   initialScope?: ExportScope
@@ -150,6 +150,9 @@ export default class Export extends React.Component<ExportProps, State>
         break
       case ExportState.EXPORTED:
         // 导出成功
+        if (this.props.onSuccess) {
+          this.props.onSuccess(this.downloadUrl!)
+        }
         window.open(this.downloadUrl)
         this.handleCancel()
         break

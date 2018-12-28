@@ -27,7 +27,7 @@
 
 ### 🎉 新增
 
-- `@gdjiami/rc-components/hooks`暴露了一些 React Hooks, 用于取代高阶组件，让代码更加简洁. 目前包含以下 hooks
+- `@gdjiami/rc-components/es/hooks`暴露了一些 React Hooks, 用于取代高阶组件，让代码更加简洁. 目前包含以下 hooks
   - useQuery 用于取代 withQuery
   - useAcl 用于取代 withAcl
   - useUpdate 返回一个回调，用于强制刷新

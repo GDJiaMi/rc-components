@@ -116,7 +116,7 @@ export default class Import<T> extends React.Component<ImportProps<T>, State>
         footer={null}
         width="500px"
         visible={visible}
-        onCancel={this.handleCancel}
+        onCancel={this.handleClose}
       >
         <div className="jm-import">
           <div className="jm-import-content">
@@ -234,6 +234,14 @@ export default class Import<T> extends React.Component<ImportProps<T>, State>
         break
       default:
     }
+  }
+
+  private handleClose = () => {
+    if (this.state.status === ImportState.IMPORTED && this.props.onSuccess) {
+      this.props.onSuccess()
+    }
+
+    this.handleCancel()
   }
 
   private handleUploadChange = (info: UploadChangeParam) => {
