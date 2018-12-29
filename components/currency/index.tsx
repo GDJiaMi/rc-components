@@ -10,7 +10,7 @@ export interface CurrencyProps extends HTMLAttributes<HTMLSpanElement> {
   value: number
 }
 
-const ThousandRegex = /\d(?=(\d{3})+\.)/g
+const ThousandRegex = /\d(?=(\d{3})+(\.|$))/g
 
 export default class Currency extends React.PureComponent<CurrencyProps> {
   public render() {
