@@ -14,7 +14,7 @@ export default function withQuery<P extends QueryComponentProps>(
         <QueryContext.Consumer>
           {props => (
             // @ts-ignore
-            <Component {...props} {...this.props} />
+            <Component search={props} {...this.props} />
           )}
         </QueryContext.Consumer>
       )
