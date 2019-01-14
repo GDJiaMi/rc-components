@@ -55,6 +55,14 @@ export interface Adaptor {
    */
   getDepartmentTree(tenementId: string): Promise<DepartmentDesc>
   /**
+   * 获取指定部门的子节点，用于惰性加载子节点
+   * 可选
+   */
+  getDepartmentChildren?: (
+    tenementId: string,
+    departmentId: string,
+  ) => Promise<DepartmentDesc[] | undefined>
+  /**
    * 获取部门成员
    */
   getDepartmentUsers(
@@ -120,6 +128,7 @@ export default class Provider extends React.Component<ProviderProps> {
       getDepartmentUsers: this.getDepartmentUsers,
       searchUser: this.searchUser,
       searchTenement: this.searchTenement,
+      getDepartmentChildren: this.props.adaptor.getDepartmentChildren,
     }
   }
 

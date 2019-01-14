@@ -7,12 +7,15 @@ import Alert from 'antd/es/alert'
 import Input from 'antd/es/input'
 import Button from 'antd/es/button'
 import Icon from 'antd/es/icon'
-import Tree, { AntTreeNodeCheckedEvent } from 'antd/es/tree'
+import Tree, { AntTreeNodeCheckedEvent, AntTreeNode } from 'antd/es/tree'
+import message from 'antd/es/message'
 import memoize from 'lodash/memoize'
 import debounce from 'lodash/debounce'
+
 import withProvider from '../withProvider'
 import { Adaptor, DepartmentDesc, TenementDesc } from '../Provider'
 import { DefaultExpandedLevel } from '../constants'
+import { findAndReplace } from '../../fat-table/utils'
 
 export interface DepartmentTreeProps {
   // 当前部门
@@ -51,6 +54,10 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   private preservedValue: DepartmentDesc[] = []
+  /**
+   * 是否是异步加载模式
+   */
+  private isLazyMode = this.props.getDepartmentChildren != null
 
   public componentDidMount() {
     this.fetchDepartment()
@@ -139,6 +146,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return (
       <Tree
         key={tenementId}
+        loadData={this.isLazyMode ? this.fetchChildrenIfNeed : undefined}
         checkStrictly={checkStrictly || onlyAllowCheckLeaf}
         checkable={selectable}
         checkedKeys={checkedKeys}
@@ -166,6 +174,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const filter = this.state.filter || ''
     const userCount = tree.userCount != null ? ` (${tree.userCount})` : ''
     const filterIndex = tree.name.search(new RegExp(filter, 'i'))
+    const isLeaf = tree.children == null
 
     const title =
       filterIndex !== -1 ? (
@@ -194,6 +203,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     ) : (
       <Tree.TreeNode
         disableCheckbox={disabled}
+        isLeaf={isLeaf}
         title={title}
         key={tree.id}
         // @ts-ignore
@@ -310,6 +320,52 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   /**
+   * 异步获取
+   */
+  private fetchChildrenIfNeed = async (node: AntTreeNode) => {
+    const id = node.props.id
+    const department = this.getDepartment(id)!
+    if (
+      !this.isLazyMode ||
+      department.children == null ||
+      department.children.length !== 0
+    ) {
+      return
+    }
+
+    try {
+      const children = await this.props.getDepartmentChildren!(
+        this.props.tenementId!,
+        id,
+      )
+      if (Array.isArray(children) && children.length !== 0) {
+        department.children = children
+      } else {
+        department.children = undefined
+      }
+      this.updateItem(department)
+    } catch (err) {
+      message.error(err.message)
+    }
+  }
+
+  private updateItem(item: DepartmentDesc) {
+    const dataSource = [this.state.dataSource!]
+    const replaced = findAndReplace(dataSource, item, 'id')
+    if (replaced !== dataSource) {
+      this.state.dataSourceById![item.id] = item
+      const newNodes = DepartmentTree.getCached(item, this.props.tenement)
+      this.setState({
+        dataSource: replaced[0],
+        dataSourceById: {
+          ...this.state.dataSourceById,
+          ...newNodes,
+        },
+      })
+    }
+  }
+
+  /**
    * 获取组织部门树
    */
   private fetchDepartment = async () => {
@@ -365,13 +421,14 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
-  private static getCached = memoize(
-    (res: DepartmentDesc, tenement: TenementDesc | undefined) => {
-      const cached = {}
-      DepartmentTree.walkTree(res, tenement, cached)
-      return cached
-    },
-  )
+  private static getCached = (
+    res: DepartmentDesc,
+    tenement: TenementDesc | undefined,
+  ) => {
+    const cached = {}
+    DepartmentTree.walkTree(res, tenement, cached)
+    return cached
+  }
 
   private static walkTree(
     tree: DepartmentDesc,

@@ -1,4 +1,9 @@
-import Provider, { Adaptor, UserDesc, TenementDesc } from '../Provider'
+import Provider, {
+  Adaptor,
+  UserDesc,
+  TenementDesc,
+  DepartmentDesc,
+} from '../Provider'
 
 function delay(time: number) {
   return new Promise(res => window.setTimeout(res, time))
@@ -23,6 +28,22 @@ const adaptor: Adaptor = {
       total: 3 * pageSize,
     }
   },
+
+  async getDepartmentChildren(tenementId: string, departmentId: string) {
+    const list: DepartmentDesc[] = []
+    for (let i = 0; i < 3; i++) {
+      list.push({
+        id: `${departmentId}-${i}`,
+        name: `${departmentId}-${i}`,
+        userCount: '18',
+        open: true,
+        children: [],
+      })
+    }
+
+    return list
+  },
+
   async getDepartmentTree(tenementId) {
     return {
       id: `${tenementId}-root`,
@@ -75,6 +96,8 @@ const adaptor: Adaptor = {
           name: '二级部门2',
           userCount: '18',
           extra: null,
+          // 测试异步加载
+          children: [],
         },
         {
           id: `${tenementId}-3`,
