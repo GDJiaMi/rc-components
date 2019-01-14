@@ -127,6 +127,13 @@ export type FetchHandler<T, P = {}> = (
   params: P & PaginationInfo,
 ) => Promise<ListInfo<T>>
 
+// onFetchChildren
+export type FetchChildrenHandler<T, P = {}> = (
+  id: any,
+  record: T,
+  params: P & PaginationInfo,
+) => Promise<T[] | undefined>
+
 export type SubmitHandler<T, P = {}> = (params: P) => boolean
 
 // onShift
@@ -167,9 +174,13 @@ export interface FatTableProps<T, P extends object = {}> {
   defaultPagination?: Partial<PaginationProps>
   // 偏移模式，将分页转换为数据库偏移模式, 默认为true
   offsetMode?: boolean
+  // 异步加载树节点
+  lazyMode?: boolean
   // 查询事件, 返回一个Promise，表格会根据Promise的状态设置loading或展示错误信息
   // Promise将resolve列表信息
   onFetch?: FetchHandler<T, P>
+  // 异步加载子节点
+  onFetchChildren?: FetchChildrenHandler<T, P>
   // 在组件挂载时进行fetch，在非受控模式下有效。默认为true
   fetchOnMount?: boolean
   onSubmit?: SubmitHandler<T, P>

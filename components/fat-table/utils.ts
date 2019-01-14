@@ -19,8 +19,8 @@ export function getExpandKeyByLevel<T extends { children?: T[] }>(
     groups = []
     for (let group of tempGroups) {
       for (let item of group) {
-        keys.push(item[idKey])
-        if (item.children) {
+        if (Array.isArray(item.children) && item.children.length !== 0) {
+          keys.push(item[idKey])
           groups.push(item.children)
         }
       }

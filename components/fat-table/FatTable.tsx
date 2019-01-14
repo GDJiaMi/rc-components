@@ -890,6 +890,10 @@ export default class FatTableInner<T extends object, P extends object>
     const expandedKeys = this.state.expandedKeys
     const idKey = this.props.idKey || 'id'
     const key = record[idKey]
+
+    // 异步获取下级节点
+    this.loadChildrenIfNeed(record)
+
     if (expanded) {
       if (expandedKeys == null) {
         this.setState({
@@ -910,6 +914,42 @@ export default class FatTableInner<T extends object, P extends object>
           })
         }
       }
+    }
+  }
+
+  private async loadChildrenIfNeed<P extends T & { children?: T[] }>(
+    record: P,
+  ) {
+    // 不存在下级或已经有下级
+    if (record.children == null || record.children.length !== 0) {
+      return
+    }
+
+    if (this.props.onFetchChildren == null) {
+      return
+    }
+
+    const idKey = this.props.idKey || 'id'
+    const key = record[idKey]
+    const params = this.getParams()
+
+    try {
+      this.setState({
+        loading: true,
+      })
+      const children = await this.props.onFetchChildren(key, record, params)
+      if (Array.isArray(children) && children.length !== 0) {
+        record.children = children
+      } else {
+        record.children = undefined
+      }
+      this.updateItem(record)
+    } catch (err) {
+      message.error(err.message)
+    } finally {
+      this.setState({
+        loading: false,
+      })
     }
   }
 

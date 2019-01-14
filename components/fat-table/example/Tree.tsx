@@ -7,6 +7,7 @@ import Input from 'antd/es/input'
 import Form from 'antd/es/form'
 import AdminLayout from '../../admin-layout'
 import '../style/css'
+import { FetchChildrenHandler } from '../type'
 
 interface Params {
   name: string
@@ -82,6 +83,8 @@ export default class Base extends React.Component {
         <FatTable<Data, Params>
           columns={this.columns}
           onFetch={this.handleFetch}
+          lazyMode
+          onFetchChildren={this.handleFetchChildren}
           filterKey="name"
           filterValue={this.state.filterValue}
           // 确认默认值
@@ -108,6 +111,24 @@ export default class Base extends React.Component {
     )
   }
 
+  private handleFetchChildren: FetchChildrenHandler<Data, Params> = async (
+    id,
+    record,
+  ) => {
+    const list: Data[] = []
+    for (let i = 0; i < 3; i++) {
+      list.push({
+        id: `${record.id + i}`,
+        name: `${record.id + i}AbCdEfG${Math.random()}`,
+        birthday: `1995-12-12 12:12:${i}`,
+        note: '',
+        children: [],
+      })
+    }
+
+    return list
+  }
+
   private handleFetch: FetchHandler<Data, Params> = async params => {
     console.log('fetching...', { ...params })
     const { pageSize, current } = params
@@ -119,18 +140,7 @@ export default class Base extends React.Component {
         name: `${current + i}AbCdEfG${Math.random()}`,
         birthday: `1995-12-12 12:12:${i}`,
         note: '',
-        children: [1, 2, 3].map(index => ({
-          id: `${current + i}-${index}`,
-          name: `${current + i}-${index}-${params.name}`,
-          birthday: `1995-12-12 12:12:${i}`,
-          note: '',
-          children: [1, 2, 3].map(nestedIndex => ({
-            id: `${current + i}-${index}-${nestedIndex}`,
-            name: `${current + i}-${index}-${nestedIndex}-${params.name}`,
-            note: '',
-            birthday: `1995-12-12 12:12:${i}`,
-          })),
-        })),
+        children: [],
       })
     }
     return {
