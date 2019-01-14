@@ -63,7 +63,7 @@
     "antd": "3.8.4",
     "cpx": "^1.5.0",
     "css-loader": "^2.0.1",
-    "docz": "^0.13.4",
+    "docz": "^0.13.7",
     "docz-theme-default": "^0.13.4",
     "husky": "^0.14.3",
     "jh-tslint": "^1.0.0",
