@@ -619,52 +619,6 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   /**
-   * 异步获取
-   */
-  private fetchChildrenIfNeed = async (node: AntTreeNode) => {
-    const id = node.props.id
-    const department = this.getDepartment(id)!
-    if (
-      !this.isLazyMode ||
-      department.children == null ||
-      department.children.length !== 0
-    ) {
-      return
-    }
-
-    try {
-      const children = await this.props.getDepartmentChildren!(
-        this.props.tenementId!,
-        id,
-      )
-      if (Array.isArray(children) && children.length !== 0) {
-        department.children = children
-      } else {
-        department.children = undefined
-      }
-      this.updateItem(department)
-    } catch (err) {
-      message.error(err.message)
-    }
-  }
-
-  private updateItem(item: DepartmentDesc) {
-    const dataSource = [this.state.dataSource!]
-    const replaced = findAndReplace(dataSource, item, 'id')
-    if (replaced !== dataSource) {
-      this.state.dataSourceById![item.id] = item
-      const newNodes = DepartmentTree.getCached(item, this.props.tenement)
-      this.setState({
-        dataSource: replaced[0],
-        dataSourceById: {
-          ...this.state.dataSourceById,
-          ...newNodes,
-        },
-      })
-    }
-  }
-
-  /**
    * 获取组织部门树
    */
   private fetchDepartment = async () => {

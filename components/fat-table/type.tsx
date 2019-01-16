@@ -57,10 +57,11 @@ export interface IFatTable<T, P = {}> {
   shiftDown(id: any): void
   shift(id: any, dir?: 'up' | 'down'): void
   submit(evt: React.FormEvent<void>): void
-  canShiftUp(id: string): boolean
-  canShiftDown(id: string): boolean
+  canShiftUp(id: any): boolean
+  canShiftDown(id: any): boolean
   updateItems(updator: (list: T[]) => T[]): void
   updateItem(item: T): void
+  findAndReplace(id: any, replacer: (item: T) => T): void
   scrollToLastPage(): void
   scrollToFirstPage(): void
   /**

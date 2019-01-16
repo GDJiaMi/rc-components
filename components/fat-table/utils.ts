@@ -109,3 +109,32 @@ export function findAndReplace<T extends { children?: T[] }>(
     _findAndReplace(state as T[], newData, idKey)
   })
 }
+
+export function findAndReplaceWithReplacer<T extends { children?: T[] }>(
+  data: T[],
+  idKey: string,
+  id: any,
+  replacer: (item: T) => T,
+) {
+  const _findAndReplace = (data: T[]) => {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i][idKey] === id) {
+        const item = data[i]
+        data.splice(i, 1, replacer(item))
+        return true
+      }
+
+      if (data[i].children != null) {
+        if (_findAndReplace(data[i].children!)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  return immer(data, state => {
+    _findAndReplace(state as T[])
+  })
+}

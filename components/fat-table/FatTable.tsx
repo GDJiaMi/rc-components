@@ -21,6 +21,7 @@ import {
   filterDataSource,
   findAndReplace,
   isTree,
+  findAndReplaceWithReplacer,
 } from './utils'
 import {
   FatTableProps,
@@ -501,6 +502,23 @@ export default class FatTableInner<T extends object, P extends object>
         // TODO: 可能要跟随
         this.search(false, false)
       })
+    }
+  }
+
+  /**
+   * 查看替换
+   */
+  public findAndReplace(id: string, replacer: (item: T) => T) {
+    const dataSource = this.state.dataSource
+    const idKey = this.props.idKey as string
+    const newDataSource = findAndReplaceWithReplacer(
+      dataSource,
+      idKey,
+      id,
+      replacer,
+    )
+    if (dataSource !== newDataSource) {
+      this.setDataSource(newDataSource)
     }
   }
 
