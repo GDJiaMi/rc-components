@@ -6,13 +6,24 @@ import Spin from 'antd/es/spin'
 import Alert from 'antd/es/alert'
 import Input from 'antd/es/input'
 import Button from 'antd/es/button'
+import Checkbox from 'antd/es/checkbox'
+import Pagination, { PaginationProps } from 'antd/es/pagination'
+import List from 'antd/es/list'
 import Icon from 'antd/es/icon'
-import Tree, { AntTreeNodeCheckedEvent } from 'antd/es/tree'
+import Tree, { AntTreeNodeCheckedEvent, AntTreeNode } from 'antd/es/tree'
+import message from 'antd/es/message'
 import memoize from 'lodash/memoize'
 import debounce from 'lodash/debounce'
+
 import withProvider from '../withProvider'
-import { Adaptor, DepartmentDesc, TenementDesc } from '../Provider'
-import { DefaultExpandedLevel } from '../constants'
+import {
+  Adaptor,
+  DepartmentDesc,
+  TenementDesc,
+  DepartmentSearchResult,
+} from '../Provider'
+import { DefaultExpandedLevel, PageSize } from '../constants'
+import { findAndReplace } from '../../fat-table/utils'
 
 export interface DepartmentTreeProps {
   // 当前部门
@@ -39,6 +50,14 @@ interface State {
   loading?: boolean
   error?: Error
   searchKey?: string
+  // 异步搜索模式
+  searchMode?: boolean
+  // 正在异步搜索
+  searching?: boolean
+  searchResult?: DepartmentSearchResult[]
+  // TODO: 异常和分页
+  searchError?: Error
+  searchPagination: PaginationProps
   filter?: string
   dataSource?: DepartmentDesc
   dataSourceById?: { [key: string]: DepartmentDesc }
@@ -48,9 +67,28 @@ interface State {
 class DepartmentTree extends React.PureComponent<Props, State> {
   public state: State = {
     loading: false,
+    searchPagination: {
+      current: 1,
+      total: 0,
+      pageSize: PageSize,
+      size: 'small',
+      hideOnSinglePage: true,
+      onChange: current => {
+        this.setState(
+          {
+            searchPagination: { ...this.state.searchPagination, current },
+          },
+          this.handleSearch,
+        )
+      },
+    },
   }
 
   private preservedValue: DepartmentDesc[] = []
+  /**
+   * 是否是异步加载模式
+   */
+  private isLazyMode = this.props.getDepartmentChildren != null
 
   public componentDidMount() {
     this.fetchDepartment()
@@ -59,12 +97,20 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   public componentDidUpdate(prevProps: Props) {
     // 需要获取更新
     if (this.props.tenementId !== prevProps.tenementId) {
-      this.fetchDepartment()
+      this.reset(this.fetchDepartment)
     }
   }
 
   public render() {
-    const { loading, error, dataSource } = this.state
+    const {
+      loading,
+      error,
+      dataSource,
+      searchKey,
+      searchMode,
+      searching,
+    } = this.state
+
     return (
       <div className="jm-us-container">
         <Spin spinning={!!loading}>
@@ -76,17 +122,28 @@ class DepartmentTree extends React.PureComponent<Props, State> {
               <Input
                 className="jm-department-filter"
                 prefix={<Icon type="filter" />}
+                value={searchKey}
                 onChange={this.handleFilterChange}
                 size="small"
-                placeholder="筛选部门"
+                placeholder="部门"
               />
               <Button
                 size="small"
                 htmlType="submit"
                 className="jm-department-filter__button"
+                loading={searching}
               >
-                筛选
+                搜索
               </Button>
+              {searchMode && (
+                <Button
+                  size="small"
+                  className="jm-department-filter__button"
+                  onClick={this.handleSearchCancel}
+                >
+                  取消
+                </Button>
+              )}
             </form>
           )}
           {!!error && (
@@ -101,6 +158,12 @@ class DepartmentTree extends React.PureComponent<Props, State> {
               }
             />
           )}
+          <div
+            className="jm-us-container__search-result"
+            style={{ display: searchMode ? 'block' : 'none' }}
+          >
+            {this.renderSearchResult()}
+          </div>
           <div className="jm-us-container__body">{this.renderTree()}</div>
         </Spin>
       </div>
@@ -112,16 +175,23 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return this.state.dataSourceById && this.state.dataSourceById[id]
   }
 
-  public reset() {
-    this.setState({
-      loading: false,
-      error: undefined,
-      dataSource: undefined,
-      dataSourceById: undefined,
-      expandedKeys: undefined,
-      filter: undefined,
-      searchKey: undefined,
-    })
+  public reset(cb?: any) {
+    this.setState(
+      {
+        loading: false,
+        error: undefined,
+        dataSource: undefined,
+        dataSourceById: undefined,
+        expandedKeys: undefined,
+        filter: undefined,
+        searchKey: undefined,
+        searchMode: false,
+        searching: false,
+        searchResult: undefined,
+        searchError: undefined,
+      },
+      cb,
+    )
   }
 
   private renderTree = () => {
@@ -139,6 +209,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return (
       <Tree
         key={tenementId}
+        loadData={this.isLazyMode ? this.fetchChildrenIfNeed : undefined}
         checkStrictly={checkStrictly || onlyAllowCheckLeaf}
         checkable={selectable}
         checkedKeys={checkedKeys}
@@ -166,6 +237,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const filter = this.state.filter || ''
     const userCount = tree.userCount != null ? ` (${tree.userCount})` : ''
     const filterIndex = tree.name.search(new RegExp(filter, 'i'))
+    const isLeaf = tree.children == null
 
     const title =
       filterIndex !== -1 ? (
@@ -194,6 +266,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     ) : (
       <Tree.TreeNode
         disableCheckbox={disabled}
+        isLeaf={isLeaf}
         title={title}
         key={tree.id}
         // @ts-ignore
@@ -202,19 +275,163 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     )
   }
 
+  private renderSearchResult() {
+    const { searchResult, searching, searchPagination } = this.state
+    return (
+      <Spin spinning={searching}>
+        {this.renderListHeader()}
+        {!!searchResult && (
+          <List
+            bordered={false}
+            split={false}
+            size="small"
+            dataSource={searchResult}
+            renderItem={this.renderSearchResultItem}
+          />
+        )}
+        <Pagination className="jm-us-container__footer" {...searchPagination} />
+      </Spin>
+    )
+  }
+
+  private renderListHeader() {
+    const { searchError: error } = this.state
+    return (
+      !!error && (
+        <div className="jm-us-container__header">
+          <Alert
+            type="error"
+            showIcon
+            banner
+            message={
+              <span>
+                {error.message}, <a onClick={this.handleSearch}>重试</a>
+              </span>
+            }
+          />
+        </div>
+      )
+    )
+  }
+
+  private renderSearchResultItem = (item: DepartmentSearchResult) => {
+    const {
+      selected,
+      selectable,
+      value,
+      keepValue,
+      orgValue,
+      onlyAllowCheckLeaf,
+    } = this.props
+    const checked =
+      selectable && value && value.findIndex(i => i.id === item.id) !== -1
+    const disabled =
+      selectable &&
+      keepValue &&
+      orgValue &&
+      orgValue.findIndex(i => i.id === item.id) !== -1
+    const isLeaf = item.leaf
+    const disableCheckbox = (isLeaf ? onlyAllowCheckLeaf : false) || disabled
+
+    return (
+      <div
+        className={`jm-us-checkbox ${selected === item.id ? 'selected' : ''}`}
+        onClickCapture={() => this.handleSelect(item)}
+        title={item.name}
+      >
+        {!!selectable ? (
+          <Checkbox
+            checked={checked}
+            onChange={evt => this.handleCheck(item, evt.target.checked)}
+            disabled={disableCheckbox}
+          >
+            {item.name}
+          </Checkbox>
+        ) : (
+          item.name
+        )}
+      </div>
+    )
+  }
+
+  private handleCheck = (item: DepartmentSearchResult, checked: boolean) => {
+    this.saveItem(item)
+
+    const { value } = this.props
+    const selectedValue = [...(value || [])]
+
+    if (checked) {
+      selectedValue.push(this.state.dataSourceById![item.id])
+    } else {
+      const idx = selectedValue.findIndex(i => i.id === item.id)
+      if (idx !== -1) {
+        selectedValue.splice(idx, 1)
+      }
+    }
+
+    if (this.props.onChange) {
+      this.props.onChange(selectedValue)
+    }
+  }
+
+  private saveItem(item: DepartmentSearchResult) {
+    if (
+      this.state.dataSourceById &&
+      this.state.dataSourceById[item.id] == null
+    ) {
+      this.state.dataSourceById[item.id] = {
+        ...item,
+        tenement: this.props.tenement,
+      } as DepartmentDesc
+    }
+  }
+
+  private handleSelect = (item: DepartmentSearchResult) => {
+    this.saveItem(item)
+    this.handleTreeSelect([item.id])
+  }
+
   private handleSubmit = (evt: React.FormEvent) => {
     evt.preventDefault()
     evt.stopPropagation()
-    if (this.state.searchKey === this.state.filter) {
-      return
-    }
+    // 本地筛选
+    if (!this.isLazyMode) {
+      if (this.state.searchKey === this.state.filter) {
+        return
+      }
 
-    this.setState(
-      {
-        filter: this.state.searchKey,
-      },
-      this.regenerateExpandedKeys,
-    )
+      this.setState(
+        {
+          filter: this.state.searchKey,
+        },
+        this.regenerateExpandedKeys,
+      )
+    } else {
+      // 远程搜索
+      if (this.props.searchDepartment == null) {
+        throw new Error('[用户选择器]: 未提供部门搜索接口')
+      }
+
+      this.setState(
+        {
+          searchPagination: {
+            ...this.state.searchPagination,
+            current: 1,
+            total: 0,
+          },
+        },
+        this.handleSearch,
+      )
+    }
+  }
+
+  private handleSearchCancel = () => {
+    this.setState({
+      searchKey: '',
+      searchMode: false,
+      searching: false,
+      searchResult: undefined,
+    })
   }
 
   private handleFilterChange = (evt: React.ChangeEvent<{ value: string }>) => {
@@ -251,28 +468,39 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       this.props.checkStrictly || this.props.onlyAllowCheckLeaf
     const checkedTree: Array<{ pos: string; id: string }> = []
     keys = Array.isArray(keys) ? keys : keys.checked
+    // FIXME: 异步模式下可能选择异常
     if (!checkStrictly) {
       const checkedPositions = (evt as any).checkedNodesPositions as Array<{
         node: { key: string }
         pos: string
       }>
       checkedPositions.forEach(pos => {
+        const idToRemove: string[] = []
         let done = false
+
+        // 遍历已选中的可以
         for (let i = 0; i < checkedTree.length; i++) {
           const key = checkedTree[i].pos
+
+          // 存在更深的键
           if (key.startsWith(pos.pos)) {
-            // replace
-            checkedTree.splice(i, 1, {
-              pos: pos.pos,
-              id: pos.node.key,
-            })
-            done = true
-            break
+            // 删除掉它
+            idToRemove.push(checkedTree[i].id)
+            continue
           } else if (pos.pos.startsWith(key)) {
             // already exist
             done = true
             break
           }
+        }
+
+        if (idToRemove.length) {
+          idToRemove.forEach(i => {
+            const idx = checkedTree.findIndex(item => item.id === i)
+            if (idx !== -1) {
+              checkedTree.splice(idx, 1)
+            }
+          })
         }
 
         if (!done) {
@@ -306,6 +534,87 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       const detail =
         this.state.dataSourceById && this.state.dataSourceById[departmentId]
       this.props.onSelect(departmentId, detail)
+    }
+  }
+
+  private handleSearch = async () => {
+    const { searchKey } = this.state
+    if (searchKey == null || searchKey.trim() == '') {
+      return
+    }
+
+    try {
+      this.setState({
+        searching: true,
+        searchMode: true,
+        searchError: undefined,
+      })
+      const { current = 1, pageSize = PageSize } = this.state.searchPagination
+      const res = await this.props.searchDepartment!(
+        searchKey,
+        current,
+        pageSize,
+        this.props.tenementId,
+      )
+      this.setState({
+        searchResult: res.items,
+        searchPagination: {
+          ...this.state.searchPagination,
+          total: res.total,
+        },
+      })
+    } catch (err) {
+      this.setState({
+        searchError: err,
+      })
+    } finally {
+      this.setState({ searching: false })
+    }
+  }
+
+  /**
+   * 异步获取
+   */
+  private fetchChildrenIfNeed = async (node: AntTreeNode) => {
+    const id = node.props.id
+    const department = this.getDepartment(id)!
+    if (
+      !this.isLazyMode ||
+      department.children == null ||
+      department.children.length !== 0
+    ) {
+      return
+    }
+
+    try {
+      const children = await this.props.getDepartmentChildren!(
+        this.props.tenementId!,
+        id,
+      )
+      if (Array.isArray(children) && children.length !== 0) {
+        department.children = children
+      } else {
+        department.children = undefined
+      }
+      this.updateItem(department)
+    } catch (err) {
+      message.error(err.message)
+    }
+  }
+
+  private updateItem(item: DepartmentDesc) {
+    const dataSource = [this.state.dataSource!]
+    const replaced = findAndReplace(dataSource, item, 'id')
+    if (replaced !== dataSource) {
+      this.state.dataSourceById![item.id] = item
+      const newNodes = DepartmentTree.getCached(item, this.props.tenement)
+      this.setState({
+        dataSource: replaced[0],
+        dataSourceById: {
+          ...this.state.dataSourceById,
+          ...newNodes,
+        },
+      })
     }
   }
 
@@ -365,13 +674,14 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
-  private static getCached = memoize(
-    (res: DepartmentDesc, tenement: TenementDesc | undefined) => {
-      const cached = {}
-      DepartmentTree.walkTree(res, tenement, cached)
-      return cached
-    },
-  )
+  private static getCached = (
+    res: DepartmentDesc,
+    tenement: TenementDesc | undefined,
+  ) => {
+    const cached = {}
+    DepartmentTree.walkTree(res, tenement, cached)
+    return cached
+  }
 
   private static walkTree(
     tree: DepartmentDesc,

@@ -35,6 +35,18 @@ export interface DepartmentDesc {
 }
 
 /**
+ * 搜索结构表示
+ */
+export interface DepartmentSearchResult {
+  userCount?: number
+  parentId: string
+  leaf: boolean
+  id: string
+  name: string
+  extra?: any
+}
+
+/**
  * 成员
  */
 export interface UserDesc {
@@ -54,6 +66,14 @@ export interface Adaptor {
    * 获取部门树
    */
   getDepartmentTree(tenementId: string): Promise<DepartmentDesc>
+  /**
+   * 获取指定部门的子节点，用于惰性加载子节点
+   * 可选
+   */
+  getDepartmentChildren?: (
+    tenementId: string,
+    departmentId: string,
+  ) => Promise<DepartmentDesc[] | undefined>
   /**
    * 获取部门成员
    */
@@ -81,6 +101,15 @@ export interface Adaptor {
     page: number,
     pageSize: number,
   ): Promise<{ items: TenementDesc[]; total: number }>
+  /**
+   * 部门搜索, 异步模式下会使用这种方式进行搜索
+   */
+  searchDepartment?: (
+    query: string,
+    page: number,
+    pageSize: number,
+    tenementId?: string,
+  ) => Promise<{ items: DepartmentSearchResult[]; total: number }>
 }
 
 export interface ProviderProps {
@@ -120,6 +149,8 @@ export default class Provider extends React.Component<ProviderProps> {
       getDepartmentUsers: this.getDepartmentUsers,
       searchUser: this.searchUser,
       searchTenement: this.searchTenement,
+      getDepartmentChildren: this.props.adaptor.getDepartmentChildren,
+      searchDepartment: this.props.adaptor.searchDepartment,
     }
   }
 

@@ -1,4 +1,10 @@
-import Provider, { Adaptor, UserDesc, TenementDesc } from '../Provider'
+import Provider, {
+  Adaptor,
+  UserDesc,
+  TenementDesc,
+  DepartmentDesc,
+  DepartmentSearchResult,
+} from '../Provider'
 
 function delay(time: number) {
   return new Promise(res => window.setTimeout(res, time))
@@ -23,6 +29,21 @@ const adaptor: Adaptor = {
       total: 3 * pageSize,
     }
   },
+
+  async getDepartmentChildren(tenementId: string, departmentId: string) {
+    const list: DepartmentDesc[] = []
+    for (let i = 0; i < 3; i++) {
+      list.push({
+        id: `${departmentId}-${i}`,
+        name: `${departmentId}-${i}`,
+        userCount: '18',
+        open: true,
+      })
+    }
+
+    return list
+  },
+
   async getDepartmentTree(tenementId) {
     return {
       id: `${tenementId}-root`,
@@ -75,6 +96,8 @@ const adaptor: Adaptor = {
           name: '二级部门2',
           userCount: '18',
           extra: null,
+          // 测试异步加载
+          children: [],
         },
         {
           id: `${tenementId}-3`,
@@ -117,6 +140,27 @@ const adaptor: Adaptor = {
       total: 3 * pageSize,
     }
   },
+
+  async searchDepartment(query, page, pageSize, tenementId) {
+    if (page === 3 || query == '异常') {
+      throw new Error('模拟抛出异常')
+    }
+
+    const list: DepartmentSearchResult[] = []
+    for (let i = 0; i < pageSize; i++) {
+      list.push({
+        parentId: '1',
+        id: i + '',
+        leaf: i % 2 === 0,
+        name: `${query}-${page}-${i}`,
+      })
+    }
+
+    await delay(1000)
+
+    return { items: list, total: 3 * pageSize }
+  },
+
   async searchTenement(query, page, pageSize) {
     const list: TenementDesc[] = []
     if (page === 3 || query === '异常') {

@@ -3,6 +3,7 @@ module.exports = {
   files: '**/*.{md,markdown,mdx}',
   title: 'rc-components',
   description: 'MYGZB.com 中后台业务组件',
+  port: 3000,
   typescript: true,
   ordering: 'ascending',
   hashRouter: true,
