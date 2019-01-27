@@ -15,6 +15,7 @@ import UserSelectProvider, {
   Adaptor as UserSelectAdaptor,
   ProviderProps as UserSelectProviderProps,
   Context as UserSelectContext,
+  DepartmentSearchResult,
 } from './Provider'
 
 export default UserSelect
@@ -31,4 +32,5 @@ export {
   UserDesc,
   UserSelectAdaptor,
   UserSelectContext,
+  DepartmentSearchResult,
 }
