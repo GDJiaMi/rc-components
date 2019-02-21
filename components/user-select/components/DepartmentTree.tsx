@@ -25,6 +25,8 @@ import {
 import { DefaultExpandedLevel, PageSize } from '../constants'
 import { findAndReplace } from '../../fat-table/utils'
 
+import { PathTree } from './utils'
+
 export interface DepartmentTreeProps {
   // 当前部门
   tenementId?: string
@@ -62,6 +64,7 @@ interface State {
   dataSource?: DepartmentDesc
   dataSourceById?: { [key: string]: DepartmentDesc }
   expandedKeys?: string[]
+  checkedValue?: string[]
 }
 
 class DepartmentTree extends React.PureComponent<Props, State> {
@@ -84,7 +87,11 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     },
   }
 
+  /**
+   * 缓存其他企业已选中的界面，避免被覆盖
+   */
   private preservedValue: DepartmentDesc[] = []
+
   /**
    * 是否是异步加载模式
    */
@@ -98,6 +105,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     // 需要获取更新
     if (this.props.tenementId !== prevProps.tenementId) {
       this.reset(this.fetchDepartment)
+    } else if (this.props.value !== prevProps.value) {
+      this.updateCheckedValue()
     }
   }
 
@@ -189,6 +198,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         searching: false,
         searchResult: undefined,
         searchError: undefined,
+        checkedValue: undefined,
       },
       cb,
     )
@@ -196,14 +206,14 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
   private renderTree = () => {
     const { checkStrictly, onlyAllowCheckLeaf } = this.props
-    const { dataSource, expandedKeys } = this.state
+    const { dataSource, expandedKeys, checkedValue } = this.state
 
     if (dataSource == null) {
       return null
     }
 
-    const { selectable, value, selected, tenementId } = this.props
-    const checkedKeys = (value || []).map(i => i.id)
+    const { selectable, selected, tenementId } = this.props
+    const checkedKeys = checkedValue
     const selectedKeys = selected ? [selected] : undefined
 
     return (
@@ -275,6 +285,9 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     )
   }
 
+  /**
+   * 渲染搜索结果
+   */
   private renderSearchResult() {
     const { searchResult, searching, searchPagination } = this.state
     return (
@@ -354,6 +367,21 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     )
   }
 
+  private updateCheckedValue() {
+    const value = this.props.value || []
+    const normalized = value
+      .filter(val => {
+        return this.preservedValue.findIndex(i => i.id === val.id) === -1
+      })
+      .map(i => i.id)
+    this.setState({
+      checkedValue: normalized,
+    })
+  }
+
+  /**
+   * 搜索项选中
+   */
   private handleCheck = (item: DepartmentSearchResult, checked: boolean) => {
     this.saveItem(item)
 
@@ -466,51 +494,19 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   ) => {
     const checkStrictly =
       this.props.checkStrictly || this.props.onlyAllowCheckLeaf
-    const checkedTree: Array<{ pos: string; id: string }> = []
+    let checkedTree: string[] = []
     keys = Array.isArray(keys) ? keys : keys.checked
-    // FIXME: 异步模式下可能选择异常
     if (!checkStrictly) {
       const checkedPositions = (evt as any).checkedNodesPositions as Array<{
         node: { key: string }
         pos: string
       }>
-      checkedPositions.forEach(pos => {
-        const idToRemove: string[] = []
-        let done = false
-
-        // 遍历已选中的可以
-        for (let i = 0; i < checkedTree.length; i++) {
-          const key = checkedTree[i].pos
-
-          // 存在更深的键
-          if (key.startsWith(pos.pos)) {
-            // 删除掉它
-            idToRemove.push(checkedTree[i].id)
-            continue
-          } else if (pos.pos.startsWith(key)) {
-            // already exist
-            done = true
-            break
-          }
-        }
-
-        if (idToRemove.length) {
-          idToRemove.forEach(i => {
-            const idx = checkedTree.findIndex(item => item.id === i)
-            if (idx !== -1) {
-              checkedTree.splice(idx, 1)
-            }
-          })
-        }
-
-        if (!done) {
-          checkedTree.push({ pos: pos.pos, id: pos.node.key })
-        }
-      })
+      const filteredPositions = PathTree.normalizedPathNodes(checkedPositions)
+      checkedTree = filteredPositions.map(pos => pos.node.key)
     }
 
     // 将keys映射为DepartmentDesc[]
-    const selectedValue = (checkStrictly ? keys : checkedTree.map(i => i.id))
+    const selectedValue = (checkStrictly ? keys : checkedTree)
       .map(id => {
         return this.state.dataSourceById![id]
       })
@@ -642,6 +638,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         },
         () => {
           this.updatePreserveValue()
+          this.updateCheckedValue()
         },
       )
     } catch (error) {
