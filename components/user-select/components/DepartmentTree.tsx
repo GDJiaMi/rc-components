@@ -65,6 +65,7 @@ interface State {
   dataSourceById?: { [key: string]: DepartmentDesc }
   expandedKeys?: string[]
   checkedValue?: string[]
+  checkedValueInSet?: Set<string>
 }
 
 class DepartmentTree extends React.PureComponent<Props, State> {
@@ -199,6 +200,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         searchResult: undefined,
         searchError: undefined,
         checkedValue: undefined,
+        checkedValueInSet: undefined,
       },
       cb,
     )
@@ -331,32 +333,47 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const {
       selected,
       selectable,
-      value,
       keepValue,
       orgValue,
       onlyAllowCheckLeaf,
     } = this.props
-    const checked =
-      selectable && value && value.findIndex(i => i.id === item.id) !== -1
+    const [checked, checkedDirectly] =
+      selectable && this.isSearchItemChecked(item)
     const disabled =
       selectable &&
-      keepValue &&
-      orgValue &&
-      orgValue.findIndex(i => i.id === item.id) !== -1
+      (keepValue &&
+        orgValue &&
+        orgValue.findIndex(i => i.id === item.id) !== -1)
     const isLeaf = item.leaf
-    const disableCheckbox = (isLeaf ? onlyAllowCheckLeaf : false) || disabled
+    const disabledByLeaf = isLeaf ? onlyAllowCheckLeaf : false
+    const disabledByLazyMode = this.isLazyMode && checked && !checkedDirectly
+    const disableCheckbox =
+      disabledByLeaf ||
+      // 已选中的父级部门，不能反选
+      disabledByLazyMode ||
+      disabled
 
     return (
       <div
         className={`jm-us-checkbox ${selected === item.id ? 'selected' : ''}`}
-        onClickCapture={() => this.handleSelect(item)}
+        onClickCapture={() => {
+          this.handleSelect(item)
+        }}
         title={item.name}
       >
         {!!selectable ? (
           <Checkbox
             checked={checked}
-            onChange={evt => this.handleCheck(item, evt.target.checked)}
-            disabled={disableCheckbox}
+            style={{ opacity: disableCheckbox ? 0.5 : 1 }}
+            onChange={evt => {
+              disableCheckbox
+                ? message.info(
+                    disabledByLeaf
+                      ? '只能选中叶子节点'
+                      : '无法取消，已选中父节点',
+                  )
+                : this.handleCheck(item, evt.target.checked)
+            }}
           >
             {item.name}
           </Checkbox>
@@ -367,15 +384,40 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     )
   }
 
+  /**
+   * 检查搜索项是否处理选中状态
+   * @returns [boolean, boolean] 1 是否选中 2. 是否直接选中
+   */
+  private isSearchItemChecked(
+    item: DepartmentSearchResult,
+  ): [boolean, boolean] {
+    const { checkedValueInSet } = this.state
+    if (checkedValueInSet && checkedValueInSet.has(item.id)) {
+      return [true, true]
+    }
+
+    const parents = item.parentIds
+    return [
+      parents &&
+        parents.some(i => !!checkedValueInSet && checkedValueInSet.has(i)),
+      false,
+    ]
+  }
+
   private updateCheckedValue() {
     const value = this.props.value || []
+    const set = new Set<string>()
     const normalized = value
       .filter(val => {
         return this.preservedValue.findIndex(i => i.id === val.id) === -1
       })
-      .map(i => i.id)
+      .map(i => {
+        set.add(i.id)
+        return i.id
+      })
     this.setState({
       checkedValue: normalized,
+      checkedValueInSet: set,
     })
   }
 
@@ -518,6 +560,15 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
+  /**
+   * 异步加载的树无法记录当前选中的节点，所以需要强制进行更新
+   */
+  private forceUpdateTreeCheckState() {
+    if (this.props.onChange) {
+      this.props.onChange([...(this.props.value || [])])
+    }
+  }
+
   private handleExpand = (keys: string[]) => {
     this.setState({
       expandedKeys: keys,
@@ -593,6 +644,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         department.children = undefined
       }
       this.updateItem(department)
+      setTimeout(() => this.forceUpdateTreeCheckState(), 100)
     } catch (err) {
       message.error(err.message)
     }
