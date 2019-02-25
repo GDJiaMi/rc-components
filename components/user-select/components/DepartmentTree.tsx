@@ -5,13 +5,15 @@
  * - 搜索: 在搜索结束/或切换企业(判断是否在搜索状态)/或点击确定后(判断是否在搜索状态)，对选中项进行规范化
  *   - 本地规范: 如果选中的节点已经在渲染树中，将进行本地规范化
  *   - 远程规范: 如果选中节点在未在树中加载，则需要传递到远程进行规范化。 远程服务器缓存了完整的组织架构树
- * - TODO: 选择:
+ * - 选择:
  *   - 通过搜索选中了下级部门，这时候选中父级部门需要将已选中的下级部门合并掉. 每个选中项应该有完整的parentIds路径，包括回显的数据
  * - 搜索项选中规则
  *   - 直接选中
  *   - 异步直接选中
  *   - 父节点被直接选中
  *   - 父节点被异步选中
+ * // TODO: 显式配置异步模式
+ * // TODO: 关闭搜索进行规范化
  */
 import React from 'react'
 import Spin from 'antd/es/spin'
@@ -63,6 +65,7 @@ interface Props extends Adaptor, DepartmentTreeProps {}
 
 interface State {
   loading?: boolean
+  normalizing?: boolean
   error?: Error
   searchKey?: string
   // 异步搜索模式
@@ -111,6 +114,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
    */
   private preservedValue: DepartmentDesc[] = []
   private preservedValueInSet: Set<string> = new Set()
+  private normalizedDepartments: { [key: string]: DepartmentSearchResult } = {}
   /**
    * 跟踪搜索状态选中和取消状态. 新增和取消的节点会在后端进行合并.后端拥有完整的组织架构树
    */
@@ -136,6 +140,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   public render() {
     const {
       loading,
+      normalizing,
       error,
       dataSource,
       searchKey,
@@ -145,7 +150,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
     return (
       <div className="jm-us-container">
-        <Spin spinning={!!loading}>
+        <Spin spinning={!!loading || !!normalizing}>
           {!!dataSource && (
             <form
               onSubmit={this.handleSubmit}
@@ -444,6 +449,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   private updateCheckedValue() {
     const value = this.props.value || []
     const preservedValue: DepartmentDesc[] = []
+    const unloadedDepartments: DepartmentDesc[] = []
     const preservedValueInSet = new Set<string>()
     const checkedValue: string[] = []
     const checkedValueInSet = new Set<string>()
@@ -464,6 +470,9 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         // 未在已渲染的树中
         preservedValue.push(val)
         preservedValueInSet.add(val.id)
+        if (!this.props.checkStrictly && this.isLazyMode) {
+          unloadedDepartments.push(val)
+        }
       } else {
         // 当前树已选中节点
         checkedValue.push(val.id)
@@ -477,6 +486,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       checkedValue,
       checkedValueInSet,
     })
+    this.normalizeUnloadedDepartments(unloadedDepartments)
   }
 
   /**
@@ -501,6 +511,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
     // 异步模式下，且选中节点不在树中，需要记录下来
     if (this.isLazyMode && !this.isSearchItemInTree(item)) {
+      this.normalizedDepartments[`${this.props.tenementId}-${item.id}`] = item
       let checkedDiff = { ...(this.searchItemCheckedDiff || {}) }
       if (item.id in checkedDiff) {
         // 恢复
@@ -537,7 +548,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
    */
   private handleSearchCancel = async () => {
     try {
-      this.setState({ loading: true })
+      this.setState({ normalizing: true })
       // 首先进行本地规范化
       await this.localNormalizeCheckState()
       // 远程规范化
@@ -552,7 +563,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     } catch (err) {
       message.info(err.message)
     } finally {
-      this.setState({ loading: false })
+      this.setState({ normalizing: false })
     }
   }
 
@@ -582,12 +593,13 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const filteredKeys = PathTree.normalizedPathNodes(posInTree).map(
       i => i.node.key,
     )
-    const selectedValue = filteredKeys
-      .map(i => {
-        return this.state.dataSourceById![i]
-      })
-      .filter(i => !!i)
-      .concat(this.preservedValue)
+    const selectedValue = this.preservedValue.concat(
+      filteredKeys
+        .map(i => {
+          return this.state.dataSourceById![i]
+        })
+        .filter(i => !!i),
+    )
 
     if (this.props.onChange) {
       this.props.onChange(selectedValue)
@@ -612,7 +624,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       return
     }
 
-    let allChecked = this.props.value || []
+    let value = this.props.value || []
     const state = this.searchItemCheckedDiff
     const keys = Object.keys(state)
     if (keys.length === 0) {
@@ -630,14 +642,20 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     })
 
     // 再一次规范化跟踪记录, 因为可能在其他地方被取消选中
-    added = added.filter(
-      item => allChecked.findIndex(i => i.id === item.id) !== -1,
-    )
+    added = added.filter(item => value.findIndex(i => i.id === item.id) !== -1)
 
-    // 移除重复的数据
-    allChecked = allChecked.filter(
-      item => added.findIndex(i => i.id === item.id) === -1,
-    )
+    const preserved: DepartmentDesc[] = []
+    const allChecked: DepartmentDesc[] = []
+    const tenementId = this.props.tenementId
+
+    // 移除重复的数据, 和其他企业选中的值
+    value.forEach(i => {
+      if (i.tenement && i.tenement.id !== tenementId) {
+        preserved.push(i)
+      } else if (added.findIndex(item => item.id === i.id) === -1) {
+        allChecked.push(i)
+      }
+    })
 
     // 远程规范化，返回规范化后的所有数据
     const res = await this.props.normalizeDepartmentChecked(
@@ -645,13 +663,51 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       added,
       removed,
     )
+    const normalized = res.map(i => {
+      i.tenement = this.props.tenement
+      this.normalizedDepartments[`${tenementId}-${i.id}`] = i
+      return i
+    })
 
     if (this.props.onChange) {
-      const normalized = res.map(i => {
-        i.tenement = this.props.tenement
-        return i
+      this.props.onChange(preserved.concat(normalized))
+    }
+  }
+
+  /**
+   * 规范化回显数据
+   */
+  private async normalizeUnloadedDepartments(departments: DepartmentDesc[]) {
+    if (departments.length === 0 || this.state.normalizing) {
+      return
+    }
+    const tenementId = this.props.tenementId
+    const filtered = departments.filter(
+      i =>
+        i.parentIds == null &&
+        this.normalizedDepartments[`${tenementId}-${i.id}`] == null,
+    )
+
+    if (filtered.length === 0) {
+      return
+    }
+
+    try {
+      this.setState({ normalizing: true })
+      const res = await this.props.getDepartmentDetail(
+        filtered.map(i => i.id),
+        this.props.tenementId,
+      )
+      res.forEach(i => {
+        this.normalizedDepartments[`${tenementId}-${i.id}`] = {
+          ...i,
+          tenement: this.props.tenement,
+        }
       })
-      this.props.onChange(normalized)
+    } catch (err) {
+      message.info(err.message)
+    } finally {
+      this.setState({ normalizing: false })
     }
   }
 
@@ -742,6 +798,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     keys = Array.isArray(keys) ? keys : keys.checked
     const checkStrictly =
       this.props.checkStrictly || this.props.onlyAllowCheckLeaf
+    const isLazyMode = this.isLazyMode
     let checkedTree: string[] = []
 
     if (!checkStrictly) {
@@ -753,13 +810,39 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       checkedTree = filteredPositions.map(pos => pos.node.key)
     }
 
-    // 将keys映射为DepartmentDesc[]
-    const selectedValue = (checkStrictly ? keys : checkedTree)
-      .map(id => {
-        return this.state.dataSourceById![id]
+    const preProcessPreservedValue = () => {
+      if (!evt.checked || checkStrictly || !isLazyMode) {
+        return this.preservedValue
+      }
+
+      const checked = checkedTree
+      return this.preservedValue.filter(val => {
+        if (val.tenement && val.tenement.id !== this.props.tenementId) {
+          return true
+        }
+
+        const normalized = this.normalizedDepartments[
+          `${this.props.tenementId}-${val.id}`
+        ]
+
+        if (normalized == null) {
+          return true
+        }
+
+        const parentIds = normalized.parentIds
+        // 过滤掉父节点已选中的异步节点
+        return !parentIds.some(id => checked.indexOf(id) !== -1)
       })
-      .filter(i => !!i)
-      .concat(this.preservedValue)
+    }
+
+    // 将keys映射为DepartmentDesc[]
+    const selectedValue = preProcessPreservedValue().concat(
+      (checkStrictly ? keys : checkedTree)
+        .map(id => {
+          return this.state.dataSourceById![id]
+        })
+        .filter(i => !!i),
+    )
 
     if (this.props.onChange) {
       this.props.onChange(selectedValue)

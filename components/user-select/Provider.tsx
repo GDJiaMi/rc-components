@@ -32,6 +32,8 @@ export interface DepartmentDesc {
   tenement?: TenementDesc
   // 扩展字段，自定义，用户选择器不会关心这里面的内容
   extra?: any
+  // 父部门的完整路径，在异步模式下有用
+  parentIds?: string[]
 }
 
 /**
@@ -113,12 +115,22 @@ export interface Adaptor {
   ) => Promise<{ items: DepartmentSearchResult[]; total: number }>
   /**
    * 节点合并， 用于配合部门搜索，将选择和取消选择的节点进行合并
+   *  用于异步模式
    */
   normalizeDepartmentChecked?: (
     currentSelected: DepartmentDesc[],
     added: DepartmentDesc[],
     removed: DepartmentDesc[],
-  ) => Promise<DepartmentDesc[]>
+    tenementId?: string,
+  ) => Promise<DepartmentSearchResult[]>
+
+  /**
+   * 获取部门信息详情，包含完整路径等信息, 用于异步模式
+   */
+  getDepartmentDetail(
+    ids: string[],
+    tenementId?: string,
+  ): Promise<DepartmentSearchResult[]>
 }
 
 export interface ProviderProps {
@@ -161,6 +173,7 @@ export default class Provider extends React.Component<ProviderProps> {
       getDepartmentChildren: this.props.adaptor.getDepartmentChildren,
       searchDepartment: this.props.adaptor.searchDepartment,
       normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
+      getDepartmentDetail: this.props.adaptor.getDepartmentDetail,
     }
   }
 
