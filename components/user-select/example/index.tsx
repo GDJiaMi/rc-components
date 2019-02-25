@@ -174,7 +174,6 @@ class Department extends React.Component {
           value={value}
           onChange={value => this.setState({ value })}
           wrappedComponentRef={this.departmentSelect}
-          onlyAllowCheckLeaf
           max="5"
           locale={{ tip: '最多选择5个部门, 只允许选择叶子节点' }}
         />

@@ -135,7 +135,7 @@ export default class SearchableSelect<
             !!this.props.value &&
             this.props.value.map(this.renderItem)}
         </Select>
-        {!!loading && <Icon type="loading" />}
+        {!!loading && <Icon className="loading-icon" type="loading" />}
       </div>
     )
   }

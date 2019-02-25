@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "description": "mygzb.com React Components",
   "main": "es/index.js",
   "module": "es/index.js",
@@ -60,7 +60,6 @@
     "@types/react-dom": "^16.0.11",
     "@types/react-router": "^4.4.3",
     "@types/react-router-dom": "^4.3.1",
-    "antd": "3.8.4",
     "cpx": "^1.5.0",
     "css-loader": "^2.0.1",
     "docz": "^0.13.7",
@@ -84,7 +83,7 @@
     "typescript": "3.2.2"
   },
   "dependencies": {
-    "antd": "3.8.4",
+    "antd": "^3.13.5",
     "classnames": "^2.2.6",
     "immer": "^1.8.0",
     "qs": "^6.5.2",
