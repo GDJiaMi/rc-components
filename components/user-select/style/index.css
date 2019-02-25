@@ -168,7 +168,7 @@
   width: 100%;
 }
 
-.jm-user-search .anticon {
+.jm-user-search .loading-icon {
   position: absolute;
   color: #1890ff;
   font-size: 19px;
@@ -239,4 +239,9 @@
   padding: 5px;
   z-index: 1;
   background: white;
+}
+
+.jm-us-checkbox.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

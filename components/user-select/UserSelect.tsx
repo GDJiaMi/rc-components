@@ -8,7 +8,7 @@ import Button from 'antd/es/button'
 import withProvider from './withProvider'
 import { Adaptor, UserDesc, DepartmentDesc, TenementDesc } from './Provider'
 import TenementSearch from './components/TenementSearchPanel'
-import DepartemntTree from './components/DepartmentTree'
+import DepartmentTree from './components/DepartmentTree'
 import UsersPanel from './components/UsersPanel'
 import UserSearchPanel from './components/UserSearchPanel'
 import memoize from 'lodash/memoize'
@@ -75,6 +75,7 @@ interface Props extends UserSelectProps, Adaptor {}
 
 interface State {
   visible: boolean
+  normalizing?: boolean
   currentTenementId?: string
   currentTenement?: TenementDesc
   selectedTenements?: TenementDesc[]
@@ -207,6 +208,7 @@ class UserSelectInner extends React.Component<Props, State>
       currentDepartment,
       selectedDepartments,
       selectedUsers,
+      normalizing,
     } = this.state
     return (
       <div className="jm-us">
@@ -222,6 +224,7 @@ class UserSelectInner extends React.Component<Props, State>
             onSelect={this.handleTenementSelect}
             wrappedComponentRef={this.tenementSearchPanel}
             placeholder={tenementSearchPlaceholder}
+            normalizing={normalizing}
           />
         )}
         <UserSearchPanel
@@ -238,7 +241,7 @@ class UserSelectInner extends React.Component<Props, State>
           renderItem={renderUserSearchItem}
         >
           <div className="jm-us-containers">
-            <DepartemntTree
+            <DepartmentTree
               // 部门树
               checkStrictly={checkStrictly}
               tenementId={currentTenementId}
@@ -251,6 +254,8 @@ class UserSelectInner extends React.Component<Props, State>
               onChange={this.handleDepartmentChange}
               keepValue={keepValue}
               orgValue={this.props.value && this.props.value.departments}
+              onNormalizeStart={this.handleNormalizeStart}
+              onNormalizeEnd={this.handleNormalizeEnd}
             />
             {!!userSelectable && (
               <UsersPanel
@@ -282,9 +287,11 @@ class UserSelectInner extends React.Component<Props, State>
   }
 
   private renderFooter = () => {
+    const { normalizing } = this.state
     const tip = this.getLocale('tip')
     const cancelText = this.getLocale('cancel')
     const okText = this.getLocale('ok')
+
     return (
       <div className="jm-us-footer">
         <div>
@@ -293,12 +300,20 @@ class UserSelectInner extends React.Component<Props, State>
         </div>
         <div className="buttons">
           <Button onClick={this.handleCancel}>{cancelText}</Button>
-          <Button onClick={this.handleOk} type="primary">
+          <Button onClick={this.handleOk} type="primary" loading={normalizing}>
             {okText}
           </Button>
         </div>
       </div>
     )
+  }
+
+  private handleNormalizeStart = () => {
+    this.setState({ normalizing: true })
+  }
+
+  private handleNormalizeEnd = () => {
+    this.setState({ normalizing: false })
   }
 
   private handleTenementChange = (tenements: TenementDesc[]) => {

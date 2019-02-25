@@ -8,6 +8,7 @@ import Input from 'antd/es/input'
 import Spin from 'antd/es/spin'
 import Alert from 'antd/es/alert'
 import List from 'antd/es/list'
+import message from 'antd/es/message'
 import Pagination from 'antd/es/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { PaginationProps } from 'antd/es/pagination'
@@ -27,6 +28,7 @@ export interface TenementSearchPanelProps {
   onSelect?: (tenementId: string, detail: TenementDesc) => void
   keepValue?: boolean
   placeholder?: string
+  normalizing?: boolean
 }
 
 interface Props extends TenementSearchPanelProps, Adaptor {}
@@ -164,6 +166,7 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     const value = this.props.value || []
     const selectable = this.props.selectable
     const checked = selectable && value.findIndex(i => i.id === item.id) !== -1
+    const normalizing = this.props.normalizing
     const disabled =
       selectable &&
       this.props.keepValue &&
@@ -172,7 +175,9 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     const selected = this.props.selected === item.id
     return (
       <div
-        className={`jm-us-checkbox ${selected ? 'selected' : ''}`}
+        className={`jm-us-checkbox ${selected ? 'selected' : ''} ${
+          normalizing ? 'disabled' : ''
+        }`}
         onClickCapture={this.handleSelect(item)}
         title={item.name}
       >
@@ -195,6 +200,10 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     if (this.props.onSelect) {
       const onSelect = this.props.onSelect
       return (evt: React.MouseEvent) => {
+        if (this.props.normalizing) {
+          message.info('正在合并节点，请稍后')
+          return
+        }
         onSelect(item.id, item)
       }
     }

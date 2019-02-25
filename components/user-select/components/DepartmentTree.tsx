@@ -2,7 +2,7 @@
  * 部门树
  *
  * 异步模式部门合并策略
- * - 搜索: 在搜索结束/或切换企业(判断是否在搜索状态)/或点击确定后(判断是否在搜索状态)，对选中项进行规范化
+ * - 搜索: 在搜索发生选择事件时，进行延时性规范化，对选中项进行规范化
  *   - 本地规范: 如果选中的节点已经在渲染树中，将进行本地规范化
  *   - 远程规范: 如果选中节点在未在树中加载，则需要传递到远程进行规范化。 远程服务器缓存了完整的组织架构树
  * - 选择:
@@ -13,7 +13,6 @@
  *   - 父节点被直接选中
  *   - 父节点被异步选中
  * // TODO: 显式配置异步模式
- * // TODO: 关闭搜索进行规范化
  */
 import React from 'react'
 import Spin from 'antd/es/spin'
@@ -53,12 +52,14 @@ export interface DepartmentTreeProps {
   onSelect?: (value: string, detail?: DepartmentDesc) => void
   // 已选中部门
   value?: DepartmentDesc[]
-  onChange?: (value: DepartmentDesc[]) => void
+  onChange: (value: DepartmentDesc[]) => void
   checkStrictly?: boolean
   // 只允许选择叶子节点
   onlyAllowCheckLeaf?: boolean
   orgValue?: DepartmentDesc[]
   keepValue?: boolean
+  onNormalizeStart?: () => void
+  onNormalizeEnd?: () => void
 }
 
 interface Props extends Adaptor, DepartmentTreeProps {}
@@ -212,8 +213,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return this.state.dataSourceById && this.state.dataSourceById[id]
   }
 
-  public async reset(cb?: any) {
-    await this.handleSearchCancel()
+  public reset(cb?: any) {
     this.setState(
       {
         loading: false,
@@ -510,7 +510,11 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
 
     // 异步模式下，且选中节点不在树中，需要记录下来
-    if (this.isLazyMode && !this.isSearchItemInTree(item)) {
+    if (
+      !this.props.checkStrictly &&
+      this.isLazyMode &&
+      !this.isSearchItemInTree(item)
+    ) {
       this.normalizedDepartments[`${this.props.tenementId}-${item.id}`] = item
       let checkedDiff = { ...(this.searchItemCheckedDiff || {}) }
       if (item.id in checkedDiff) {
@@ -525,9 +529,9 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       this.searchItemCheckedDiff = checkedDiff
     }
 
-    if (this.props.onChange) {
-      this.props.onChange(selectedValue)
-    }
+    this.props.onChange(selectedValue)
+    this.props.onNormalizeStart!()
+    this.normalizeSearchCheckState()
   }
 
   /**
@@ -546,7 +550,19 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   /**
    * 搜索取消. 在这个时机对选中节点进行规范化
    */
-  private handleSearchCancel = async () => {
+  private handleSearchCancel = () => {
+    this.setState({
+      searchKey: '',
+      searchMode: false,
+      searching: false,
+      searchResult: undefined,
+    })
+  }
+
+  /**
+   * 规范化搜索选中项
+   */
+  private normalizeSearchCheckState = debounce(async () => {
     try {
       this.setState({ normalizing: true })
       // 首先进行本地规范化
@@ -554,18 +570,13 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       // 远程规范化
       await this.remoteNormalizeCheckState()
       this.searchItemCheckedDiff = undefined
-      this.setState({
-        searchKey: '',
-        searchMode: false,
-        searching: false,
-        searchResult: undefined,
-      })
     } catch (err) {
       message.info(err.message)
     } finally {
       this.setState({ normalizing: false })
+      this.props.onNormalizeEnd!()
     }
-  }
+  }, 1000)
 
   /**
    * 本地对树的选中节点进行合并.
@@ -601,10 +612,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         .filter(i => !!i),
     )
 
-    if (this.props.onChange) {
-      this.props.onChange(selectedValue)
-    }
-    await delay(100)
+    this.props.onChange(selectedValue)
+    await delay(0)
   }
 
   /**
@@ -669,9 +678,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       return i
     })
 
-    if (this.props.onChange) {
-      this.props.onChange(preserved.concat(normalized))
-    }
+    this.props.onChange(preserved.concat(normalized))
   }
 
   /**
@@ -844,18 +851,14 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         .filter(i => !!i),
     )
 
-    if (this.props.onChange) {
-      this.props.onChange(selectedValue)
-    }
+    this.props.onChange(selectedValue)
   }
 
   /**
    * 异步加载的树无法记录当前选中的节点，所以需要强制进行更新
    */
   private forceUpdateTreeCheckState() {
-    if (this.props.onChange) {
-      this.props.onChange([...(this.props.value || [])])
-    }
+    this.props.onChange([...(this.props.value || [])])
   }
 
   private handleExpand = (keys: string[]) => {
