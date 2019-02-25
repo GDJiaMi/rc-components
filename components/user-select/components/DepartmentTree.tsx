@@ -1,5 +1,17 @@
 /**
  * 部门树
+ *
+ * 异步模式部门合并策略
+ * - 搜索: 在搜索结束/或切换企业(判断是否在搜索状态)/或点击确定后(判断是否在搜索状态)，对选中项进行规范化
+ *   - 本地规范: 如果选中的节点已经在渲染树中，将进行本地规范化
+ *   - 远程规范: 如果选中节点在未在树中加载，则需要传递到远程进行规范化。 远程服务器缓存了完整的组织架构树
+ * - TODO: 选择:
+ *   - 通过搜索选中了下级部门，这时候选中父级部门需要将已选中的下级部门合并掉. 每个选中项应该有完整的parentIds路径，包括回显的数据
+ * - 搜索项选中规则
+ *   - 直接选中
+ *   - 异步直接选中
+ *   - 父节点被直接选中
+ *   - 父节点被异步选中
  */
 import React from 'react'
 import Spin from 'antd/es/spin'
@@ -15,6 +27,7 @@ import message from 'antd/es/message'
 import memoize from 'lodash/memoize'
 import debounce from 'lodash/debounce'
 
+import { delay } from '../../utils/common'
 import withProvider from '../withProvider'
 import {
   Adaptor,
@@ -89,14 +102,23 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   /**
-   * 缓存其他企业已选中的界面，避免被覆盖
-   */
-  private preservedValue: DepartmentDesc[] = []
-
-  /**
    * 是否是异步加载模式
    */
   private isLazyMode = this.props.getDepartmentChildren != null
+
+  /**
+   * 缓存其他企业, 或异步加载的已选中的节点，避免在树选择后被清空
+   */
+  private preservedValue: DepartmentDesc[] = []
+  private preservedValueInSet: Set<string> = new Set()
+  /**
+   * 跟踪搜索状态选中和取消状态. 新增和取消的节点会在后端进行合并.后端拥有完整的组织架构树
+   */
+  private searchItemCheckedDiff?: {
+    [id: string]: { checked: boolean; item: DepartmentDesc }
+  }
+
+  private tree = React.createRef<Tree>()
 
   public componentDidMount() {
     this.fetchDepartment()
@@ -185,7 +207,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return this.state.dataSourceById && this.state.dataSourceById[id]
   }
 
-  public reset(cb?: any) {
+  public async reset(cb?: any) {
+    await this.handleSearchCancel()
     this.setState(
       {
         loading: false,
@@ -221,6 +244,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return (
       <Tree
         key={tenementId}
+        ref={this.tree}
         loadData={this.isLazyMode ? this.fetchChildrenIfNeed : undefined}
         checkStrictly={checkStrictly || onlyAllowCheckLeaf}
         checkable={selectable}
@@ -346,6 +370,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         orgValue.findIndex(i => i.id === item.id) !== -1)
     const isLeaf = item.leaf
     const disabledByLeaf = isLeaf ? onlyAllowCheckLeaf : false
+    // 禁止非直接选中的checkbox
     const disabledByLazyMode = this.isLazyMode && checked && !checkedDirectly
     const disableCheckbox =
       disabledByLeaf ||
@@ -392,37 +417,71 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     item: DepartmentSearchResult,
   ): [boolean, boolean] {
     const { checkedValueInSet } = this.state
+    const parents = item.parentIds
     if (checkedValueInSet && checkedValueInSet.has(item.id)) {
+      return [true, true]
+    } else if (
+      parents &&
+      parents.some(
+        i =>
+          (!!checkedValueInSet && checkedValueInSet.has(i)) ||
+          this.preservedValueInSet.has(i),
+      )
+    ) {
+      // 父节点选中
+      return [true, false]
+    } else if (this.preservedValueInSet.has(item.id)) {
+      // 未加载节点选中
       return [true, true]
     }
 
-    const parents = item.parentIds
-    return [
-      parents &&
-        parents.some(i => !!checkedValueInSet && checkedValueInSet.has(i)),
-      false,
-    ]
+    return [false, false]
   }
 
+  /**
+   * 更新保留的已选中项
+   */
   private updateCheckedValue() {
     const value = this.props.value || []
-    const set = new Set<string>()
-    const normalized = value
-      .filter(val => {
-        return this.preservedValue.findIndex(i => i.id === val.id) === -1
-      })
-      .map(i => {
-        set.add(i.id)
-        return i.id
-      })
+    const preservedValue: DepartmentDesc[] = []
+    const preservedValueInSet = new Set<string>()
+    const checkedValue: string[] = []
+    const checkedValueInSet = new Set<string>()
+    const tenementId = this.props.tenementId
+    // 内部树， 缓存了已渲染的树节点
+    const innerTree = this.tree.current && this.tree.current.tree
+
+    value.forEach(val => {
+      if (tenementId && val.tenement && val.tenement.id !== tenementId) {
+        // 其他企业的已选中项
+        preservedValue.push(val)
+        preservedValueInSet.add(val.id)
+      } else if (
+        innerTree &&
+        innerTree.state.keyEntities &&
+        !(val.id in innerTree.state.keyEntities)
+      ) {
+        // 未在已渲染的树中
+        preservedValue.push(val)
+        preservedValueInSet.add(val.id)
+      } else {
+        // 当前树已选中节点
+        checkedValue.push(val.id)
+        checkedValueInSet.add(val.id)
+      }
+    })
+
+    this.preservedValue = preservedValue
+    this.preservedValueInSet = preservedValueInSet
     this.setState({
-      checkedValue: normalized,
-      checkedValueInSet: set,
+      checkedValue,
+      checkedValueInSet,
     })
   }
 
   /**
-   * 搜索项选中
+   * 搜索项选中. 异步模式下比较复杂，需要一些选中项可以在本地进行合并，而另外一些需要
+   * 传递后后台进行合并
    */
   private handleCheck = (item: DepartmentSearchResult, checked: boolean) => {
     this.saveItem(item)
@@ -430,6 +489,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const { value } = this.props
     const selectedValue = [...(value || [])]
 
+    // 更新value
     if (checked) {
       selectedValue.push(this.state.dataSourceById![item.id])
     } else {
@@ -439,11 +499,165 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       }
     }
 
+    // 异步模式下，且选中节点不在树中，需要记录下来
+    if (this.isLazyMode && !this.isSearchItemInTree(item)) {
+      let checkedDiff = { ...(this.searchItemCheckedDiff || {}) }
+      if (item.id in checkedDiff) {
+        // 恢复
+        if (checkedDiff[item.id].checked !== checked) {
+          delete checkedDiff[item.id]
+        }
+      } else {
+        checkedDiff[item.id] = { checked, item: item }
+      }
+
+      this.searchItemCheckedDiff = checkedDiff
+    }
+
     if (this.props.onChange) {
       this.props.onChange(selectedValue)
     }
   }
 
+  /**
+   * 判断指定选项是否在已渲染的树种
+   */
+  private isSearchItemInTree(item: DepartmentSearchResult) {
+    const innerTree = this.tree.current && this.tree.current.tree
+    if (innerTree == null) {
+      return false
+    }
+
+    const keyEntities = innerTree.state.keyEntities
+    return item.id in keyEntities
+  }
+
+  /**
+   * 搜索取消. 在这个时机对选中节点进行规范化
+   */
+  private handleSearchCancel = async () => {
+    try {
+      this.setState({ loading: true })
+      // 首先进行本地规范化
+      await this.localNormalizeCheckState()
+      // 远程规范化
+      await this.remoteNormalizeCheckState()
+      this.searchItemCheckedDiff = undefined
+      this.setState({
+        searchKey: '',
+        searchMode: false,
+        searching: false,
+        searchResult: undefined,
+      })
+    } catch (err) {
+      message.info(err.message)
+    } finally {
+      this.setState({ loading: false })
+    }
+  }
+
+  /**
+   * 本地对树的选中节点进行合并.
+   */
+  private async localNormalizeCheckState() {
+    if (this.props.checkStrictly || this.tree.current == null) {
+      return
+    }
+
+    // 访问内部的树结构，需要从里面获取选中状态
+    const innerTree = (this.tree.current as any).tree
+    if (innerTree == null) {
+      console.warn('请更新到antd 3.11 以上版本')
+      return
+    }
+
+    // 获取树的选中状态
+    const checkedKey = innerTree.state.checkedKeys as string[]
+    const keyEntities = innerTree.state.keyEntities
+    const posInTree: Array<{
+      node: { key: string }
+      pos: string
+    }> = checkedKey.map(i => keyEntities[i])
+    // 规范化
+    const filteredKeys = PathTree.normalizedPathNodes(posInTree).map(
+      i => i.node.key,
+    )
+    const selectedValue = filteredKeys
+      .map(i => {
+        return this.state.dataSourceById![i]
+      })
+      .filter(i => !!i)
+      .concat(this.preservedValue)
+
+    if (this.props.onChange) {
+      this.props.onChange(selectedValue)
+    }
+    await delay(100)
+  }
+
+  /**
+   * 远程对树的选中节点进行合并，适用于异步加载模式
+   */
+  private remoteNormalizeCheckState = async () => {
+    if (
+      this.props.checkStrictly ||
+      !this.isLazyMode ||
+      this.searchItemCheckedDiff == null
+    ) {
+      return
+    }
+
+    if (this.props.normalizeDepartmentChecked == null) {
+      console.warn('未提供normalizeDepartmentChecked方法')
+      return
+    }
+
+    let allChecked = this.props.value || []
+    const state = this.searchItemCheckedDiff
+    const keys = Object.keys(state)
+    if (keys.length === 0) {
+      return
+    }
+
+    let added: DepartmentDesc[] = []
+    const removed: DepartmentDesc[] = []
+    keys.forEach(k => {
+      if (state[k].checked) {
+        added.push(state[k].item)
+      } else {
+        removed.push(state[k].item)
+      }
+    })
+
+    // 再一次规范化跟踪记录, 因为可能在其他地方被取消选中
+    added = added.filter(
+      item => allChecked.findIndex(i => i.id === item.id) !== -1,
+    )
+
+    // 移除重复的数据
+    allChecked = allChecked.filter(
+      item => added.findIndex(i => i.id === item.id) === -1,
+    )
+
+    // 远程规范化，返回规范化后的所有数据
+    const res = await this.props.normalizeDepartmentChecked(
+      allChecked,
+      added,
+      removed,
+    )
+
+    if (this.props.onChange) {
+      const normalized = res.map(i => {
+        i.tenement = this.props.tenement
+        return i
+      })
+      this.props.onChange(normalized)
+    }
+  }
+
+  /**
+   * 缓存到dataSourceById中
+   */
   private saveItem(item: DepartmentSearchResult) {
     if (
       this.state.dataSourceById &&
@@ -495,15 +709,6 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
   }
 
-  private handleSearchCancel = () => {
-    this.setState({
-      searchKey: '',
-      searchMode: false,
-      searching: false,
-      searchResult: undefined,
-    })
-  }
-
   private handleFilterChange = (evt: React.ChangeEvent<{ value: string }>) => {
     this.setState({
       searchKey: evt.target.value,
@@ -534,10 +739,11 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     keys: (string[]) | { checked: string[] },
     evt: AntTreeNodeCheckedEvent,
   ) => {
+    keys = Array.isArray(keys) ? keys : keys.checked
     const checkStrictly =
       this.props.checkStrictly || this.props.onlyAllowCheckLeaf
     let checkedTree: string[] = []
-    keys = Array.isArray(keys) ? keys : keys.checked
+
     if (!checkStrictly) {
       const checkedPositions = (evt as any).checkedNodesPositions as Array<{
         node: { key: string }
@@ -603,8 +809,12 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         pageSize,
         this.props.tenementId,
       )
+      const normalized = res.items.map(i => {
+        i.tenement = this.props.tenement
+        return i
+      })
       this.setState({
-        searchResult: res.items,
+        searchResult: normalized,
         searchPagination: {
           ...this.state.searchPagination,
           total: res.total,
@@ -689,7 +899,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
           expandedKeys: [...expandedKeys],
         },
         () => {
-          this.updatePreserveValue()
+          // 更新选中项
           this.updateCheckedValue()
         },
       )
@@ -697,29 +907,6 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       this.setState({ error })
     } finally {
       this.setState({ loading: false })
-    }
-  }
-
-  /**
-   * Tree选择是无法保留跨企业的数据的，所有需要计算非当前树的保留字段，避免被移除
-   */
-  private updatePreserveValue() {
-    const value = this.props.value
-    const tenementId = this.props.tenementId
-    this.preservedValue = []
-    if (value == null) {
-      return
-    }
-    // 记录非当前企业的已选值
-    for (const item of value) {
-      if (item.tenement && item.tenement.id !== tenementId) {
-        this.preservedValue.push(item)
-      } else if (
-        this.state.dataSourceById &&
-        this.state.dataSourceById[item.id] == null
-      ) {
-        this.preservedValue.push(item)
-      }
     }
   }
 

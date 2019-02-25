@@ -37,13 +37,11 @@ export interface DepartmentDesc {
 /**
  * 搜索结构表示
  */
-export interface DepartmentSearchResult {
-  userCount?: number
-  parentId: string
+export interface DepartmentSearchResult extends DepartmentDesc {
   leaf: boolean
-  id: string
-  name: string
-  extra?: any
+  parentId: string
+  // 完整路径
+  parentIds: string[]
 }
 
 /**
@@ -61,13 +59,16 @@ export interface UserDesc {
   department?: DepartmentDesc
 }
 
+/**
+ * 用户选择器适配器
+ */
 export interface Adaptor {
   /**
    * 获取部门树
    */
   getDepartmentTree(tenementId: string): Promise<DepartmentDesc>
   /**
-   * 获取指定部门的子节点，用于惰性加载子节点
+   * 获取指定部门的子节点，用于惰性加载子节点, 如果提供该方法将会启用异步模式
    * 可选
    */
   getDepartmentChildren?: (
@@ -110,6 +111,14 @@ export interface Adaptor {
     pageSize: number,
     tenementId?: string,
   ) => Promise<{ items: DepartmentSearchResult[]; total: number }>
+  /**
+   * 节点合并， 用于配合部门搜索，将选择和取消选择的节点进行合并
+   */
+  normalizeDepartmentChecked?: (
+    currentSelected: DepartmentDesc[],
+    added: DepartmentDesc[],
+    removed: DepartmentDesc[],
+  ) => Promise<DepartmentDesc[]>
 }
 
 export interface ProviderProps {
@@ -151,6 +160,7 @@ export default class Provider extends React.Component<ProviderProps> {
       searchTenement: this.searchTenement,
       getDepartmentChildren: this.props.adaptor.getDepartmentChildren,
       searchDepartment: this.props.adaptor.searchDepartment,
+      normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
     }
   }
 
