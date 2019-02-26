@@ -127,10 +127,10 @@ export interface Adaptor {
   /**
    * 获取部门信息详情，包含完整路径等信息, 用于异步模式
    */
-  getDepartmentDetail(
+  getDepartmentDetail?: (
     ids: string[],
     tenementId?: string,
-  ): Promise<DepartmentSearchResult[]>
+  ) => Promise<DepartmentSearchResult[]>
 }
 
 export interface ProviderProps {

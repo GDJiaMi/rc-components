@@ -486,7 +486,10 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       checkedValue,
       checkedValueInSet,
     })
-    this.normalizeUnloadedDepartments(unloadedDepartments)
+
+    if (unloadedDepartments.length) {
+      this.normalizeUnloadedDepartments(unloadedDepartments)
+    }
   }
 
   /**
@@ -697,6 +700,10 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
     if (filtered.length === 0) {
       return
+    }
+
+    if (this.props.getDepartmentDetail == null) {
+      throw new Error(`[user-select]: 未提供getDepartmentDetail方法`)
     }
 
     try {
