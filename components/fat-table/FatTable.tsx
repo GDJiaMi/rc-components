@@ -585,6 +585,12 @@ export default class FatTableInner<T extends object, P extends object>
     })
   }
 
+  public triggerAction(action: string, data: any) {
+    if (this.props.onAction) {
+      this.props.onAction(action, data, this)
+    }
+  }
+
   /**
    * 删除后同步列表状态
    */

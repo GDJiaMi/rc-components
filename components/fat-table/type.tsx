@@ -74,6 +74,10 @@ export interface IFatTable<T, P = {}> {
   cancelEdit(): void
   save(): void
   setSnapshot(setter: Setter<T>): void
+  /**
+   * 触发自定义事件
+   */
+  triggerAction(action: string, data: any): void
 }
 
 /**
@@ -155,6 +159,12 @@ export type SaveHandler<T, P = {}> = (snapshot: T) => Promise<void>
 
 // onPersist
 export type PersistHandler<T, P = {}> = (params: P & PaginationInfo) => object
+
+export type ActionHandler<T, P = {}> = (
+  name: string,
+  data: any,
+  instance: IFatTable<T, P>,
+) => void
 
 /**
  * 参数
@@ -253,6 +263,7 @@ export interface FatTableProps<T, P extends object = {}> {
   // URL持久化钩子, 返回需要被持久化的对象
   onPersist?: PersistHandler<T, P>
   onSave?: SaveHandler<T, P>
+  onAction?: ActionHandler<T, P>
 
   /**
    * 转发给Table
