@@ -85,7 +85,10 @@ export default class ProgressSpin extends React.Component<ProgressSpinProps> {
         className={`jm-progress-spin-wrapper ${className || ''}`}
         style={style}
       >
-        <div className="jm-progress-spin">
+        <div
+          className="jm-progress-spin"
+          style={progress === 0 ? { display: 'none' } : undefined}
+        >
           <div
             ref={this.bar}
             className="jm-progress-spin__bar"
