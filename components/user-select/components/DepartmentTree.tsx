@@ -39,7 +39,11 @@ import {
 import { DefaultExpandedLevel, PageSize } from '../constants'
 import { findAndReplace } from '../../fat-table/utils'
 
-import { PathTree } from './utils'
+import {
+  PathTree,
+  PathNodeWithChildren,
+  normalizedPathNodesInUncheck,
+} from './utils'
 
 export interface DepartmentTreeProps {
   // 当前部门
@@ -58,6 +62,7 @@ export interface DepartmentTreeProps {
   onlyAllowCheckLeaf?: boolean
   orgValue?: DepartmentDesc[]
   keepValue?: boolean
+  childrenUncheckable?: boolean
   onNormalizeStart?: () => void
   onNormalizeEnd?: () => void
 }
@@ -74,6 +79,7 @@ interface State {
   // 正在异步搜索
   searching?: boolean
   searchResult?: DepartmentSearchResult[]
+  searchUncheckedKeys: { [key: string]: boolean }
   // TODO: 异常和分页
   searchError?: Error
   searchPagination: PaginationProps
@@ -86,8 +92,13 @@ interface State {
 }
 
 class DepartmentTree extends React.PureComponent<Props, State> {
+  static defaultProps = {
+    childrenUncheckable: true,
+  }
+
   public state: State = {
     loading: false,
+    searchUncheckedKeys: {},
     searchPagination: {
       current: 1,
       total: 0,
@@ -226,6 +237,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         searchMode: false,
         searching: false,
         searchResult: undefined,
+        searchUncheckedKeys: {},
         searchError: undefined,
         checkedValue: undefined,
         checkedValueInSet: undefined,
@@ -364,6 +376,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       selectable,
       keepValue,
       orgValue,
+      childrenUncheckable,
       onlyAllowCheckLeaf,
     } = this.props
     const [checked, checkedDirectly] =
@@ -376,7 +389,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const isLeaf = item.leaf
     const disabledByLeaf = isLeaf ? onlyAllowCheckLeaf : false
     // 禁止非直接选中的checkbox
-    const disabledByLazyMode = this.isLazyMode && checked && !checkedDirectly
+    const disabledByLazyMode =
+      this.isLazyMode && checked && !childrenUncheckable && !checkedDirectly
     const disableCheckbox =
       disabledByLeaf ||
       // 已选中的父级部门，不能反选
@@ -421,9 +435,11 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   private isSearchItemChecked(
     item: DepartmentSearchResult,
   ): [boolean, boolean] {
-    const { checkedValueInSet } = this.state
+    const { checkedValueInSet, searchUncheckedKeys } = this.state
     const parents = item.parentIds
-    if (checkedValueInSet && checkedValueInSet.has(item.id)) {
+    if (searchUncheckedKeys[item.id]) {
+      return [false, true]
+    } else if (checkedValueInSet && checkedValueInSet.has(item.id)) {
       return [true, true]
     } else if (
       parents &&
@@ -501,23 +517,40 @@ class DepartmentTree extends React.PureComponent<Props, State> {
 
     const { value } = this.props
     const selectedValue = [...(value || [])]
+    const itemInTree = this.isSearchItemInTree(item)
 
     // 更新value
     if (checked) {
       selectedValue.push(this.state.dataSourceById![item.id])
+      this.setState({
+        searchUncheckedKeys: {
+          ...this.state.searchUncheckedKeys,
+          [item.id]: false,
+        },
+      })
     } else {
       const idx = selectedValue.findIndex(i => i.id === item.id)
       if (idx !== -1) {
         selectedValue.splice(idx, 1)
+      } else {
+        // 需要记录unchecked的状态
+        if (itemInTree) {
+          // 这时候需要强制localNormalize
+          this.localNormalizeUncheckState(item.id)
+          return
+        } else {
+          this.setState({
+            searchUncheckedKeys: {
+              ...this.state.searchUncheckedKeys,
+              [item.id]: true,
+            },
+          })
+        }
       }
     }
 
     // 异步模式下，且选中节点不在树中，需要记录下来
-    if (
-      !this.props.checkStrictly &&
-      this.isLazyMode &&
-      !this.isSearchItemInTree(item)
-    ) {
+    if (!this.props.checkStrictly && this.isLazyMode && !itemInTree) {
       this.normalizedDepartments[`${this.props.tenementId}-${item.id}`] = item
       let checkedDiff = { ...(this.searchItemCheckedDiff || {}) }
       if (item.id in checkedDiff) {
@@ -559,6 +592,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       searchMode: false,
       searching: false,
       searchResult: undefined,
+      searchUncheckedKeys: {},
     })
   }
 
@@ -580,6 +614,39 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       this.props.onNormalizeEnd!()
     }
   }, 1000)
+
+  private localNormalizeUncheckState(key: string) {
+    if (this.props.checkStrictly || this.tree.current == null) {
+      return
+    }
+
+    // 访问内部的树结构，需要从里面获取选中状态
+    const innerTree = (this.tree.current as any).tree
+    if (innerTree == null) {
+      console.warn('请更新到antd 3.11 以上版本')
+      return
+    }
+
+    // 获取树的选中状态
+    const checkedKey = innerTree.state.checkedKeys as string[]
+    const keyEntities = innerTree.state.keyEntities
+    const posInTree: Array<
+      PathNodeWithChildren<{ key: string }>
+    > = checkedKey.map(i => keyEntities[i])
+    const filteredKeys = normalizedPathNodesInUncheck(
+      posInTree,
+      keyEntities[key],
+    ).map(i => i.node.key)
+    const selectedValue = this.preProcessPreservedValue(filteredKeys).concat(
+      filteredKeys
+        .map(i => {
+          return this.state.dataSourceById![i]
+        })
+        .filter(i => !!i),
+    )
+
+    this.props.onChange(selectedValue)
+  }
 
   /**
    * 本地对树的选中节点进行合并.
@@ -607,7 +674,8 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     const filteredKeys = PathTree.normalizedPathNodes(posInTree).map(
       i => i.node.key,
     )
-    const selectedValue = this.preservedValue.concat(
+
+    const selectedValue = this.preProcessPreservedValue(filteredKeys).concat(
       filteredKeys
         .map(i => {
           return this.state.dataSourceById![i]
@@ -802,6 +870,31 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }, 500)
 
   /**
+   * 过滤保留的节点
+   */
+  private preProcessPreservedValue(checked: string[]) {
+    return this.preservedValue.filter(val => {
+      // 非本企业节点
+      if (val.tenement && val.tenement.id !== this.props.tenementId) {
+        return true
+      }
+
+      // 没有路径信息的节点
+      const normalized = this.normalizedDepartments[
+        `${this.props.tenementId}-${val.id}`
+      ]
+
+      if (normalized == null) {
+        return true
+      }
+
+      const parentIds = normalized.parentIds
+      // 过滤掉父节点已选中的异步节点
+      return !parentIds.some(id => checked.indexOf(id) !== -1)
+    })
+  }
+
+  /**
    * 处理树节点选中
    * TODO: 支持checkStrictly模式
    */
@@ -829,24 +922,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         return this.preservedValue
       }
 
-      const checked = checkedTree
-      return this.preservedValue.filter(val => {
-        if (val.tenement && val.tenement.id !== this.props.tenementId) {
-          return true
-        }
-
-        const normalized = this.normalizedDepartments[
-          `${this.props.tenementId}-${val.id}`
-        ]
-
-        if (normalized == null) {
-          return true
-        }
-
-        const parentIds = normalized.parentIds
-        // 过滤掉父节点已选中的异步节点
-        return !parentIds.some(id => checked.indexOf(id) !== -1)
-      })
+      return this.preProcessPreservedValue(checkedTree)
     }
 
     // 将keys映射为DepartmentDesc[]

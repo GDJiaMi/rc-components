@@ -3,10 +3,41 @@ export interface PathNode<T> {
   node: T
 }
 
+export interface PathNodeWithChildren<T> extends PathNode<T> {
+  children: PathNodeWithChildren<T>[]
+}
+
 interface Node<T> {
   node?: PathNode<T>
   key: string
   children: { [key: string]: Node<T> }
+}
+
+/**
+ * uncheck模式
+ */
+export function normalizedPathNodesInUncheck<T>(
+  nodes: PathNodeWithChildren<T>[],
+  node: PathNodeWithChildren<T>,
+) {
+  const nodesAdded: { [pos: string]: PathNode<T> } = {}
+
+  nodes.forEach(item => {
+    // 父节点
+    if (node.pos.startsWith(item.pos) && node.pos !== item.pos) {
+      item.children.forEach(child => {
+        // 过滤掉自己和自己的父级
+        if (!node.pos.startsWith(child.pos)) {
+          nodesAdded[child.pos] = child
+        }
+      })
+    } else if (node.pos !== item.pos && !item.pos.startsWith(node.pos)) {
+      // 无关节点, 不等于自身，也不是子节点
+      nodesAdded[item.pos] = item
+    }
+  })
+
+  return Object.keys(nodesAdded).map(i => nodesAdded[i])
 }
 
 /**

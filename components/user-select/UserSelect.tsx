@@ -68,6 +68,7 @@ export interface UserSelectProps {
   // 其他，极为少用的定制化
   tenementSearchPlaceholder?: string
   userSearchPlaceholder?: string
+  childrenUncheckable?: boolean
   renderUserSearchItem?: (item: UserDesc) => React.ReactNode
 }
 
@@ -199,6 +200,7 @@ class UserSelectInner extends React.Component<Props, State>
       onlyAllowCheckLeaf,
       userSearchPlaceholder,
       renderUserSearchItem,
+      childrenUncheckable,
     } = this.props
     const {
       currentTenementId,
@@ -256,6 +258,7 @@ class UserSelectInner extends React.Component<Props, State>
               orgValue={this.props.value && this.props.value.departments}
               onNormalizeStart={this.handleNormalizeStart}
               onNormalizeEnd={this.handleNormalizeEnd}
+              childrenUncheckable={childrenUncheckable}
             />
             {!!userSelectable && (
               <UsersPanel
