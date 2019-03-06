@@ -34,6 +34,8 @@ export interface DepartmentDesc {
   extra?: any
   // 父部门的完整路径，在异步模式下有用
   parentIds?: string[]
+  // 完整路径, 如果存在，在已选中栏的tooltip会显示该数据
+  fullPath?: string
 }
 
 /**

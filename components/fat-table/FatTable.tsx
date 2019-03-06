@@ -1275,7 +1275,13 @@ export default class FatTableInner<T extends object, P extends object>
       return
     }
 
-    const { onFetch, onPersist, namespace, enablePersist } = this.props
+    const {
+      onFetch,
+      onPersist,
+      namespace,
+      enablePersist,
+      lazyMode,
+    } = this.props
     const { page, current, pageSize } = this.getPagination()
 
     const paramsToSerial = {
@@ -1305,6 +1311,7 @@ export default class FatTableInner<T extends object, P extends object>
           },
           dataSource: list,
           allReady: total === list.length,
+          expandedKeys: lazyMode ? [] : this.state.expandedKeys,
         },
         () => {
           // 页码纠正

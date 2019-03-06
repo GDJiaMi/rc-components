@@ -175,7 +175,9 @@ export default class SelectedPanel extends React.PureComponent<
   }
 
   private formatDepartment(d: DepartmentDesc) {
-    return `${d.tenement ? d.tenement.name + ' > ' : ''}${d.name}`
+    return d.fullPath
+      ? d.fullPath
+      : `${d.tenement ? d.tenement.name + ' > ' : ''}${d.name}`
   }
 
   private formatUser(u: UserDesc) {
