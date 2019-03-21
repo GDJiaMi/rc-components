@@ -1,6 +1,6 @@
 import Form from 'antd/es/form'
 import Button from 'antd/es/button'
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import {
   FormProps,
   HeaderExtraRenderer,
@@ -18,7 +18,7 @@ interface HeaderProps<T, P> {
   table: IFatTable<T, P>
 }
 
-export default class Header<T, P> extends PureComponent<HeaderProps<T, P>> {
+export default class Header<T, P> extends Component<HeaderProps<T, P>> {
   public render() {
     const {
       header,
