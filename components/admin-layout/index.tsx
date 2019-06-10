@@ -7,6 +7,7 @@ import classnames from 'classnames'
 import Alert from 'antd/es/alert'
 import Menu from 'antd/es/menu'
 import Icon from 'antd/es/icon'
+import Spin from 'antd/es/spin'
 import { createComponent } from '../utils/common'
 
 export type LinkComponent = typeof _Link
@@ -14,6 +15,8 @@ export interface MenuConfig {
   path?: string
   icon?: string | React.ReactElement<any>
   title: string
+  // 点击事件
+  onClick?: () => void
   children?: MenuConfig[]
 }
 
@@ -26,7 +29,8 @@ export interface AdminLayoutProps {
   siteName?: string
   title?: React.ReactNode
   indexLink?: string
-  menus?: MenuConfig[]
+  // 菜单项
+  menus?: (() => Promise<MenuConfig[]>) | MenuConfig[]
   path?: string
   Link?: LinkComponent
   after?: React.ReactNode
@@ -39,6 +43,9 @@ export interface AdminLayoutProps {
 interface State {
   collapsed: boolean
   openKeys: string[]
+  menuLoading?: boolean
+  finalMenus?: MenuConfig[]
+  menuError?: Error
 }
 
 const COLLAPSED_KEY = '__admin_layout__collapsed'
@@ -71,6 +78,10 @@ export default class AdminLayout extends React.Component<
         this.setState({ collapsed: true })
       }
     }
+
+    if (typeof this.props.menus === 'function') {
+      this.loadMenu()
+    }
   }
 
   public render() {
@@ -80,14 +91,12 @@ export default class AdminLayout extends React.Component<
       siteName = '工作宝',
       title,
       indexLink = '/',
-      menus,
-      path,
       error,
       after,
       freeze,
       children,
     } = this.props
-    const { collapsed, openKeys } = this.state
+    const { collapsed } = this.state
 
     return (
       <div className="jm-layout">
@@ -109,23 +118,7 @@ export default class AdminLayout extends React.Component<
               {!!logo && <img alt="logo" src={logo} />}
               <span title={siteName}>{siteName}</span>
             </Link>
-            <Menu
-              className="jm-layout__nav-menu"
-              theme="dark"
-              inlineCollapsed={collapsed}
-              mode="inline"
-              selectedKeys={path != null ? [path] : undefined}
-              defaultOpenKeys={
-                !!menus && !!menus.length && path != null && !openKeys.length
-                  ? this.resolveOpenKeys(menus, path)
-                  : openKeys
-              }
-              onOpenChange={(openKeys: string[]) => {
-                this.setState({ openKeys })
-              }}
-            >
-              {!!menus && !!menus.length && this.renderMenu(menus)}
-            </Menu>
+            {this.renderMenus()}
           </nav>
           <main className="jm-layout__body">
             <header className="jm-layout__header">
@@ -144,6 +137,72 @@ export default class AdminLayout extends React.Component<
         </main>
       </div>
     )
+  }
+
+  private renderMenus = () => {
+    const { menus, path } = this.props
+    const { openKeys, collapsed, menuError, finalMenus } = this.state
+    const lazyLoading = typeof menus === 'function'
+    const _menus = lazyLoading ? finalMenus : (menus as MenuConfig[])
+
+    if (lazyLoading && menuError) {
+      return (
+        <div className="jm-layout__nav-menu">
+          <Alert
+            banner
+            message={
+              <span>
+                菜单加载失败: {menuError.message},{' '}
+                <a onClick={this.loadMenu}>重试</a>
+              </span>
+            }
+          />
+        </div>
+      )
+    } else if (lazyLoading && finalMenus == null) {
+      return (
+        <div className="jm-layout__nav-menu">
+          <Spin tip="加载中...">
+            <div style={{ width: '100%', height: 200 }} />
+          </Spin>
+        </div>
+      )
+    }
+
+    return (
+      <Menu
+        className="jm-layout__nav-menu"
+        theme="dark"
+        inlineCollapsed={collapsed}
+        mode="inline"
+        selectedKeys={path != null ? [path] : undefined}
+        defaultOpenKeys={
+          !!_menus && !!_menus.length && path != null && !openKeys.length
+            ? this.resolveOpenKeys(_menus, path)
+            : openKeys
+        }
+        onOpenChange={(openKeys: string[]) => {
+          this.setState({ openKeys })
+        }}
+      >
+        {!!_menus && !!_menus.length && this.renderMenu(_menus)}
+      </Menu>
+    )
+  }
+
+  private loadMenu = async () => {
+    if (typeof this.props.menus !== 'function') {
+      return
+    }
+    try {
+      this.setState({ menuLoading: true, menuError: undefined })
+      const menus = await this.props.menus()
+      this.setState({ finalMenus: menus })
+    } catch (err) {
+      this.setState({ menuError: err })
+    } finally {
+      this.setState({ menuLoading: false })
+    }
   }
 
   private resolveOpenKeys = (menus: MenuConfig[], path: string) => {
@@ -188,7 +247,9 @@ export default class AdminLayout extends React.Component<
           {this.renderMenu(menu.children)}
         </Menu.SubMenu>
       ) : (
-        <Menu.Item key={menu.path}>{this.renderMenuLink(menu)}</Menu.Item>
+        <Menu.Item key={menu.path} onClick={menu.onClick}>
+          {this.renderMenuLink(menu)}
+        </Menu.Item>
       ),
     )
   }
@@ -198,7 +259,7 @@ export default class AdminLayout extends React.Component<
     const icon =
       typeof menu.icon === 'string' ? <Icon type={menu.icon} /> : menu.icon
 
-    if (menu.path == null) {
+    if (menu.path == null || menu.onClick) {
       return (
         <span>
           {!!icon && icon}

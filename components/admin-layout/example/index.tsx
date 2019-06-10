@@ -10,6 +10,7 @@ import Icon from 'antd/es/icon'
 import 'antd/es/icon/style/css'
 import Dropdown from 'antd/es/dropdown'
 import 'antd/es/dropdown/style/css'
+import { delay } from '../../utils/common'
 
 /**
  * 定义菜单项，支持嵌套
@@ -41,6 +42,7 @@ const menu = [
     title: '统计',
     icon: 'bar-chart',
     path: '/stat',
+
     children: [
       {
         path: '/stat/a',
@@ -51,6 +53,14 @@ const menu = [
         title: '用户',
       },
     ],
+  },
+  {
+    title: '只支持点击',
+    path: 'test',
+    icon: 'setting',
+    onClick: () => {
+      console.log('handle click')
+    },
   },
 ]
 
@@ -73,7 +83,10 @@ class App extends React.Component {
         // error={
         //   this.state.showError ? new Error('会话失效, 请重新登录') : undefined
         // }
-        menus={menu}
+        menus={async () => {
+          await delay(2000)
+          return menu
+        }}
         path={this.state.path}
         after={
           <>
