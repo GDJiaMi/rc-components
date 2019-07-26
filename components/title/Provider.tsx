@@ -73,7 +73,9 @@ export class InnerProvider extends React.Component<
 
   private updateDocumentTitle = debounce(() => {
     const formatter = this.props.titleFormatter
-    const title = formatter ? formatter(this.state.titles) : this.el.innerText
+    const title = formatter
+      ? formatter(this.state.titles)
+      : this.el.innerText || this.el.textContent || this.el.innerHTML
     document.title = title
   }, 100)
 
