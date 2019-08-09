@@ -70,7 +70,7 @@ export interface Adaptor {
   /**
    * 获取部门树
    */
-  getDepartmentTree(tenementId: string): Promise<DepartmentDesc>
+  getDepartmentTree(tenementId: string, extra?: any): Promise<DepartmentDesc>
   /**
    * 获取指定部门的子节点，用于惰性加载子节点, 如果提供该方法将会启用异步模式
    * 可选
@@ -78,6 +78,7 @@ export interface Adaptor {
   getDepartmentChildren?: (
     tenementId: string,
     departmentId: string,
+    extra?: any,
   ) => Promise<DepartmentDesc[] | undefined>
   /**
    * 获取部门成员
@@ -87,6 +88,7 @@ export interface Adaptor {
     departmentId: string,
     page: number,
     pageSize: number,
+    extra?: any,
   ): Promise<{ items: UserDesc[]; total: number }>
   /**
    * 用户搜索
@@ -97,6 +99,7 @@ export interface Adaptor {
     page: number,
     pageSize: number,
     tenementId?: string,
+    extra?: any,
   ): Promise<{ items: UserDesc[]; total: number }>
   /**
    * 企业搜索
@@ -105,6 +108,7 @@ export interface Adaptor {
     query: string,
     page: number,
     pageSize: number,
+    extra?: any,
   ): Promise<{ items: TenementDesc[]; total: number }>
   /**
    * 部门搜索, 异步模式下会使用这种方式进行搜索
@@ -114,6 +118,7 @@ export interface Adaptor {
     page: number,
     pageSize: number,
     tenementId?: string,
+    extra?: any,
   ) => Promise<{ items: DepartmentSearchResult[]; total: number }>
   /**
    * 节点合并， 用于配合部门搜索，将选择和取消选择的节点进行合并
@@ -124,6 +129,7 @@ export interface Adaptor {
     added: DepartmentDesc[],
     removed: DepartmentDesc[],
     tenementId?: string,
+    extra?: any,
   ) => Promise<DepartmentSearchResult[]>
 
   /**
@@ -132,11 +138,14 @@ export interface Adaptor {
   getDepartmentDetail?: (
     ids: string[],
     tenementId?: string,
+    extra?: any,
   ) => Promise<DepartmentSearchResult[]>
 }
 
 export interface ProviderProps {
   adaptor: Adaptor
+  // 是否启用缓存
+  cacheable?: boolean
 }
 
 interface State {
@@ -167,11 +176,18 @@ export default class Provider extends React.Component<ProviderProps> {
   private contextValue: Adaptor
 
   public componentWillMount() {
+    const { cacheable = true } = this.props
     this.contextValue = {
-      getDepartmentTree: this.getDepartmentTree,
-      getDepartmentUsers: this.getDepartmentUsers,
-      searchUser: this.searchUser,
-      searchTenement: this.searchTenement,
+      getDepartmentTree: cacheable
+        ? this.getDepartmentTree
+        : this.props.adaptor.getDepartmentTree,
+      getDepartmentUsers: cacheable
+        ? this.getDepartmentUsers
+        : this.props.adaptor.getDepartmentUsers,
+      searchUser: cacheable ? this.searchUser : this.props.adaptor.searchUser,
+      searchTenement: cacheable
+        ? this.searchTenement
+        : this.props.adaptor.searchTenement,
       getDepartmentChildren: this.props.adaptor.getDepartmentChildren,
       searchDepartment: this.props.adaptor.searchDepartment,
       normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
@@ -189,12 +205,14 @@ export default class Provider extends React.Component<ProviderProps> {
 
   private getDepartmentTree = async (
     tenement: string,
+    extra?: any,
   ): Promise<DepartmentDesc> => {
-    if (this.store.departmentTrees.has(tenement)) {
-      return this.store.departmentTrees.get(tenement) as DepartmentDesc
+    const key = `${tenement}-${this.serialExtra(extra)}`
+    if (this.store.departmentTrees.has(key)) {
+      return this.store.departmentTrees.get(key) as DepartmentDesc
     }
-    const tree = await this.props.adaptor.getDepartmentTree(tenement)
-    this.store.departmentTrees.set(tenement, tree)
+    const tree = await this.props.adaptor.getDepartmentTree(tenement, extra)
+    this.store.departmentTrees.set(key, tree)
     return tree
   }
 
@@ -203,8 +221,9 @@ export default class Provider extends React.Component<ProviderProps> {
     departmentId: string,
     page: number,
     pageSize: number,
+    extra?: any,
   ): Promise<{ items: UserDesc[]; total: number }> => {
-    const key = `${tenementId}-${departmentId}`
+    const key = `${tenementId}-${departmentId}-${this.serialExtra(extra)}`
     const users = this.store.departmentUsers.get(key)
     if (users && users.list && users.list[page] != null) {
       return { items: users.list[page], total: users.total }
@@ -214,6 +233,7 @@ export default class Provider extends React.Component<ProviderProps> {
       departmentId,
       page,
       pageSize,
+      extra,
     )
     this.store.departmentUsers.set(key, {
       list: { ...((users && users.list) || {}), [page]: res.items },
@@ -228,8 +248,10 @@ export default class Provider extends React.Component<ProviderProps> {
     page: number,
     pageSize: number,
     tenement?: string,
+    extra?: any,
   ): Promise<{ items: UserDesc[]; total: number }> => {
-    const key = `${query}-${page}-${pageSize}-${tenement || ''}`
+    const key = `${query}-${page}-${pageSize}-${tenement ||
+      ''}-${this.serialExtra(extra)}`
     const cached = this.store.usersCached.get(key)
     if (cached) {
       return cached
@@ -239,6 +261,7 @@ export default class Provider extends React.Component<ProviderProps> {
       page,
       pageSize,
       tenement,
+      extra,
     )
     this.store.usersCached.set(key, res)
     return res
@@ -248,14 +271,31 @@ export default class Provider extends React.Component<ProviderProps> {
     query: string,
     page: number,
     pageSize: number,
+    extra?: any,
   ): Promise<{ items: TenementDesc[]; total: number }> => {
-    const key = `${query}-${page}-${pageSize}`
+    const key = `${query}-${page}-${pageSize}-${this.serialExtra(extra)}`
     const cached = this.store.tenementsCached.get(key)
     if (cached) {
       return cached
     }
-    const res = await this.props.adaptor.searchTenement(query, page, pageSize)
+    const res = await this.props.adaptor.searchTenement(
+      query,
+      page,
+      pageSize,
+      extra,
+    )
     this.store.tenementsCached.set(key, res)
     return res
+  }
+
+  private serialExtra(extra: any) {
+    if (extra == null) {
+      return ''
+    }
+    try {
+      return JSON.stringify(extra)
+    } catch (err) {
+      return ''
+    }
   }
 }

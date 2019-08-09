@@ -13,6 +13,7 @@ export type UserSearchComboBoxProps = Partial<
   Omit<ComboBoxProps<UserDesc>, 'onFetch'>
 > & {
   tenementId?: string
+  extra?: any
 }
 interface Props extends UserSearchComboBoxProps, Adaptor {}
 
@@ -37,7 +38,13 @@ export class UserSearchComboBox extends React.Component<Props, {}> {
       : `${t.name}(${t.mobile || t.id})`
 
   private handleFetch = (query: string, page: number, pageSize: number) =>
-    this.props.searchUser(query, page, pageSize, this.props.tenementId)
+    this.props.searchUser(
+      query,
+      page,
+      pageSize,
+      this.props.tenementId,
+      this.props.extra,
+    )
 }
 
 export default withProvider(UserSearchComboBox)

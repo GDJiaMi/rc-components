@@ -15,6 +15,7 @@ export type UserSearchProps = Partial<
   Omit<SearchableSelectProps<UserDesc>, 'onFetch' | 'notFoundContent'>
 > & {
   tenementId?: string
+  extra?: any
 }
 interface Props extends UserSearchProps, Adaptor {}
 
@@ -41,7 +42,13 @@ export class UserSearch extends React.Component<Props, {}> {
       : `${t.name}(${t.mobile || t.id})`
 
   private handleFetch = (query: string, page: number, pageSize: number) =>
-    this.props.searchUser(query, page, pageSize, this.props.tenementId)
+    this.props.searchUser(
+      query,
+      page,
+      pageSize,
+      this.props.tenementId,
+      this.props.extra,
+    )
 }
 
 export default withProvider(UserSearch)

@@ -13,7 +13,10 @@ export { TenementDesc }
 
 export type TenementSearchProps = Partial<
   Omit<SearchableSelectProps<TenementDesc>, 'onFetch' | 'notFoundContent'>
->
+> & {
+  extra?: any
+}
+
 interface Props extends TenementSearchProps, Adaptor {}
 
 export class TenementSearch extends React.Component<Props, {}> {
@@ -37,7 +40,7 @@ export class TenementSearch extends React.Component<Props, {}> {
     this.props.formatter ? this.props.formatter(t) : t.name
 
   private handleFetch = (query: string, page: number, pageSize: number) =>
-    this.props.searchTenement(query, page, pageSize)
+    this.props.searchTenement(query, page, pageSize, this.props.extra)
 }
 
 export default withProvider(TenementSearch)
