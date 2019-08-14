@@ -140,6 +140,11 @@ export interface Adaptor {
     tenementId?: string,
     extra?: any,
   ) => Promise<DepartmentSearchResult[]>
+
+  /**
+   * 用户显示格式化器，适用于UserSearch和UserSearchComboBox
+   */
+  userFormatter?: (t: UserDesc) => string
 }
 
 export interface ProviderProps {
@@ -192,6 +197,7 @@ export default class Provider extends React.Component<ProviderProps> {
       searchDepartment: this.props.adaptor.searchDepartment,
       normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
       getDepartmentDetail: this.props.adaptor.getDepartmentDetail,
+      userFormatter: this.props.adaptor.userFormatter,
     }
   }
 

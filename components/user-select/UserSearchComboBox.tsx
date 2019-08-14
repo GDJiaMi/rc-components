@@ -35,6 +35,8 @@ export class UserSearchComboBox extends React.Component<Props, {}> {
   private formatter = (t: UserDesc) =>
     this.props.formatter
       ? this.props.formatter(t)
+      : this.props.userFormatter
+      ? this.props.userFormatter(t)
       : `${t.name}(${t.mobile || t.id})`
 
   private handleFetch = (query: string, page: number, pageSize: number) =>
