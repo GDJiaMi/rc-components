@@ -108,6 +108,8 @@ export default class FatTableInner<T extends object, P extends object>
   private defaultExpandedKeys?: string[]
   private defaultValues: Partial<P> = {}
   private tableInstance = React.createRef<Table<T>>()
+  // 上次查询的参数，只有在点击搜索时才会变更，换页、改变页面显示数量都不会改变大小
+  private lastSearchParams?: object
 
   public static getDerivedStateFromProps<T, P extends object>(
     props: Props<T, P>,
@@ -1013,6 +1015,7 @@ export default class FatTableInner<T extends object, P extends object>
         pageSize,
       },
     })
+
     if (!this.state.allReady) {
       this.search(false, false)
     } else {
@@ -1233,16 +1236,22 @@ export default class FatTableInner<T extends object, P extends object>
       })
     }
 
-    if (validate) {
+    if (validate || triggerBySubmit) {
       this.props.form.validateFields((errors, values) => {
         if (errors != null) {
           return
         }
+        this.lastSearchParams = values
         doit(values)
       })
     } else {
-      const values = this.props.form.getFieldsValue()
-      doit(values)
+      if (this.lastSearchParams) {
+        doit(this.lastSearchParams)
+      } else {
+        const values = this.props.form.getFieldsValue()
+        this.lastSearchParams = values
+        doit(values)
+      }
     }
   }
 
@@ -1268,6 +1277,7 @@ export default class FatTableInner<T extends object, P extends object>
 
   /**
    * 获取列表
+   * FIXME: 如果后端返回的total有误，可能出现死循环加载的情况
    */
   private fetchList = async (extraParams: Partial<P> = {}) => {
     const { loading } = this.state
