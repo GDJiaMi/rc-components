@@ -226,7 +226,14 @@
 
 .jm-user-combobox .ant-select-selection__rendered {
   margin-left: 0;
-  margin-right: 0;
+  margin-right: 0 !important;
+}
+
+.jm-user-combobox .anticon-loading {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translate(-50%, -50%);
 }
 
 .jm-us-container__search-result {

@@ -210,6 +210,7 @@ class UserSearchTest extends React.Component {
         />
         <h4>comboBox 模式</h4>
         <UserSearchComboBox
+          allowClear
           value={this.state.comboValue}
           ignoreEmpty
           onChange={value => this.setState({ comboValue: value })}
