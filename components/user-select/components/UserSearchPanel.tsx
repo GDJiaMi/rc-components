@@ -259,7 +259,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
 
     try {
       this.setState({ searching: true, error: undefined })
-      const { tenementId, platformSearch } = this.props
+      const { tenementId } = this.props
       const {
         pagination: { current = 1, pageSize = PageSize },
         query,
@@ -268,7 +268,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
         query,
         current,
         pageSize,
-        platformSearch ? tenementId : undefined,
+        tenementId,
       )
       this.setState({
         dataSource: res.items,
