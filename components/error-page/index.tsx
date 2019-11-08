@@ -15,6 +15,10 @@ interface ErrorPageInnerProps {
   children?: React.ReactNode
 }
 
+function wrapIcon(icon: any) {
+  return typeof icon === 'string' ? icon : icon.default
+}
+
 export class ErrorPageInner extends React.Component<ErrorPageInnerProps> {
   public render() {
     const { icon, title, desc, children } = this.props
@@ -34,7 +38,7 @@ export class ErrorPageInner extends React.Component<ErrorPageInnerProps> {
 function NotFound(props: { children?: React.ReactNode }) {
   return (
     <ErrorPageInner
-      icon={notFound}
+      icon={wrapIcon(notFound)}
       title="404"
       desc="抱歉， 你访问的页面不存在"
       children={props.children}
@@ -45,7 +49,7 @@ function NotFound(props: { children?: React.ReactNode }) {
 function Unauthorized(props: { children?: React.ReactNode }) {
   return (
     <ErrorPageInner
-      icon={unauthorized}
+      icon={wrapIcon(unauthorized)}
       title="401"
       desc="抱歉， 请登录后操作"
       children={props.children}
@@ -56,7 +60,7 @@ function Unauthorized(props: { children?: React.ReactNode }) {
 function Forbidden(props: { children?: React.ReactNode }) {
   return (
     <ErrorPageInner
-      icon={forbidden}
+      icon={wrapIcon(forbidden)}
       title="403"
       desc="抱歉， 你无权访问该页面"
       children={props.children}
@@ -67,7 +71,7 @@ function Forbidden(props: { children?: React.ReactNode }) {
 function InternalError(props: { children?: React.ReactNode }) {
   return (
     <ErrorPageInner
-      icon={internalError}
+      icon={wrapIcon(internalError)}
       title="500"
       desc="服务器内部错误"
       children={props.children}
