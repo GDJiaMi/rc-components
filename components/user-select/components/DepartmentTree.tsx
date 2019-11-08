@@ -51,6 +51,7 @@ export interface DepartmentTreeProps {
   tenement?: TenementDesc
   // 可选模式
   selectable?: boolean
+  searchable?: boolean
   // 已激活部门
   selected?: string
   onSelect?: (value: string, detail?: DepartmentDesc) => void
@@ -150,6 +151,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   }
 
   public render() {
+    const { searchable } = this.props
     const {
       loading,
       normalizing,
@@ -163,7 +165,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return (
       <div className="jm-us-container">
         <Spin spinning={!!loading || !!normalizing}>
-          {!!dataSource && (
+          {!!dataSource && !!searchable && (
             <form
               onSubmit={this.handleSubmit}
               className="jm-department-filter__wrapper"

@@ -46,6 +46,8 @@ export interface UserSelectProps {
   userSelectable?: boolean
   // 用户是支持搜索, 默认开启
   userSearchable?: boolean
+  // 部门是否支持搜索, 默认开启
+  departmentSearchable?: boolean
   // 部门节点选择完全受控，父子节点选中状态不再关联
   checkStrictly?: boolean
   // 只允许选择叶子节点
@@ -102,6 +104,7 @@ class UserSelectInner extends React.Component<Props, State>
   public static defaultProps = {
     userSearchable: true,
     userSelectable: true,
+    departmentSearchable: true,
   }
   public state: State = {
     visible: false,
@@ -193,6 +196,7 @@ class UserSelectInner extends React.Component<Props, State>
     const { tenementSelectable, tenementVisible, departmentSelectable } = this
     const {
       userSearchable,
+      departmentSearchable,
       keepValue,
       tenementSearchPlaceholder,
       userSelectable,
@@ -249,6 +253,7 @@ class UserSelectInner extends React.Component<Props, State>
               tenementId={currentTenementId}
               tenement={currentTenement}
               selectable={departmentSelectable}
+              searchable={departmentSearchable}
               onlyAllowCheckLeaf={onlyAllowCheckLeaf}
               selected={currentDepartmentId}
               onSelect={this.handleDepartmentSelect}
