@@ -6,7 +6,12 @@ import React from 'react'
 import Modal from 'antd/es/modal'
 import Button from 'antd/es/button'
 import withProvider from './withProvider'
-import { Adaptor, UserDesc, DepartmentDesc, TenementDesc } from './Provider'
+import {
+  UserDesc,
+  DepartmentDesc,
+  TenementDesc,
+  UserSelectContext,
+} from './Provider'
 import TenementSearch from './components/TenementSearchPanel'
 import DepartmentTree from './components/DepartmentTree'
 import UsersPanel from './components/UsersPanel'
@@ -72,9 +77,10 @@ export interface UserSelectProps {
   userSearchPlaceholder?: string
   childrenUncheckable?: boolean
   renderUserSearchItem?: (item: UserDesc) => React.ReactNode
+  extra?: any
 }
 
-interface Props extends UserSelectProps, Adaptor {}
+interface Props extends UserSelectProps, UserSelectContext {}
 
 interface State {
   visible: boolean
@@ -192,6 +198,10 @@ class UserSelectInner extends React.Component<Props, State>
     this.setState({ visible: true })
   }
 
+  public resetCache() {
+    this.props.resetCache()
+  }
+
   private renderBody() {
     const { tenementSelectable, tenementVisible, departmentSelectable } = this
     const {
@@ -205,6 +215,7 @@ class UserSelectInner extends React.Component<Props, State>
       userSearchPlaceholder,
       renderUserSearchItem,
       childrenUncheckable,
+      extra,
     } = this.props
     const {
       currentTenementId,
@@ -231,6 +242,7 @@ class UserSelectInner extends React.Component<Props, State>
             wrappedComponentRef={this.tenementSearchPanel}
             placeholder={tenementSearchPlaceholder}
             normalizing={normalizing}
+            extra={extra}
           />
         )}
         <UserSearchPanel
@@ -245,6 +257,7 @@ class UserSelectInner extends React.Component<Props, State>
           header={this.props.header}
           placeholder={userSearchPlaceholder}
           renderItem={renderUserSearchItem}
+          extra={extra}
         >
           <div className="jm-us-containers">
             <DepartmentTree
@@ -264,6 +277,7 @@ class UserSelectInner extends React.Component<Props, State>
               onNormalizeStart={this.handleNormalizeStart}
               onNormalizeEnd={this.handleNormalizeEnd}
               childrenUncheckable={childrenUncheckable}
+              extra={extra}
             />
             {!!userSelectable && (
               <UsersPanel
@@ -274,6 +288,7 @@ class UserSelectInner extends React.Component<Props, State>
                 onChange={this.handleUsersChange}
                 keepValue={keepValue}
                 orgValue={this.props.value && this.props.value.users}
+                extra={extra}
               />
             )}
           </div>

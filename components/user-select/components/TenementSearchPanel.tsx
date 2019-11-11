@@ -12,7 +12,7 @@ import message from 'antd/es/message'
 import Pagination from 'antd/es/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { PaginationProps } from 'antd/es/pagination'
-import { TenementDesc, Adaptor } from '../Provider'
+import { TenementDesc, UserSelectContext } from '../Provider'
 import withProvider from '../withProvider'
 import Group from './Group'
 import { PageSize } from '../constants'
@@ -29,9 +29,10 @@ export interface TenementSearchPanelProps {
   keepValue?: boolean
   placeholder?: string
   normalizing?: boolean
+  extra?: any
 }
 
-interface Props extends TenementSearchPanelProps, Adaptor {}
+interface Props extends TenementSearchPanelProps, UserSelectContext {}
 
 interface State {
   query: string
@@ -265,6 +266,7 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
         query.trim(),
         current,
         pageSize,
+        this.props.extra,
       )
       this.setState({
         dataSource: res.items,

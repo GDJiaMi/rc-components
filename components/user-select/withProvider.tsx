@@ -1,14 +1,14 @@
 import React from 'react'
-import { Adaptor, Context } from './Provider'
+import { Context, UserSelectContext } from './Provider'
 import { Omit } from 'react-router'
 
-export default function withProvider<P extends Adaptor>(
+export default function withProvider<P extends UserSelectContext>(
   Target: React.ComponentClass<P>,
 ) {
   return class withUserSelect extends React.Component<
     {
       wrappedComponentRef?: React.Ref<any>
-    } & Omit<P, keyof Adaptor>
+    } & Omit<P, keyof UserSelectContext>
   > {
     static displayName: string = `InjectUserSelectAdaptor(${Target.name ||
       'Unknown'})`

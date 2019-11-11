@@ -12,7 +12,7 @@ import Pagination from 'antd/es/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { PaginationProps } from 'antd/es/pagination'
 import Group from './Group'
-import { Adaptor, UserDesc } from '../Provider'
+import { UserDesc, UserSelectContext } from '../Provider'
 import withProvider from '../withProvider'
 import { PageSize } from '../constants'
 
@@ -29,9 +29,10 @@ export interface UserSearchPanelProps {
   placeholder?: string
   renderItem?: (item: UserDesc) => React.ReactNode
   header?: React.ReactNode
+  extra?: any
 }
 
-interface Props extends UserSearchPanelProps, Adaptor {}
+interface Props extends UserSearchPanelProps, UserSelectContext {}
 
 interface State {
   searchMode?: boolean
@@ -269,6 +270,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
         current,
         pageSize,
         tenementId,
+        this.props.extra,
       )
       this.setState({
         dataSource: res.items,

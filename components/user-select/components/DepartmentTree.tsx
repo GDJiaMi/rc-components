@@ -31,10 +31,10 @@ import debounce from 'lodash/debounce'
 import { delay } from '../../utils/common'
 import withProvider from '../withProvider'
 import {
-  Adaptor,
   DepartmentDesc,
   TenementDesc,
   DepartmentSearchResult,
+  UserSelectContext,
 } from '../Provider'
 import { DefaultExpandedLevel, PageSize } from '../constants'
 import { findAndReplace } from '../../fat-table/utils'
@@ -66,9 +66,10 @@ export interface DepartmentTreeProps {
   childrenUncheckable?: boolean
   onNormalizeStart?: () => void
   onNormalizeEnd?: () => void
+  extra?: any
 }
 
-interface Props extends Adaptor, DepartmentTreeProps {}
+interface Props extends UserSelectContext, DepartmentTreeProps {}
 
 interface State {
   loading?: boolean
@@ -744,6 +745,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       allChecked,
       added,
       removed,
+      this.props.extra,
     )
     const normalized = res.map(i => {
       i.tenement = this.props.tenement
@@ -781,6 +783,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       const res = await this.props.getDepartmentDetail(
         filtered.map(i => i.id),
         this.props.tenementId,
+        this.props.extra,
       )
       res.forEach(i => {
         this.normalizedDepartments[`${tenementId}-${i.id}`] = {
@@ -979,6 +982,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         current,
         pageSize,
         this.props.tenementId,
+        this.props.extra,
       )
       const normalized = res.items.map(i => {
         i.tenement = this.props.tenement
@@ -1018,6 +1022,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
       const children = await this.props.getDepartmentChildren!(
         this.props.tenementId!,
         id,
+        this.props.extra,
       )
       if (Array.isArray(children) && children.length !== 0) {
         department.children = children
@@ -1058,7 +1063,10 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     }
     try {
       this.setState({ error: undefined, loading: true })
-      const res = await this.props.getDepartmentTree(tenementId)
+      const res = await this.props.getDepartmentTree(
+        tenementId,
+        this.props.extra,
+      )
       // 缓存
       const cached = DepartmentTree.getCached(res, this.props.tenement)
       // 计算默认展开

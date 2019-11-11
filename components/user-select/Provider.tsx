@@ -144,7 +144,11 @@ export interface Adaptor {
   /**
    * 用户显示格式化器，适用于UserSearch和UserSearchComboBox
    */
-  userFormatter?: (t: UserDesc) => string
+  userFormatter?: (t: UserDesc, extra?: any) => string
+}
+
+export interface UserSelectContext extends Adaptor {
+  resetCache: () => void
 }
 
 export interface ProviderProps {
@@ -165,7 +169,9 @@ interface State {
   tenementsCached: Map<string, { items: TenementDesc[]; total: number }>
 }
 
-export const Context = React.createContext<Adaptor>({} as Adaptor)
+export const Context = React.createContext<UserSelectContext>(
+  {} as UserSelectContext,
+)
 
 /**
  * UserSelect Provider
@@ -178,7 +184,7 @@ export default class Provider extends React.Component<ProviderProps> {
     usersCached: new Map(),
     tenementsCached: new Map(),
   }
-  private contextValue: Adaptor
+  private contextValue: UserSelectContext
 
   public componentWillMount() {
     const { cacheable = true } = this.props
@@ -198,6 +204,14 @@ export default class Provider extends React.Component<ProviderProps> {
       normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
       getDepartmentDetail: this.props.adaptor.getDepartmentDetail,
       userFormatter: this.props.adaptor.userFormatter,
+      resetCache: () => {
+        this.store = {
+          departmentTrees: new Map(),
+          departmentUsers: new Map(),
+          usersCached: new Map(),
+          tenementsCached: new Map(),
+        }
+      },
     }
   }
 

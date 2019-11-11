@@ -14,7 +14,7 @@ import UserSelectProvider, {
   UserDesc,
   Adaptor as UserSelectAdaptor,
   ProviderProps as UserSelectProviderProps,
-  Context as UserSelectContext,
+  UserSelectContext,
   DepartmentSearchResult,
 } from './Provider'
 

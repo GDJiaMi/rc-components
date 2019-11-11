@@ -7,7 +7,7 @@ import Alert from 'antd/es/alert'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import List from 'antd/es/list'
 import Pagination, { PaginationProps } from 'antd/es/pagination'
-import { Adaptor, UserDesc, DepartmentDesc } from '../Provider'
+import { UserDesc, DepartmentDesc, UserSelectContext } from '../Provider'
 import withProvider from '../withProvider'
 import { PageSize } from '../constants'
 
@@ -19,9 +19,10 @@ export interface UsersPanelProps {
   onChange?: (value: UserDesc[]) => void
   orgValue?: UserDesc[]
   keepValue?: boolean
+  extra?: any
 }
 
-interface Props extends UsersPanelProps, Adaptor {}
+interface Props extends UsersPanelProps, UserSelectContext {}
 
 interface State {
   loading?: boolean
@@ -210,7 +211,7 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
   }
 
   private fetchUsers = async () => {
-    const { tenementId, departmentId } = this.props
+    const { tenementId, departmentId, extra } = this.props
     const { loading } = this.state
     if (loading) {
       return
@@ -233,6 +234,7 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
         departmentId,
         current,
         pageSize,
+        extra,
       )
       this.setState({
         dataSource: res.items.map(i => ({

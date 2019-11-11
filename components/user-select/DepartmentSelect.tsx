@@ -20,6 +20,7 @@ export interface DepartmentSelectProps {
   value?: DepartmentSelectValue
   onChange?: (value: DepartmentSelectValue) => void
   tenementSelectable?: boolean
+  departmentSearchable?: boolean
   // 最多可选中部门
   max?: number | string
   // 最多可选企业

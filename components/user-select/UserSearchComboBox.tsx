@@ -2,7 +2,7 @@
  * 用户搜索ComboBox
  */
 import React from 'react'
-import { Adaptor, UserDesc } from './Provider'
+import { UserDesc, UserSelectContext } from './Provider'
 import withProvider from './withProvider'
 import ComboBox, { ComboBoxProps } from './components/ComboBox'
 import { Omit } from '../utils/type-utils'
@@ -15,7 +15,7 @@ export type UserSearchComboBoxProps = Partial<
   tenementId?: string
   extra?: any
 }
-interface Props extends UserSearchComboBoxProps, Adaptor {}
+interface Props extends UserSearchComboBoxProps, UserSelectContext {}
 
 export class UserSearchComboBox extends React.Component<Props, {}> {
   public static defaultProps = {
@@ -36,7 +36,7 @@ export class UserSearchComboBox extends React.Component<Props, {}> {
     this.props.formatter
       ? this.props.formatter(t)
       : this.props.userFormatter
-      ? this.props.userFormatter(t)
+      ? this.props.userFormatter(t, this.props.extra)
       : `${t.name}(${t.mobile || t.id})`
 
   private handleFetch = (query: string, page: number, pageSize: number) =>

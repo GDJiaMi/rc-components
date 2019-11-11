@@ -2,7 +2,7 @@
  * 企业搜索下拉列表
  */
 import React from 'react'
-import { Adaptor, TenementDesc } from './Provider'
+import { TenementDesc, UserSelectContext } from './Provider'
 import withProvider from './withProvider'
 import SearchableSelect, {
   SearchableSelectProps,
@@ -17,7 +17,7 @@ export type TenementSearchProps = Partial<
   extra?: any
 }
 
-interface Props extends TenementSearchProps, Adaptor {}
+interface Props extends TenementSearchProps, UserSelectContext {}
 
 export class TenementSearch extends React.Component<Props, {}> {
   public static defaultProps = {

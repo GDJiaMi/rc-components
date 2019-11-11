@@ -2,7 +2,7 @@
  * 用户搜索下拉列表
  */
 import React from 'react'
-import { Adaptor, UserDesc } from './Provider'
+import { UserDesc, UserSelectContext } from './Provider'
 import withProvider from './withProvider'
 import SearchableSelect, {
   SearchableSelectProps,
@@ -17,7 +17,7 @@ export type UserSearchProps = Partial<
   tenementId?: string
   extra?: any
 }
-interface Props extends UserSearchProps, Adaptor {}
+interface Props extends UserSearchProps, UserSelectContext {}
 
 export class UserSearch extends React.Component<Props, {}> {
   public static defaultProps = {
@@ -40,7 +40,7 @@ export class UserSearch extends React.Component<Props, {}> {
     this.props.formatter
       ? this.props.formatter(t)
       : this.props.userFormatter
-      ? this.props.userFormatter(t)
+      ? this.props.userFormatter(t, this.props.extra)
       : `${t.name}(${t.mobile || t.id})`
 
   private handleFetch = (query: string, page: number, pageSize: number) =>
