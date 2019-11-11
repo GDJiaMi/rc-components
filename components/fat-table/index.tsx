@@ -25,6 +25,11 @@ export default class FatTable<T, P extends object = {}> extends React.Component<
   public static Nowrap = Nowrap
   public static DefaultPagination = DefaultPagination
   public static EmptyColumn = EmptyColumn
+  public static createProps<T extends object, P extends object = {}>(
+    props: FatTableProps<T, P>,
+  ) {
+    return props
+  }
   public render() {
     return (
       <Query.Context.Consumer>
