@@ -6,6 +6,9 @@ import Modal from 'antd/es/modal'
 import Progress from 'antd/es/progress'
 import Radio, { RadioChangeEvent } from 'antd/es/radio'
 import { delay } from '../utils/common'
+import create from './createExporter'
+
+export * from './createExporter'
 
 export interface Showable {
   show(): void
@@ -63,6 +66,8 @@ export default class Export extends React.Component<ExportProps, State>
     currentText: '当前',
     showScope: true,
   }
+
+  public static create = create
 
   public state: State = {
     scope: ExportScope.All,

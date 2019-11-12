@@ -109,6 +109,7 @@ export class WindowTabs extends React.Component<TabsProps, State> {
         style={style}
         autoHide
         ref={this.scrollbar}
+        // @ts-ignore
         onWheel={this.handleScrollWheel}
       >
         <div className="jm-window-tabs">
@@ -134,7 +135,7 @@ export class WindowTabs extends React.Component<TabsProps, State> {
     )
   }
 
-  private handleScrollWheel = (evt: React.WheelEvent<any>) => {
+  private handleScrollWheel: React.WheelEventHandler<any> = evt => {
     const currentScollDelta = this.scrollbar.current!.getScrollLeft()
     this.scrollbar.current!.scrollLeft(currentScollDelta + evt.deltaY)
   }

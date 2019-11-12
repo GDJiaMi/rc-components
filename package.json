@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.2.24",
+  "version": "0.2.26",
   "description": "mygzb.com React Components",
   "main": "es/index.js",
   "module": "es/index.js",
@@ -43,24 +43,25 @@
   "author": "ivan",
   "license": "MIT",
   "peerDependencies": {
-    "lodash": "^4.17.10",
+    "antd": ">=3.13.5",
+    "lodash": ">=4.17.10",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0",
-    "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.1",
-    "antd": ">=3.13.5",
-    "tslib": "^1.9.3"
+    "react-router": ">=4.3.1",
+    "react-router-dom": ">=4.3.1",
+    "tslib": ">=1.9.3"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.4",
     "@types/lodash": "^4.14.113",
     "@types/node": "^10.9.4",
     "@types/qs": "^6.5.1",
-    "@types/react": "^16.7.17",
+    "@types/react": "^16.9.11",
     "@types/react-custom-scrollbars": "^4.0.5",
-    "@types/react-dom": "^16.0.11",
+    "@types/react-dom": "^16.9.4",
     "@types/react-router": "^4.4.3",
     "@types/react-router-dom": "^4.3.1",
+    "antd": "^3.25.1",
     "cpx": "^1.5.0",
     "css-loader": "^2.0.1",
     "docz": "^0.13.7",
@@ -81,7 +82,7 @@
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "4.1.1",
     "tslint-react": "3.2.0",
-    "typescript": "3.2.2"
+    "typescript": "^3.7.2"
   },
   "dependencies": {
     "classnames": "^2.2.6",

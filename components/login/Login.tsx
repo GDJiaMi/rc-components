@@ -140,7 +140,7 @@ export class LoginInner extends React.Component<Props> {
     }
   }
 
-  private handleSubmit = async (evt: React.FormEvent<void>) => {
+  private handleSubmit = async (evt: React.FormEvent<any>) => {
     evt.preventDefault()
     this.props.form.validateFields(async (errors, value: Params) => {
       if (errors != null) {

@@ -8,6 +8,10 @@ import Upload from 'antd/es/upload'
 import { UploadChangeParam } from 'antd/es/upload'
 import { delay } from '../utils/common'
 
+import create from './createImporter'
+
+export * from './createImporter'
+
 export interface Showable {
   show(): void
 }
@@ -86,6 +90,8 @@ export default class Import<T> extends React.Component<ImportProps<T>, State>
   public static defaultProps = {
     title: '导入',
   }
+
+  public static create = create
 
   public state: State = {
     visible: false,

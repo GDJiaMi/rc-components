@@ -56,7 +56,7 @@ export interface IFatTable<T, P = {}> {
   shiftUp(id: any): void
   shiftDown(id: any): void
   shift(id: any, dir?: 'up' | 'down'): void
-  submit(evt: React.FormEvent<void>): void
+  submit(evt: React.FormEvent<any>): void
   canShiftUp(id: any): boolean
   canShiftDown(id: any): boolean
   updateItems(updator: (list: T[]) => T[]): void

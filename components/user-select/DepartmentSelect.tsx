@@ -37,6 +37,7 @@ export interface DepartmentSelectProps {
   onlyAllowCheckLeaf?: boolean
   wrappedComponentRef?: React.Ref<IUserSelect>
   childrenUncheckable?: boolean
+  extra?: any
 }
 
 const DefaultLocale = {

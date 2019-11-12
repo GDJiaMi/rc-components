@@ -80,12 +80,12 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
     this.setState(
       {
         query: '',
+        loading: false,
+        error: undefined,
         pagination: {
           ...this.state.pagination,
           current: 1,
           total: 0,
-          loading: false,
-          error: undefined,
         },
         // 恢复默认
       },

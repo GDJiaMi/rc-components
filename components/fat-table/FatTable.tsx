@@ -1088,9 +1088,12 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   private handleResize = () => {
+    // FIXME: 修复
     const tableWrapper =
       this.tableInstance.current &&
-      this.tableInstance.current.getPopupContainer()
+      (this.tableInstance.current as any).getPopupContainer &&
+      (this.tableInstance.current as any).getPopupContainer()
+
     const scroll = this.props.scroll
     if (tableWrapper && scroll && scroll.x) {
       const { offsetWidth } = tableWrapper
