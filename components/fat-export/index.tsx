@@ -19,7 +19,7 @@ export interface ProgressEvent {
   progress: number
   error?: Error
   result: {
-    message: string
+    message?: string
     taskResult: any
   }
 }

@@ -25,20 +25,36 @@ export interface ExportProps {
   fileName?: string
 }
 
-export interface ProgressDesc {
-  message: string
-  progress: number
-  status: 'cancelled' | 'fail' | 'success' | 'executing'
-  // 执行成功后应该返回下载url
-  taskResult: { fileId: string }
-}
+/**
+ * 进度描述对象
+ */
+export type ProgressDesc =
+  | {
+      message?: string
+      progress: number
+      status: 'cancelled' | 'fail' | 'executing'
+      taskResult?: any
+    }
+  | {
+      status: 'success'
+      message?: string
+      progress: number
+      // 执行成功后应该返回下载url
+      taskResult: { fileId: string }
+    }
 
 export interface ExporterOptions {
   /**
    * 请求导出，返回一个taskId
    */
   handleStart: (params: any) => Promise<string>
+  /**
+   * 获取进度
+   */
   getProgress: (taskId: string) => Promise<ProgressDesc>
+  /**
+   * 获取下载链接
+   */
   getDownloadUrl: (fileId: string, fileName?: string) => string
 }
 
@@ -47,7 +63,7 @@ export interface ExporterOptions {
  */
 export default function createExporter(options: ExporterOptions) {
   /**
-   * 封装FatTable
+   * 封装FatExport
    */
   const Export: RefForwardingComponent<ExportMethods, ExportProps> = (
     props,
@@ -89,13 +105,12 @@ export default function createExporter(options: ExporterOptions) {
       }
     }, [])
 
-    // @ts-ignore
     return (
       <FatExport
         ref={exporter}
-        {...other}
         showScope={showScope}
         onProgress={handleProgress}
+        {...other}
       />
     )
   }

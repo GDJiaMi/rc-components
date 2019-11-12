@@ -26,24 +26,39 @@ export interface ImportMethods {
   show(): void
 }
 
-export interface ProgressDesc {
-  message: string
-  progress: number
-  status: 'cancelled' | 'fail' | 'success' | 'executing'
-  taskResult: { summary: string }
-}
+export type ProgressDesc =
+  | {
+      status: 'cancelled' | 'fail' | 'executing'
+      message?: string
+      progress: number
+      taskResult?: any
+    }
+  | {
+      status: 'success'
+      message?: string
+      progress: number
+      taskResult?: { summary: string }
+    }
 
 interface T {
   taskId: string
 }
 
 export interface ImporterOptions {
-  getProgress: (taskId: string) => Promise<ProgressDesc>
+  /**
+   * 获取上传地址
+   */
+  getAction: () => string
+
   /**
    * 上传响应中获取taskId
    */
-  getAction: () => string
   handleStart?: (response: any, data: any) => Promise<string>
+
+  /**
+   * 获取导入进度
+   */
+  getProgress: (taskId: string) => Promise<ProgressDesc>
 }
 
 /**
@@ -88,9 +103,7 @@ export default function createImporter(options: ImporterOptions) {
     /**
      * 抽取task id
      */
-    const handleStart = useCallback(res => options.handleStart!(res, data), [
-      data,
-    ])
+    const handleStart = (res: any) => options.handleStart!(res, data)
 
     /**
      * 进度处理
@@ -126,10 +139,10 @@ export default function createImporter(options: ImporterOptions) {
           name={'data'}
           ref={importer}
           accept={accept}
-          {...other}
           data={data}
           onStart={handleStart}
           onProgress={handleProgress}
+          {...other}
         />
       </>
     )
@@ -139,7 +152,7 @@ export default function createImporter(options: ImporterOptions) {
   function useImport(hooksOptions: {
     accept?: string
     type: string
-    template?: string
+    template?: string | React.ReactNode
     data?: any
     onSuccess?: () => void
     condition?: any
@@ -150,6 +163,7 @@ export default function createImporter(options: ImporterOptions) {
     const open = useCallback(() => {
       importer.current && importer.current.show()
     }, [])
+
     const action = options.getAction()
 
     return {
@@ -157,7 +171,13 @@ export default function createImporter(options: ImporterOptions) {
       props: {
         ref: importer,
         action,
-        footer: template && <a href={template}>模板下载</a>,
+        footer:
+          template &&
+          (typeof template === 'string' ? (
+            <a href={template}>模板下载</a>
+          ) : (
+            template
+          )),
         ...other,
       },
     }
