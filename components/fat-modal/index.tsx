@@ -1,7 +1,3 @@
-/**
- * 胖模态框
- * 适用于大部分场景下的
- */
 import React from 'react'
 import Form, { FormComponentProps } from 'antd/es/form'
 import Spin from 'antd/es/spin'
@@ -26,6 +22,8 @@ export type ModalRenderer<T> = (
 ) => React.ReactNode
 
 export interface FatModalProps<T> extends Partial<FatModalLocale> {
+  className?: string
+  style?: React.CSSProperties
   // 传入form和defaultValue用于渲染表单
   children: ModalRenderer<T>
   // 表单提交。回调需要返回一个promise，如果出现异常，modal会显示异常信息；
@@ -54,6 +52,10 @@ interface State<T> {
   templateProps?: TemporaryProps<T>
 }
 
+/**
+ * 胖模态框
+ * 适用于大部分场景下的
+ */
 export class FatModalInner<T> extends React.Component<Props<T>, State<T>>
   implements IFatModal<T> {
   public state: State<T> = {
@@ -65,12 +67,22 @@ export class FatModalInner<T> extends React.Component<Props<T>, State<T>>
   }
 
   public render() {
-    const { children, form, title, okText, cancelText, width } = this.props
+    const {
+      children,
+      form,
+      title,
+      okText,
+      cancelText,
+      width,
+      className,
+      style,
+    } = this.props
     const { templateProps: temp, visible, error, loading } = this.state
     return (
       <Modal
-        className="jm-fatmodal"
-        title={(temp && temp.title) || title}
+        className={`jm-fatmodal ${className || ''}`}
+        style={style}
+        title={(temp && temp.title) || title || '模态框'}
         visible={visible}
         onOk={this.handleOk}
         onCancel={this.handleCancel}
