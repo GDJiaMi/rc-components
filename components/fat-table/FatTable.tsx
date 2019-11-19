@@ -7,7 +7,7 @@
  */
 import React from 'react'
 import { FormComponentProps } from 'antd/es/form'
-import Table, { ColumnProps } from 'antd/es/table'
+import Table, { ColumnProps, TableProps } from 'antd/es/table'
 import Alert from 'antd/es/alert'
 import Modal from 'antd/es/modal'
 import { PaginationProps } from 'antd/es/pagination'
@@ -260,7 +260,7 @@ export default class FatTableInner<T extends object, P extends object>
     try {
       this.setState({ loading: true, saveError: undefined })
       const snapshot = this.state.snapshot
-      await onSave(snapshot)
+      await onSave(snapshot, this)
       // 保存成功
       this.setState({
         editing: undefined,
@@ -766,7 +766,7 @@ export default class FatTableInner<T extends object, P extends object>
           onExpand={this.handleTreeExpand}
           onRow={this.onRow}
           expandedRowKeys={this.state.expandedKeys}
-          expandedRowRender={expandedRowRender}
+          expandedRowRender={expandedRowRender && this.renderExpanded}
           footer={this.renderFooter()}
           {...{
             size,
@@ -780,6 +780,15 @@ export default class FatTableInner<T extends object, P extends object>
         />
       </>
     )
+  }
+
+  private renderExpanded: TableProps<T>['expandedRowRender'] = (
+    r,
+    i,
+    idn,
+    expanded,
+  ) => {
+    return this.props.expandedRowRender!(r, i, idn, expanded, this)
   }
 
   private renderFooter = () => {
@@ -842,7 +851,7 @@ export default class FatTableInner<T extends object, P extends object>
    */
   private setDataSource(dataSource: T[]) {
     if (this.props.onChange) {
-      this.props.onChange(dataSource)
+      this.props.onChange(dataSource, this)
     } else {
       this.setState({
         dataSource,
@@ -979,7 +988,12 @@ export default class FatTableInner<T extends object, P extends object>
       this.setState({
         loading: true,
       })
-      const children = await this.props.onFetchChildren(key, record, params)
+      const children = await this.props.onFetchChildren(
+        key,
+        record,
+        params,
+        this,
+      )
       if (Array.isArray(children) && children.length !== 0) {
         record.children = children
       } else {
@@ -1075,7 +1089,7 @@ export default class FatTableInner<T extends object, P extends object>
 
     try {
       this.setState({ loading: true })
-      await this.props.onShift(from, to, dir)
+      await this.props.onShift(from, to, dir, this)
       onSuccess()
     } catch (err) {
       message.error(err.message)
@@ -1094,7 +1108,7 @@ export default class FatTableInner<T extends object, P extends object>
       this.setState({
         loading: true,
       })
-      await this.props.onRemove(ids)
+      await this.props.onRemove(ids, this)
       this.syncAfterRemove(ids)
     } catch (err) {
       message.error(err.message)
@@ -1304,7 +1318,7 @@ export default class FatTableInner<T extends object, P extends object>
     const params = this.getParams()
     params.current = this.props.offsetMode ? index : index + 1
     params.pageSize = 1
-    const { list } = await this.props.onFetch!(params)
+    const { list } = await this.props.onFetch!(params, this)
     return list
   }
 
@@ -1348,7 +1362,7 @@ export default class FatTableInner<T extends object, P extends object>
         error: undefined,
         loading: true,
       })
-      let { list, total } = await onFetch(params as P & PaginationInfo)
+      let { list, total } = await onFetch(params as P & PaginationInfo, this)
 
       // total 校正
       const correctPage = Math.ceil(total / pageSize)
@@ -1392,7 +1406,9 @@ export default class FatTableInner<T extends object, P extends object>
           if (enablePersist) {
             this.props.search.set(
               namespace as string,
-              onPersist ? onPersist(paramsToSerial as any) : paramsToSerial,
+              onPersist
+                ? onPersist(paramsToSerial as any, this)
+                : paramsToSerial,
             )
           }
         },

@@ -112,6 +112,7 @@ export type ExpandedRowRenderer<T, P = {}> = (
   index: number,
   indent: any,
   expanded: boolean,
+  instance: IFatTable<T, P>,
 ) => React.ReactNode
 
 /**
@@ -130,6 +131,7 @@ export type InitHandler<T, P = {}> = ((query: QueryGetter) => Partial<P>)
 // onFetch
 export type FetchHandler<T, P = {}> = (
   params: P & PaginationInfo,
+  instance: IFatTable<T, P>,
 ) => Promise<ListInfo<T>>
 
 // onFetchChildren
@@ -137,6 +139,7 @@ export type FetchChildrenHandler<T, P = {}> = (
   id: any,
   record: T,
   params: P & PaginationInfo,
+  instance: IFatTable<T, P>,
 ) => Promise<T[] | undefined>
 
 export type SubmitHandler<T, P = {}> = (params: P) => boolean
@@ -146,19 +149,32 @@ export type ShiftHandler<T, P = {}> = (
   from: T,
   to: T | null,
   type: 'up' | 'down',
+  instance: IFatTable<T, P>,
 ) => Promise<void>
 
 // onRemove
-export type RemoveHandler<T, P = {}> = (ids: any[]) => Promise<void>
+export type RemoveHandler<T, P = {}> = (
+  ids: any[],
+  instance: IFatTable<T, P>,
+) => Promise<void>
 
 // onChange
-export type ChangeHandler<T, P = {}> = (list: T[]) => void
+export type ChangeHandler<T, P = {}> = (
+  list: T[],
+  instance: IFatTable<T, P>,
+) => void
 
 // onSave
-export type SaveHandler<T, P = {}> = (snapshot: T) => Promise<void>
+export type SaveHandler<T, P = {}> = (
+  snapshot: T,
+  instance: IFatTable<T, P>,
+) => Promise<void>
 
 // onPersist
-export type PersistHandler<T, P = {}> = (params: P & PaginationInfo) => object
+export type PersistHandler<T, P = {}> = (
+  params: P & PaginationInfo,
+  instance: IFatTable<T, P>,
+) => object
 
 export type ActionHandler<T, P = {}> = (
   name: string,
