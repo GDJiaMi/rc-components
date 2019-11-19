@@ -46,3 +46,5 @@ export function clamp(n: number, min: number, max: number) {
 }
 
 export const noop = () => {}
+export const EMPTY_OBJECT = {}
+export const EMPTY_ARRAY = []

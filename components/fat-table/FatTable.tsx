@@ -32,6 +32,7 @@ import {
 } from './type'
 import TableRow from './TableRow'
 import Header from './Header'
+import { EMPTY_OBJECT } from '../utils/common'
 
 export interface Props<T, P extends object>
   extends FatTableProps<T, P>,
@@ -281,10 +282,14 @@ export default class FatTableInner<T extends object, P extends object>
   public getParams() {
     const value = this.props.form.getFieldsValue() as P
     const { current, pageSize } = this.getPagination()
+    const extraParams = this.props.getExtraParams
+      ? (this.props.getExtraParams() as object)
+      : EMPTY_OBJECT
     return {
       ...value,
       current,
       pageSize,
+      ...extraParams,
     }
   }
 
@@ -460,13 +465,13 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   public shiftDown(id: any) {
-    this.shift(id, 'down')
+    return this.shift(id, 'down')
   }
 
   /**
    * 移动元素
    */
-  public shift(id: any, dir: 'up' | 'down' = 'up') {
+  public async shift(id: any, dir: 'up' | 'down' = 'up') {
     const {
       allReady,
       pagination: { total = 0 },
@@ -499,11 +504,22 @@ export default class FatTableInner<T extends object, P extends object>
       })
     } else {
       // shift remote
-      this.handleShift(dataSource[indexInCurrentPage], null, dir, () => {
-        // 重新加载数据
-        // TODO: 可能要跟随
-        this.search(false, false)
-      })
+      const list = await this.fetchItem(dir === 'up' ? index - 1 : index + 1)
+      if ((list && null) || list.length === 0) {
+        throw new Error(
+          `remote shift failed, can not fetch sibling item for ${index}`,
+        )
+      }
+
+      this.handleShift(
+        dataSource[indexInCurrentPage],
+        list && list[0],
+        dir,
+        () => {
+          dataSource[indexInCurrentPage] = list[0]
+          this.setDataSource(dataSource)
+        },
+      )
     }
   }
 
@@ -1234,6 +1250,7 @@ export default class FatTableInner<T extends object, P extends object>
           ? (this.props.getExtraParams() as object)
           : {}),
       }
+
       window.setTimeout(() => {
         this.fetchList({ ...(extraParams as object), ...values })
       })
@@ -1279,10 +1296,24 @@ export default class FatTableInner<T extends object, P extends object>
   }
 
   /**
+   * 远程获取单条数据
+   */
+  private fetchItem = async (index: number) => {
+    const params = this.getParams()
+    params.current = this.props.offsetMode ? index : index + 1
+    params.pageSize = 1
+    const { list } = await this.props.onFetch!(params)
+    return list
+  }
+
+  /**
    * 获取列表
    * FIXME: 如果后端返回的total有误，可能出现死循环加载的情况
    */
-  private fetchList = async (extraParams: Partial<P> = {}) => {
+  private fetchList = async (
+    extraParams: Partial<P> = {},
+    pagination = this.getPagination(),
+  ) => {
     const { loading } = this.state
     if (loading || this.props.onFetch == null) {
       return
@@ -1295,7 +1326,7 @@ export default class FatTableInner<T extends object, P extends object>
       enablePersist,
       lazyMode,
     } = this.props
-    const { page, current, pageSize } = this.getPagination()
+    const { page, current, pageSize } = pagination
 
     const paramsToSerial = {
       current: page,
