@@ -1280,14 +1280,16 @@ export default class FatTableInner<T extends object, P extends object>
     const { pagination } = this.state
     let { current = 1, pageSize = 15 } = pagination
     let page = current
+    let offset = (current - 1) * pageSize
     if (offsetMode) {
-      current = (current - 1) * pageSize
+      current = offset
     }
 
     return {
       current,
       pageSize,
       page,
+      offset,
     }
   }
 
@@ -1326,7 +1328,7 @@ export default class FatTableInner<T extends object, P extends object>
       enablePersist,
       lazyMode,
     } = this.props
-    const { page, current, pageSize } = pagination
+    const { page, current, pageSize, offset } = pagination
 
     const paramsToSerial = {
       current: page,
@@ -1346,7 +1348,35 @@ export default class FatTableInner<T extends object, P extends object>
         error: undefined,
         loading: true,
       })
-      const { list, total } = await onFetch(params as P & PaginationInfo)
+      let { list, total } = await onFetch(params as P & PaginationInfo)
+
+      // total 校正
+      const correctPage = Math.ceil(total / pageSize)
+      // 超出合法范围
+      if (page > correctPage) {
+        this.setState({
+          pagination: {
+            ...this.state.pagination,
+            current: correctPage,
+          },
+          loading: false,
+        })
+        // 重试
+        setTimeout(() => {
+          this.fetchList(extraParams)
+        }, 100)
+        return
+      } else if (offset + list.length > total) {
+        // 返回的total 少于实际请求返回的
+        total = offset + list.length
+        if (list.length > pageSize) {
+          list = list.slice(0, pageSize)
+        }
+      } else if (page === correctPage && offset + list.length < total) {
+        // 返回的total 大于实际返回的
+        total = offset + list.length
+      }
+
       this.setState(
         {
           pagination: {
@@ -1358,24 +1388,7 @@ export default class FatTableInner<T extends object, P extends object>
           expandedKeys: lazyMode ? [] : this.state.expandedKeys,
         },
         () => {
-          // 页码纠正
-          if (total != 0 && list.length === 0 && paramsToSerial.current !== 1) {
-            // 说明页码偏移了
-            const correctPage = Math.ceil(total / pageSize)
-            this.setState({
-              pagination: {
-                ...this.state.pagination,
-                current: correctPage,
-              },
-              loading: false,
-            })
-            // 重试
-            setTimeout(() => {
-              this.fetchList(extraParams)
-            }, 100)
-            return
-          }
-
+          // 持久化查询字符串
           if (enablePersist) {
             this.props.search.set(
               namespace as string,

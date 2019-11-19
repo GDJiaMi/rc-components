@@ -57,8 +57,9 @@ export default class Base extends React.Component {
   private handleFetch: FetchHandler<Data, Params> = async params => {
     console.log('fetching...', { ...params })
     const { pageSize, current } = params
-    const list: Data[] = []
-    for (let i = 0; i < pageSize; i++) {
+    let list: Data[] = []
+    const lastPage = current / pageSize + 1 >= 7
+    for (let i = 0; i < (lastPage ? pageSize + 3 : pageSize); i++) {
       list.push({
         id: `${current + i}`,
         name: `${current + i}${params.name}`,
