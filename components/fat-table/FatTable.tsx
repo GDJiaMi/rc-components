@@ -1367,7 +1367,7 @@ export default class FatTableInner<T extends object, P extends object>
       // total 校正
       const correctPage = Math.ceil(total / pageSize)
       // 超出合法范围
-      if (page > correctPage) {
+      if (correctPage > 0 && page > correctPage) {
         this.setState({
           pagination: {
             ...this.state.pagination,
