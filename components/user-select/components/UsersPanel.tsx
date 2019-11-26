@@ -6,7 +6,7 @@ import Spin from 'antd/es/spin'
 import Alert from 'antd/es/alert'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import List from 'antd/es/list'
-import Pagination, { PaginationProps } from 'antd/es/pagination'
+import { PaginationProps } from 'antd/es/pagination'
 import { UserDesc, DepartmentDesc, UserSelectContext } from '../Provider'
 import withProvider from '../withProvider'
 import { PageSize } from '../constants'
@@ -79,9 +79,9 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
               size="small"
               dataSource={dataSource}
               renderItem={this.renderItem}
+              pagination={pagination}
             />
           </div>
-          <Pagination className="jm-us-container__footer" {...pagination} />
         </Spin>
       </div>
     )

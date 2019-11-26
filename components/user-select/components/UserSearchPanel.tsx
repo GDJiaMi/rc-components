@@ -8,7 +8,6 @@ import Input from 'antd/es/input'
 import Spin from 'antd/es/spin'
 import Alert from 'antd/es/alert'
 import List from 'antd/es/list'
-import Pagination from 'antd/es/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { PaginationProps } from 'antd/es/pagination'
 import Group from './Group'
@@ -153,9 +152,9 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
               size="small"
               dataSource={dataSource}
               renderItem={this.renderItem}
+              pagination={pagination}
             />
           </div>
-          <Pagination className="jm-us-container__footer" {...pagination} />
         </Spin>
       </div>
     )

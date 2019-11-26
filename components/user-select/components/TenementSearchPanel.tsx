@@ -9,7 +9,6 @@ import Spin from 'antd/es/spin'
 import Alert from 'antd/es/alert'
 import List from 'antd/es/list'
 import message from 'antd/es/message'
-import Pagination from 'antd/es/pagination'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { PaginationProps } from 'antd/es/pagination'
 import { TenementDesc, UserSelectContext } from '../Provider'
@@ -135,9 +134,9 @@ class TenementSearchPanelInner extends React.Component<Props, State> {
               size="small"
               dataSource={dataSource}
               renderItem={this.renderItem}
+              pagination={pagination}
             />
           </div>
-          <Pagination className="jm-us-container__footer" {...pagination} />
         </Spin>
       </div>
     )
