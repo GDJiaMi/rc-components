@@ -3,9 +3,10 @@
  */
 import React from 'react'
 import omit from 'lodash/omit'
-import { withRouter, RouteComponentProps } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import qs from 'qs'
 import QueryGetter from './QueryGetter'
+import withRouter from '../utils/withRouter'
 
 export type QuerySetter = (key: string, value: any) => QuerySetter
 export { QueryGetter }

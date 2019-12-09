@@ -2,7 +2,8 @@
  * 包含所有打开的窗口
  */
 import React from 'react'
-import { withRouter, RouteComponentProps, Link } from 'react-router-dom'
+import { RouteComponentProps, Link } from 'react-router-dom'
+import withRouter from '../utils/withRouter'
 import Scrollbars from 'react-custom-scrollbars'
 import memoize from 'lodash/memoize'
 import Icon from 'antd/es/icon'

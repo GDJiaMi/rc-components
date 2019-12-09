@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { RouteComponentProps, withRouter } from 'react-router'
+import { RouteComponentProps } from 'react-router'
+import withRouter from '../utils/withRouter'
 import H from 'history'
 import { TitleDesc, ContextValue } from './type'
 import debounce from 'lodash/debounce'

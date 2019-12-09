@@ -2,12 +2,8 @@
  * 扩展react-router Link 组件，支持返回上一级
  */
 import React from 'react'
-import {
-  Link as ILink,
-  LinkProps,
-  withRouter,
-  RouteComponentProps,
-} from 'react-router-dom'
+import { Link as ILink, LinkProps, RouteComponentProps } from 'react-router-dom'
+import withRouter from '../utils/withRouter'
 
 export default class Link extends React.Component<LinkProps> {
   public render() {

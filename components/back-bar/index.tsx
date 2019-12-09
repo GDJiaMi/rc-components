@@ -2,7 +2,8 @@
  * 二级页面返回
  */
 import React, { CSSProperties } from 'react'
-import { withRouter, RouteComponentProps } from 'react-router'
+import { RouteComponentProps } from 'react-router'
+import withRouter from '../utils/withRouter'
 
 export interface BackBarProps extends RouteComponentProps<{}> {
   link?: string

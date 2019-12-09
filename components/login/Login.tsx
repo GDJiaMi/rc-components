@@ -3,7 +3,8 @@
  */
 import React from 'react'
 import qs from 'qs'
-import { withRouter, RouteComponentProps } from 'react-router'
+import { RouteComponentProps } from 'react-router'
+import withRouter from '../utils/withRouter'
 import Layout, { Input, Button } from '../login-layout'
 import Form, { FormComponentProps } from 'antd/es/form'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
