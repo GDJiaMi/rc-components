@@ -80,7 +80,7 @@
     "webpack": "^4.17.2",
     "webpack-bundle-analyzer": "^2.13.1",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.7"
+    "webpack-dev-server": "^3.1.11"
   },
   "author": "",
   "description": "项目使用`.env`模式配置, 在 clone 项目后，将`.env.production.local.sample`重命名为`.env.development.local`和\r `.env.production.local`, 分别表示开发环境和生成环境配置选项"
