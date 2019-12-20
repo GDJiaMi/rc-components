@@ -76,6 +76,7 @@ export interface UserSelectProps {
   tenementSearchPlaceholder?: string
   userSearchPlaceholder?: string
   childrenUncheckable?: boolean
+  renderUserItem?: (item: UserDesc) => React.ReactNode
   renderUserSearchItem?: (item: UserDesc) => React.ReactNode
   extra?: any
 }
@@ -214,6 +215,7 @@ class UserSelectInner extends React.Component<Props, State>
       onlyAllowCheckLeaf,
       userSearchPlaceholder,
       renderUserSearchItem,
+      renderUserItem,
       childrenUncheckable,
       extra,
     } = this.props
@@ -256,7 +258,7 @@ class UserSelectInner extends React.Component<Props, State>
           orgValue={this.props.value && this.props.value.users}
           header={this.props.header}
           placeholder={userSearchPlaceholder}
-          renderItem={renderUserSearchItem}
+          renderItem={renderUserSearchItem || renderUserItem}
           extra={extra}
         >
           <div className="jm-us-containers">
@@ -287,6 +289,7 @@ class UserSelectInner extends React.Component<Props, State>
                 value={selectedUsers}
                 onChange={this.handleUsersChange}
                 keepValue={keepValue}
+                renderItem={renderUserItem}
                 orgValue={this.props.value && this.props.value.users}
                 extra={extra}
               />
