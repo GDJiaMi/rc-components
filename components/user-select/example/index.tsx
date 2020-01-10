@@ -37,6 +37,8 @@ class BaseUse extends React.Component {
     platformMode: boolean
     checkStrictly: boolean
     onlyAllowCheckLeaf: boolean
+    userGroupEnable: boolean
+    userGroupMemberSelectable: boolean
   } = {
     value: {},
     keepValue: false,
@@ -48,6 +50,8 @@ class BaseUse extends React.Component {
     platformMode: true,
     checkStrictly: false,
     onlyAllowCheckLeaf: false,
+    userGroupEnable: false,
+    userGroupMemberSelectable: false,
   }
 
   public render() {
@@ -62,6 +66,8 @@ class BaseUse extends React.Component {
       platformMode,
       checkStrictly,
       onlyAllowCheckLeaf,
+      userGroupEnable,
+      userGroupMemberSelectable,
     } = this.state
     return (
       <div>
@@ -80,6 +86,9 @@ class BaseUse extends React.Component {
           userSearchable={userSearchable}
           userSelectable={userSelectable}
           checkStrictly={checkStrictly}
+          userGroupEnable={userGroupEnable}
+          userGroupSelectable
+          userGroupMemberSelectable={userGroupMemberSelectable}
           onlyAllowCheckLeaf={onlyAllowCheckLeaf}
         />
         <Checkbox
@@ -141,6 +150,20 @@ class BaseUse extends React.Component {
           onChange={e => this.setState({ userSelectable: e.target.checked })}
         >
           支持用户选择(userSelectable)
+        </Checkbox>
+        <Checkbox
+          checked={userGroupEnable}
+          onChange={e => this.setState({ userGroupEnable: e.target.checked })}
+        >
+          启用用户组选择(userGroupEnable)
+        </Checkbox>
+        <Checkbox
+          checked={userGroupMemberSelectable}
+          onChange={e =>
+            this.setState({ userGroupMemberSelectable: e.target.checked })
+          }
+        >
+          启用用户组用户选择(userGroupMemberSelectable)
         </Checkbox>
         <div>
           <a

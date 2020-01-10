@@ -7,24 +7,22 @@ import Alert from 'antd/es/alert'
 import Checkbox, { CheckboxChangeEvent } from 'antd/es/checkbox'
 import List from 'antd/es/list'
 import { PaginationProps } from 'antd/es/pagination'
-import { UserDesc, DepartmentDesc, UserSelectContext } from '../Provider'
+import { UserDesc, UserSelectContext, UserGroupDesc } from '../Provider'
 import withProvider from '../withProvider'
 import { PageSize } from '../constants'
 
-export interface UsersPanelProps {
+export interface UserGroupMemberPanelProps {
   tenementId?: string
-  departmentId?: string
-  department?: DepartmentDesc
+  groupId?: string
+  group?: UserGroupDesc
   value?: UserDesc[]
   onChange?: (value: UserDesc[]) => void
   renderItem?: (item: UserDesc) => React.ReactNode
-  orgValue?: UserDesc[]
-  keepValue?: boolean
   extra?: any
   style?: React.CSSProperties
 }
 
-interface Props extends UsersPanelProps, UserSelectContext {}
+interface Props extends UserGroupMemberPanelProps, UserSelectContext {}
 
 interface State {
   loading?: boolean
@@ -33,7 +31,10 @@ interface State {
   dataSource: UserDesc[]
 }
 
-class UsersPanelInner extends React.PureComponent<Props, State> {
+/**
+ * 用户组成员选择器
+ */
+class UserGroupMemberPanelInner extends React.PureComponent<Props, State> {
   public state: State = {
     loading: false,
     dataSource: [],
@@ -60,10 +61,7 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
   }
 
   public componentDidUpdate(preProps: Props) {
-    if (
-      this.props.tenementId !== preProps.tenementId ||
-      this.props.departmentId !== preProps.departmentId
-    ) {
+    if (this.props.groupId !== preProps.groupId) {
       this.resetPagination(this.fetchUsers)
     }
   }
@@ -128,17 +126,9 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
     const value = this.props.value || []
     const checked = value.findIndex(i => i.id === item.id) !== -1
     const renderItem = this.props.renderItem
-    const disabled =
-      this.props.keepValue &&
-      this.props.orgValue &&
-      this.props.orgValue.findIndex(i => i.id === item.id) !== -1
     return (
       <div className={`jm-us-checkbox`} title={item.name}>
-        <Checkbox
-          checked={checked}
-          disabled={disabled}
-          onChange={this.handleCheck(item)}
-        >
+        <Checkbox checked={checked} onChange={this.handleCheck(item)}>
           {renderItem ? renderItem(item) : item.name}
         </Checkbox>
       </div>
@@ -213,12 +203,13 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
   }
 
   private fetchUsers = async () => {
-    const { tenementId, departmentId, extra } = this.props
+    const { tenementId, groupId, extra } = this.props
     const { loading } = this.state
     if (loading) {
       return
     }
-    if (tenementId == null || departmentId == null) {
+
+    if (groupId == null) {
       this.reset()
       return
     }
@@ -228,27 +219,27 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
         loading: true,
         error: undefined,
       })
+
       const {
         pagination: { current = 1, pageSize = PageSize },
       } = this.state
-      const res = await this.props.getDepartmentUsers(
-        tenementId,
-        departmentId,
+      const res = await this.props.getUserGroupMember!(
         current,
         pageSize,
+        groupId,
+        tenementId,
         extra,
       )
+
       this.setState({
-        dataSource: res.items.map(i => ({
-          ...i,
-          department: this.props.department,
-        })),
+        dataSource: res.items,
         pagination: {
           ...this.state.pagination,
           total: res.total,
         },
       })
     } catch (error) {
+      console.error(error)
       this.setState({
         error,
       })
@@ -260,4 +251,4 @@ class UsersPanelInner extends React.PureComponent<Props, State> {
   }
 }
 
-export default withProvider(UsersPanelInner)
+export default withProvider(UserGroupMemberPanelInner)

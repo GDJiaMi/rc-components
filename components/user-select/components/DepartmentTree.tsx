@@ -164,61 +164,59 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     } = this.state
 
     return (
-      <div className="jm-us-container">
-        <Spin spinning={!!loading || !!normalizing}>
-          {!!dataSource && !!searchable && (
-            <form
-              onSubmit={this.handleSubmit}
-              className="jm-department-filter__wrapper"
+      <Spin spinning={!!loading || !!normalizing}>
+        {!!dataSource && !!searchable && (
+          <form
+            onSubmit={this.handleSubmit}
+            className="jm-department-filter__wrapper"
+          >
+            <Input
+              className="jm-department-filter"
+              prefix={<Icon type="filter" />}
+              value={searchKey}
+              onChange={this.handleFilterChange}
+              size="small"
+              placeholder="部门"
+            />
+            <Button
+              size="small"
+              htmlType="submit"
+              className="jm-department-filter__button"
+              loading={searching}
             >
-              <Input
-                className="jm-department-filter"
-                prefix={<Icon type="filter" />}
-                value={searchKey}
-                onChange={this.handleFilterChange}
-                size="small"
-                placeholder="部门"
-              />
+              搜索
+            </Button>
+            {searchMode && (
               <Button
                 size="small"
-                htmlType="submit"
                 className="jm-department-filter__button"
-                loading={searching}
+                onClick={this.handleSearchCancel}
               >
-                搜索
+                取消
               </Button>
-              {searchMode && (
-                <Button
-                  size="small"
-                  className="jm-department-filter__button"
-                  onClick={this.handleSearchCancel}
-                >
-                  取消
-                </Button>
-              )}
-            </form>
-          )}
-          {!!error && (
-            <Alert
-              showIcon
-              banner
-              type="error"
-              message={
-                <span>
-                  {error.message}, <a onClick={this.fetchDepartment}>重试</a>
-                </span>
-              }
-            />
-          )}
-          <div
-            className="jm-us-container__search-result"
-            style={{ display: searchMode ? 'block' : 'none' }}
-          >
-            {this.renderSearchResult()}
-          </div>
-          <div className="jm-us-container__body">{this.renderTree()}</div>
-        </Spin>
-      </div>
+            )}
+          </form>
+        )}
+        {!!error && (
+          <Alert
+            showIcon
+            banner
+            type="error"
+            message={
+              <span>
+                {error.message}, <a onClick={this.fetchDepartment}>重试</a>
+              </span>
+            }
+          />
+        )}
+        <div
+          className="jm-us-container__search-result"
+          style={{ display: searchMode ? 'block' : 'none' }}
+        >
+          {this.renderSearchResult()}
+        </div>
+        <div className="jm-us-container__body">{this.renderTree()}</div>
+      </Spin>
     )
   }
 
@@ -996,6 +994,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
         },
       })
     } catch (err) {
+      console.warn(err)
       this.setState({
         searchError: err,
       })

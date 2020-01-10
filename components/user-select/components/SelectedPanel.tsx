@@ -5,12 +5,18 @@ import React from 'react'
 import Tag from 'antd/es/tag'
 import Popover from 'antd/es/popover'
 import Group from './Group'
-import { TenementDesc, DepartmentDesc, UserDesc } from '../Provider'
+import {
+  TenementDesc,
+  DepartmentDesc,
+  UserDesc,
+  UserGroupDesc,
+} from '../Provider'
 
 export interface SelectedPanelValue {
   users?: UserDesc[]
   departments?: DepartmentDesc[]
   tenements?: TenementDesc[]
+  userGroups?: UserGroupDesc[]
 }
 
 export type SelectedPanelFormatter = Partial<{
@@ -20,15 +26,19 @@ export type SelectedPanelFormatter = Partial<{
   departmentTip: (department: DepartmentDesc) => string
   tenementLabel: (tenement: TenementDesc) => string
   tenementTip: (tenement: TenementDesc) => string
+  usergroupLabel: (userGroup: UserGroupDesc) => string
+  usergroupTip: (userGroup: UserGroupDesc) => string
 }>
 
 export interface SelectedPanelProps {
   departmentSelectable?: boolean
   tenementSelectable?: boolean
   userSelectable?: boolean
+  userGroupSelectable?: boolean
   tenements?: TenementDesc[]
   departments?: DepartmentDesc[]
   users?: UserDesc[]
+  userGroups?: UserGroupDesc[]
   keepValue?: boolean
   orgValue?: SelectedPanelValue
   onChange: (value: SelectedPanelValue) => void
@@ -44,9 +54,11 @@ export default class SelectedPanel extends React.PureComponent<
       tenementSelectable,
       departmentSelectable,
       userSelectable,
+      userGroupSelectable,
       tenements,
       departments,
       users,
+      userGroups,
     } = this.props
     return (
       <Group className="grow selected">
@@ -108,13 +120,32 @@ export default class SelectedPanel extends React.PureComponent<
               </div>
             </>
           )}
+          {!!userGroupSelectable && (
+            <>
+              <h3>
+                已选择用户组 ({userGroups ? userGroups.length : 0})
+                <a onClick={this.handleCloseAll('userGroups')}>清空</a>
+              </h3>
+              <div className="tags">
+                {!!userGroups &&
+                  userGroups.map(g =>
+                    this.renderTag(
+                      'userGroups',
+                      g.id,
+                      this.format('usergroup', g),
+                      this.handleClose('userGroups', g),
+                    ),
+                  )}
+              </div>
+            </>
+          )}
         </div>
       </Group>
     )
   }
 
   private renderTag(
-    type: 'users' | 'departments' | 'tenements',
+    type: 'users' | 'departments' | 'tenements' | 'userGroups',
     id: string,
     content: [string, string], // content, tip
     onClose: Function,
@@ -138,37 +169,43 @@ export default class SelectedPanel extends React.PureComponent<
   private handleClose(type: 'users', value: UserDesc): Function
   private handleClose(type: 'departments', value: DepartmentDesc): Function
   private handleClose(type: 'tenements', value: TenementDesc): Function
+  private handleClose(type: 'userGroups', value: UserGroupDesc): Function
   private handleClose(
-    type: 'users' | 'departments' | 'tenements',
-    value: UserDesc | DepartmentDesc | TenementDesc,
+    type: 'users' | 'departments' | 'tenements' | 'userGroups',
+    value: UserDesc | DepartmentDesc | TenementDesc | UserGroupDesc,
   ) {
     return () => {
       const list = [...(this.props[type] || [])]
       const index = list.findIndex(i => i.id === value.id)
       if (index !== -1) {
-        const { users, tenements, departments } = this.props
+        const { users, tenements, departments, userGroups } = this.props
         list.splice(index, 1)
         this.props.onChange({
           users,
           tenements,
           departments,
+          userGroups,
           [type]: list,
         })
       }
     }
   }
 
-  private handleCloseAll(type: 'users' | 'departments' | 'tenements') {
+  private handleCloseAll(
+    type: 'users' | 'departments' | 'tenements' | 'userGroups',
+  ) {
     return () => {
       const list = [...(this.props[type] || [])]
       if (list == null || list.length === 0) {
         return
       }
-      const { users, tenements, departments } = this.props
+
+      const { users, tenements, departments, userGroups } = this.props
       this.props.onChange({
         users,
         tenements,
         departments,
+        userGroups,
         [type]: [],
       })
     }
@@ -187,8 +224,8 @@ export default class SelectedPanel extends React.PureComponent<
   }
 
   private format(
-    type: 'user' | 'department' | 'tenement',
-    value: UserDesc | DepartmentDesc | TenementDesc,
+    type: 'user' | 'department' | 'tenement' | 'usergroup',
+    value: UserDesc | DepartmentDesc | TenementDesc | UserGroupDesc,
   ): [string, string] {
     const defaultLabel = value.name
     const defaultTip: string =

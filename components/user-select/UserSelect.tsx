@@ -5,22 +5,26 @@
 import React from 'react'
 import Modal from 'antd/es/modal'
 import Button from 'antd/es/button'
+import Tabs from 'antd/es/tabs'
+import memoize from 'lodash/memoize'
 import withProvider from './withProvider'
 import {
   UserDesc,
   DepartmentDesc,
   TenementDesc,
   UserSelectContext,
+  UserGroupDesc,
 } from './Provider'
 import TenementSearch from './components/TenementSearchPanel'
 import DepartmentTree from './components/DepartmentTree'
 import UsersPanel from './components/UsersPanel'
+import UserGroupMemberPanel from './components/UserGroupMemberPanel'
 import UserSearchPanel from './components/UserSearchPanel'
-import memoize from 'lodash/memoize'
 import SelectedPanel, {
   SelectedPanelFormatter,
   SelectedPanelValue,
 } from './components/SelectedPanel'
+import UserGroupTree from './components/UserGroupTree'
 
 export interface IUserSelect {
   show(): void
@@ -57,12 +61,22 @@ export interface UserSelectProps {
   checkStrictly?: boolean
   // 只允许选择叶子节点
   onlyAllowCheckLeaf?: boolean
+
+  // 用户组, 默认关闭
+  userGroupEnable?: boolean
+  // 用户组是否可以选择, 默认关闭
+  userGroupSelectable?: boolean
+  // 用户组成员是否可以选择, 默认关闭
+  userGroupMemberSelectable?: boolean
+
   // 最多可选中用户, 默认不限制
   max?: number | string
   // 最多可选中部门
   maxDepartment?: number | string
   // 最多可选企业
   maxTenement?: number | string
+  // 最多可选用户组
+  maxUserGroup?: number | string
   // 保留value的值，不允许删除已有的数据
   keepValue?: boolean
   width?: number
@@ -83,16 +97,24 @@ export interface UserSelectProps {
 
 interface Props extends UserSelectProps, UserSelectContext {}
 
+type ITab = 'department' | 'usergroup'
+
 interface State {
   visible: boolean
   normalizing?: boolean
+  // 当前选中
+  currentTab: ITab
   currentTenementId?: string
   currentTenement?: TenementDesc
-  selectedTenements?: TenementDesc[]
   currentDepartmentId?: string
   currentDepartment?: DepartmentDesc
+  currentUserGroupId?: string
+  currentUserGroup?: UserGroupDesc
+  // 已 checked
+  selectedTenements?: TenementDesc[]
   selectedDepartments?: DepartmentDesc[]
   selectedUsers?: UserDesc[]
+  selectedUserGroups?: UserGroupDesc[]
 }
 
 interface Closable {
@@ -116,6 +138,7 @@ class UserSelectInner extends React.Component<Props, State>
   public state: State = {
     visible: false,
     currentTenementId: this.props.tenementId,
+    currentTab: 'department',
   }
 
   private tenementSearchPanel = React.createRef<Closable>()
@@ -211,24 +234,54 @@ class UserSelectInner extends React.Component<Props, State>
       keepValue,
       tenementSearchPlaceholder,
       userSelectable,
+      userGroupMemberSelectable,
       checkStrictly,
       onlyAllowCheckLeaf,
       userSearchPlaceholder,
       renderUserSearchItem,
       renderUserItem,
       childrenUncheckable,
+      userGroupEnable,
+      userGroupSelectable,
       extra,
     } = this.props
     const {
+      currentTab,
       currentTenementId,
       currentTenement,
       currentDepartmentId,
-      selectedTenements,
       currentDepartment,
+      currentUserGroupId,
+      currentUserGroup,
+      selectedTenements,
       selectedDepartments,
       selectedUsers,
+      selectedUserGroups,
       normalizing,
     } = this.state
+
+    const depTree = (
+      <DepartmentTree
+        // 部门树
+        checkStrictly={checkStrictly}
+        tenementId={currentTenementId}
+        tenement={currentTenement}
+        selectable={departmentSelectable}
+        searchable={departmentSearchable}
+        onlyAllowCheckLeaf={onlyAllowCheckLeaf}
+        selected={currentDepartmentId}
+        onSelect={this.handleDepartmentSelect}
+        value={selectedDepartments}
+        onChange={this.handleDepartmentChange}
+        keepValue={keepValue}
+        orgValue={this.props.value && this.props.value.departments}
+        onNormalizeStart={this.handleNormalizeStart}
+        onNormalizeEnd={this.handleNormalizeEnd}
+        childrenUncheckable={childrenUncheckable}
+        extra={extra}
+      />
+    )
+
     return (
       <div className="jm-us">
         {!!tenementVisible && (
@@ -262,48 +315,72 @@ class UserSelectInner extends React.Component<Props, State>
           extra={extra}
         >
           <div className="jm-us-containers">
-            <DepartmentTree
-              // 部门树
-              checkStrictly={checkStrictly}
-              tenementId={currentTenementId}
-              tenement={currentTenement}
-              selectable={departmentSelectable}
-              searchable={departmentSearchable}
-              onlyAllowCheckLeaf={onlyAllowCheckLeaf}
-              selected={currentDepartmentId}
-              onSelect={this.handleDepartmentSelect}
-              value={selectedDepartments}
-              onChange={this.handleDepartmentChange}
-              keepValue={keepValue}
-              orgValue={this.props.value && this.props.value.departments}
-              onNormalizeStart={this.handleNormalizeStart}
-              onNormalizeEnd={this.handleNormalizeEnd}
-              childrenUncheckable={childrenUncheckable}
-              extra={extra}
-            />
-            {!!userSelectable && (
-              <UsersPanel
-                tenementId={currentTenementId}
-                departmentId={currentDepartmentId}
-                department={currentDepartment}
-                value={selectedUsers}
-                onChange={this.handleUsersChange}
-                keepValue={keepValue}
-                renderItem={renderUserItem}
-                orgValue={this.props.value && this.props.value.users}
-                extra={extra}
-              />
-            )}
+            <div className="jm-us-container">
+              {userGroupEnable ? (
+                <Tabs
+                  activeKey={currentTab}
+                  onChange={this.handleTabChange}
+                  size="small"
+                >
+                  <Tabs.TabPane tab="组织架构" key="department">
+                    {depTree}
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab="用户组" key="usergroup">
+                    <UserGroupTree
+                      tenementId={currentTenementId}
+                      tenement={currentTenement}
+                      selectable={userGroupSelectable}
+                      onSelect={this.handleUserGroupSelect}
+                      selected={currentUserGroupId}
+                      value={selectedUserGroups}
+                      onChange={this.handleUserGroupChange}
+                      extra={extra}
+                    />
+                  </Tabs.TabPane>
+                </Tabs>
+              ) : (
+                depTree
+              )}
+            </div>
+
+            <div className="jm-us-container">
+              {!!userSelectable && currentTab === 'department' && (
+                <UsersPanel
+                  tenementId={currentTenementId}
+                  departmentId={currentDepartmentId}
+                  department={currentDepartment}
+                  value={selectedUsers}
+                  onChange={this.handleUsersChange}
+                  keepValue={keepValue}
+                  renderItem={renderUserItem}
+                  orgValue={this.props.value && this.props.value.users}
+                  extra={extra}
+                />
+              )}
+              {!!userGroupMemberSelectable && currentTab === 'usergroup' && (
+                <UserGroupMemberPanel
+                  tenementId={currentTenementId}
+                  group={currentUserGroup}
+                  groupId={currentUserGroupId}
+                  value={selectedUsers}
+                  onChange={this.handleUsersChange}
+                  renderItem={renderUserItem}
+                  extra={extra}
+                />
+              )}
+            </div>
           </div>
         </UserSearchPanel>
         <SelectedPanel
           tenementSelectable={tenementSelectable}
           departmentSelectable={departmentSelectable}
+          userGroupSelectable={userGroupSelectable}
           userSelectable={userSelectable}
           keepValue={keepValue}
           orgValue={this.props.value}
           tenements={selectedTenements}
           departments={selectedDepartments}
+          userGroups={selectedUserGroups}
           users={selectedUsers}
           onChange={this.handleSelectedChange}
           formatter={this.props.formatter}
@@ -340,6 +417,10 @@ class UserSelectInner extends React.Component<Props, State>
 
   private handleNormalizeEnd = () => {
     this.setState({ normalizing: false })
+  }
+
+  private handleTabChange = (active: string) => {
+    this.setState({ currentTab: active as ITab })
   }
 
   private handleTenementChange = (tenements: TenementDesc[]) => {
@@ -382,6 +463,20 @@ class UserSelectInner extends React.Component<Props, State>
     }
   }
 
+  private handleUserGroupChange = (userGroups: UserGroupDesc[]) => {
+    if (
+      this.canSet(
+        this.props.maxUserGroup,
+        userGroups,
+        this.state.selectedUserGroups,
+      )
+    ) {
+      this.setState({
+        selectedUserGroups: userGroups,
+      })
+    }
+  }
+
   private handleDepartmentSelect = (
     departmentId: string,
     detail?: DepartmentDesc,
@@ -389,6 +484,13 @@ class UserSelectInner extends React.Component<Props, State>
     this.setState({
       currentDepartmentId: departmentId,
       currentDepartment: detail,
+    })
+  }
+
+  private handleUserGroupSelect = (id: string, item: UserGroupDesc) => {
+    this.setState({
+      currentUserGroupId: id,
+      currentUserGroup: item,
     })
   }
 

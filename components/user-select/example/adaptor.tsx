@@ -4,6 +4,7 @@ import Provider, {
   TenementDesc,
   DepartmentDesc,
   DepartmentSearchResult,
+  UserGroupDesc,
 } from '../Provider'
 
 function delay(time: number) {
@@ -173,6 +174,48 @@ const adaptor: Adaptor = {
       list.push({
         id: `${query}-${page}-${i}`,
         name: `${query}-${page}-${i}`,
+        extra: null,
+      })
+    }
+    return {
+      items: list,
+      total: 3 * pageSize,
+    }
+  },
+
+  async getUserGroup(page, pageSize, tenementId, extra) {
+    const list: UserGroupDesc[] = []
+
+    if (page === 3) {
+      throw new Error('模拟抛出异常')
+    }
+
+    for (let i = 0; i < pageSize; i++) {
+      list.push({
+        id: `${page}-${i}`,
+        name: `${page}-${i}`,
+        count: Math.random() * 100,
+        extra: null,
+      })
+    }
+    return {
+      items: list,
+      total: 3 * pageSize,
+    }
+  },
+
+  async getUserGroupMember(page, pageSize, id, tenementId, extra) {
+    const list: UserDesc[] = []
+
+    if (page === 3) {
+      throw new Error('模拟抛出异常')
+    }
+
+    for (let i = 0; i < pageSize; i++) {
+      list.push({
+        id: `${page}-${i}`,
+        name: `${page}-${i}`,
+        mobile: '1234455',
         extra: null,
       })
     }

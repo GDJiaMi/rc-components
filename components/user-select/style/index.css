@@ -68,7 +68,7 @@
 }
 
 .jm-us-container {
-  height: 100%;
+  min-height: 586px;
   flex: 1;
   min-width: 230px;
   padding: 5px 10px;
@@ -86,19 +86,22 @@
 
 /* 显示container header时的适配高度 */
 
-.jm-us-group__container .jm-us-container__header+.jm-us-container__body {
+.jm-us-group__container .jm-us-container__header + .jm-us-container__body {
   height: 520px;
 }
 
 /*显示group header*/
 
-.jm-us-group__header~.jm-us-group__container .jm-us-container__body {
+.jm-us-group__header ~ .jm-us-group__container .jm-us-container__body {
   height: 500px;
 }
 
 /*显示group header + container header*/
 
-.jm-us-group__header~.jm-us-group__container .jm-us-container__header+.jm-us-container__body {
+.jm-us-group__header
+  ~ .jm-us-group__container
+  .jm-us-container__header
+  + .jm-us-container__body {
   height: 480px;
 }
 
@@ -192,7 +195,7 @@
 }
 
 .jm-department-filter {
-  flex: 1
+  flex: 1;
 }
 
 .jm-department-filter__button {

@@ -64,6 +64,16 @@ export interface UserDesc {
 }
 
 /**
+ * 用户分组
+ */
+export interface UserGroupDesc {
+  id: string
+  name: string
+  count: number
+  extra?: any
+}
+
+/**
  * 用户选择器适配器
  */
 export interface Adaptor {
@@ -145,6 +155,27 @@ export interface Adaptor {
    * 用户显示格式化器，适用于UserSearch和UserSearchComboBox
    */
   userFormatter?: (t: UserDesc, extra?: any) => string
+
+  /**
+   * 获取用户组
+   */
+  getUserGroup?: (
+    page: number,
+    pageSize: number,
+    tenementId?: string,
+    extra?: any,
+  ) => Promise<{ items: UserGroupDesc[]; total: number }>
+
+  /**
+   * 获取用户组成员
+   */
+  getUserGroupMember?: (
+    page: number,
+    pageSize: number,
+    id: string,
+    tenementId?: string,
+    extra?: any,
+  ) => Promise<{ items: UserDesc[]; total: number }>
 }
 
 export interface UserSelectContext extends Adaptor {
@@ -204,6 +235,8 @@ export default class Provider extends React.Component<ProviderProps> {
       normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
       getDepartmentDetail: this.props.adaptor.getDepartmentDetail,
       userFormatter: this.props.adaptor.userFormatter,
+      getUserGroup: this.props.adaptor.getUserGroup,
+      getUserGroupMember: this.props.adaptor.getUserGroupMember,
       resetCache: () => {
         this.store = {
           departmentTrees: new Map(),

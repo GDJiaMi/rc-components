@@ -1,6 +1,6 @@
 {
   "name": "@gdjiami/rc-components",
-  "version": "0.2.34",
+  "version": "0.3.0",
   "description": "mygzb.com React Components",
   "main": "es/index.js",
   "module": "es/index.js",
