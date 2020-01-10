@@ -195,6 +195,11 @@ class UserSelectInner extends React.Component<Props, State>
         derivedState.selectedTenements = value.tenements
       }
 
+      if (!arrayEqual(value.userGroups, this.state.selectedUserGroups)) {
+        dirty = true
+        derivedState.selectedUserGroups = value.userGroups
+      }
+
       if (dirty) {
         this.setState(derivedState as State)
       }
@@ -506,10 +511,12 @@ class UserSelectInner extends React.Component<Props, State>
     users,
     departments,
     tenements,
+    userGroups,
   }: UserSelectValue) => {
     this.handleUsersChange(users || [])
     this.handleDepartmentChange(departments || [])
     this.handleTenementChange(tenements || [])
+    this.handleUserGroupChange(userGroups || [])
   }
 
   private handleCancel = () => {
@@ -522,11 +529,13 @@ class UserSelectInner extends React.Component<Props, State>
         selectedUsers,
         selectedDepartments,
         selectedTenements,
+        selectedUserGroups,
       } = this.state
       this.props.onChange({
         users: selectedUsers || [],
         departments: selectedDepartments || [],
         tenements: selectedTenements || [],
+        userGroups: selectedUserGroups || [],
       })
     }
 
@@ -540,10 +549,13 @@ class UserSelectInner extends React.Component<Props, State>
     this.setState(
       {
         visible: false,
+        currentTab: 'department',
         currentTenementId: undefined,
         currentTenement: undefined,
         currentDepartmentId: undefined,
         currentDepartment: undefined,
+        currentUserGroup: undefined,
+        currentUserGroupId: undefined,
       },
       () => {
         if (this.tenementSearchPanel.current) {
