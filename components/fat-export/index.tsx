@@ -35,6 +35,7 @@ export interface ExportProps {
   allText?: string
   footer?: React.ReactNode
   currentText?: string
+  label?: string
 }
 
 export enum ExportScope {
@@ -64,6 +65,7 @@ export default class Export extends React.Component<ExportProps, State>
     title: '导出',
     allText: '全部',
     currentText: '当前',
+    label: '数据范围',
     showScope: true,
   }
 
@@ -80,7 +82,7 @@ export default class Export extends React.Component<ExportProps, State>
   private downloadUrl?: string
 
   public render() {
-    const { title, footer, allText, currentText, showScope } = this.props
+    const { title, footer, allText, currentText, label, showScope } = this.props
     const { visible, status, progress, error, message } = this.state
     const { INIT, EXPORTING, EXPORT_FAIL, EXPORTED } = ExportState
     return (
@@ -119,7 +121,7 @@ export default class Export extends React.Component<ExportProps, State>
           <div className="jm-import-desc error">{!!error && error.message}</div>
           {showScope && (
             <div className="jm-import-desc">
-              <span style={{ marginRight: '1em' }}>数据范围: </span>
+              <span style={{ marginRight: '1em' }}>{label}: </span>
               <Radio.Group
                 disabled={status == EXPORTED || status == EXPORTING}
                 value={this.state.scope}
