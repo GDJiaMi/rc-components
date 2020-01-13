@@ -29,6 +29,7 @@ export interface ExportProps {
   onStart: (scope: ExportScope) => Promise<string>
   onProgress: (taskId: string) => Promise<ProgressEvent>
   onSuccess?: (downloadUrl: string) => {}
+  onClose?: () => void
   // 显示选择数据范围
   showScope?: boolean
   initialScope?: ExportScope
@@ -243,5 +244,9 @@ export default class Export extends React.Component<ExportProps, State>
       message: undefined,
       error: undefined,
     })
+
+    if (this.props.onClose) {
+      this.props.onClose()
+    }
   }
 }
