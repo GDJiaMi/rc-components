@@ -76,6 +76,7 @@ export class FatModalInner<T> extends React.Component<Props<T>, State<T>>
       width,
       className,
       style,
+      resetAfterHide,
     } = this.props
     const { templateProps: temp, visible, error, loading } = this.state
     return (
@@ -89,6 +90,7 @@ export class FatModalInner<T> extends React.Component<Props<T>, State<T>>
         maskClosable={false}
         width={width}
         confirmLoading={loading}
+        destroyOnClose={resetAfterHide}
         okText={(temp && temp.okText) || okText}
         cancelText={(temp && temp.cancelText) || cancelText}
       >

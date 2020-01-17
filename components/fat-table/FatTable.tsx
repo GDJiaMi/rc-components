@@ -639,8 +639,8 @@ export default class FatTableInner<T extends object, P extends object>
       }
 
       if (dirty) {
+        this.setDataSource(dataSource)
         this.setState({
-          dataSource,
           pagination: {
             ...this.state.pagination,
             total: total - 1,
@@ -1364,6 +1364,8 @@ export default class FatTableInner<T extends object, P extends object>
       })
       let { list, total } = await onFetch(params as P & PaginationInfo, this)
 
+      const allReady = list.length === total
+
       // total 校正
       const correctPage = Math.ceil(total / pageSize)
       // 超出合法范围
@@ -1380,15 +1382,17 @@ export default class FatTableInner<T extends object, P extends object>
           this.fetchList(extraParams)
         }, 100)
         return
-      } else if (offset + list.length > total) {
-        // 返回的total 少于实际请求返回的
-        total = offset + list.length
-        if (list.length > pageSize) {
-          list = list.slice(0, pageSize)
+      } else if (!allReady) {
+        if (offset + list.length > total) {
+          // 返回的total 少于实际请求返回的
+          total = offset + list.length
+          if (list.length > pageSize) {
+            list = list.slice(0, pageSize)
+          }
+        } else if (page === correctPage && offset + list.length < total) {
+          // 返回的total 大于实际返回的
+          total = offset + list.length
         }
-      } else if (page === correctPage && offset + list.length < total) {
-        // 返回的total 大于实际返回的
-        total = offset + list.length
       }
 
       this.setState(
@@ -1398,7 +1402,7 @@ export default class FatTableInner<T extends object, P extends object>
             total,
           },
           dataSource: list,
-          allReady: total === list.length,
+          allReady,
           expandedKeys: lazyMode ? [] : this.state.expandedKeys,
         },
         () => {
