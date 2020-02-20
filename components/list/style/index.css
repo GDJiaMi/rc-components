@@ -1,0 +1,9 @@
+.jm-list__body {
+  margin-bottom: 1em;
+}
+
+.jm-list__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1em;
+}

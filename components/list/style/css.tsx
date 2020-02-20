@@ -1,0 +1,6 @@
+import 'antd/es/pagination/style/css'
+import 'antd/es/spin/style/css'
+import 'antd/es/message/style/css'
+import 'antd/es/empty/style/css'
+import 'antd/es/alert/style/css'
+import './index.css'
