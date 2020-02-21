@@ -2,7 +2,11 @@
  * 登录页面布局
  */
 import React from 'react'
-import { createComponent, overrideComponent } from '../utils/common'
+import {
+  createComponent,
+  overrideComponent,
+  normalizeRequire,
+} from '../utils/common'
 import AInput from 'antd/es/input'
 import AButton from 'antd/es/button'
 
@@ -15,8 +19,8 @@ export interface LayoutProps {
 }
 
 //
-export const defaultBackground = require('./bg.jpg')
-export const defaultLogo = require('./logo.png')
+export const defaultBackground = normalizeRequire(require('./bg.jpg'))
+export const defaultLogo = normalizeRequire(require('./logo.png'))
 
 export const Alert = createComponent('jm-login__alert')
 

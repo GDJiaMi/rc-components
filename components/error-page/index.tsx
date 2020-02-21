@@ -2,11 +2,12 @@
  * 异常页面
  */
 import React from 'react'
+import { normalizeRequire } from '../utils/common'
 
-const unauthorized = require('./401.svg')
-const forbidden = require('./403.svg')
-const notFound = require('./404.svg')
-const internalError = require('./500.svg')
+const unauthorized = normalizeRequire(require('./401.svg'))
+const forbidden = normalizeRequire(require('./403.svg'))
+const notFound = normalizeRequire(require('./404.svg'))
+const internalError = normalizeRequire(require('./500.svg'))
 
 interface ErrorPageInnerProps {
   icon: string

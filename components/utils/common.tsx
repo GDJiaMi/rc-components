@@ -45,6 +45,12 @@ export function clamp(n: number, min: number, max: number) {
   return n
 }
 
+export function normalizeRequire(result: any) {
+  return typeof result === 'object' && 'default' in result
+    ? result.default
+    : result
+}
+
 export const noop = () => {}
 export const EMPTY_OBJECT = {}
 export const EMPTY_ARRAY = []
