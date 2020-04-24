@@ -284,10 +284,11 @@ class DepartmentTree extends React.PureComponent<Props, State> {
   private renderTreeNode = (tree: DepartmentDesc) => {
     const { selectable, keepValue, orgValue, onlyAllowCheckLeaf } = this.props
     const disabled =
-      selectable &&
-      keepValue &&
-      orgValue &&
-      orgValue.findIndex(i => i.id === tree.id) !== -1
+      tree.disabled ||
+      (selectable &&
+        keepValue &&
+        orgValue &&
+        orgValue.findIndex(i => i.id === tree.id) !== -1)
     const filter = this.state.filter || ''
     const userCount = tree.userCount != null ? ` (${tree.userCount})` : ''
     const filterIndex = tree.name.search(new RegExp(filter, 'i'))
@@ -310,6 +311,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     return tree.children != null && tree.children.length !== 0 ? (
       <Tree.TreeNode
         disableCheckbox={onlyAllowCheckLeaf || disabled}
+        disabled={tree.disabled}
         title={title}
         key={tree.id}
         // @ts-ignore
@@ -320,6 +322,7 @@ class DepartmentTree extends React.PureComponent<Props, State> {
     ) : (
       <Tree.TreeNode
         disableCheckbox={disabled}
+        disabled={tree.disabled}
         isLeaf={isLeaf}
         title={title}
         key={tree.id}

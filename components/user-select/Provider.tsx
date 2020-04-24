@@ -36,6 +36,7 @@ export interface DepartmentDesc {
   parentIds?: string[]
   // 完整路径, 如果存在，在已选中栏的tooltip会显示该数据
   fullPath?: string
+  disabled?: boolean
 }
 
 /**
