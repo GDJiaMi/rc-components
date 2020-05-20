@@ -121,6 +121,17 @@ export interface Adaptor {
     pageSize: number,
     extra?: any,
   ): Promise<{ items: TenementDesc[]; total: number }>
+
+  /**
+   * 跨组织架构 企业搜索
+   */
+  searchCrossTenement?: (
+    query: string,
+    page: number,
+    pageSize: number,
+    extra?: any,
+  ) => Promise<{ items: TenementDesc[]; total: number }>
+
   /**
    * 部门搜索, 异步模式下会使用这种方式进行搜索
    */
@@ -238,6 +249,7 @@ export default class Provider extends React.Component<ProviderProps> {
       userFormatter: this.props.adaptor.userFormatter,
       getUserGroup: this.props.adaptor.getUserGroup,
       getUserGroupMember: this.props.adaptor.getUserGroupMember,
+      searchCrossTenement: this.props.adaptor.searchCrossTenement,
       resetCache: () => {
         this.store = {
           departmentTrees: new Map(),

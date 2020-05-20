@@ -14,6 +14,7 @@ import Group from './Group'
 import { UserDesc, UserSelectContext } from '../Provider'
 import withProvider from '../withProvider'
 import { PageSize } from '../constants'
+import CrossTenementSearch, { TenementDesc } from '../CrossTenementSearch'
 
 export interface UserSearchPanelProps {
   searchable?: boolean
@@ -29,6 +30,9 @@ export interface UserSearchPanelProps {
   renderItem?: (item: UserDesc) => React.ReactNode
   header?: React.ReactNode
   extra?: any
+  crossTenementEnable?: boolean
+  crossTenementSearchPlaceholder?: string
+  onSelect?: (tenementId: string, detail: TenementDesc) => void
 }
 
 interface Props extends UserSearchPanelProps, UserSelectContext {}
@@ -40,6 +44,7 @@ interface State {
   query: string
   pagination: PaginationProps
   dataSource: UserDesc[]
+  crossTenement: TenementDesc[]
 }
 
 class UserSearchPanel extends React.PureComponent<Props, State> {
@@ -61,20 +66,29 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
       },
     },
     dataSource: [],
+    crossTenement: [],
   }
   public render() {
     const { searchable, children, header } = this.props
     const { searchMode } = this.state
     if (!searchable) {
       return (
-        <Group header={header} className="user-search-panel">
+        <Group
+          before={this.renderBefore()}
+          header={header}
+          className="user-search-panel"
+        >
           {children}
         </Group>
       )
     }
 
     return (
-      <Group header={this.renderHeader()} className="user-search-panel">
+      <Group
+        before={this.renderBefore()}
+        header={this.renderHeader()}
+        className="user-search-panel"
+      >
         {this.renderBody()}
         {React.isValidElement(children) ? (
           React.cloneElement<any>(children, {
@@ -98,6 +112,23 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
       searchMode: false,
       error: undefined,
     })
+  }
+
+  private renderBefore() {
+    const { crossTenement } = this.state
+    const { crossTenementEnable, crossTenementSearchPlaceholder } = this.props
+    if (!crossTenementEnable) {
+      return null
+    }
+    return (
+      <div className="cross-tenement-search-panel">
+        <CrossTenementSearch
+          value={crossTenement}
+          placeholder={crossTenementSearchPlaceholder}
+          onChange={this.handleChangeCrossTenement}
+        />
+      </div>
+    )
   }
 
   private renderHeader() {
@@ -232,6 +263,14 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
       error: undefined,
       searching: false,
     })
+  }
+
+  private handleChangeCrossTenement = (value: TenementDesc[]) => {
+    if (this.props.onSelect) {
+      this.props.onSelect(value[0].id, value[0])
+      this.setState({ crossTenement: value })
+    }
+    return undefined
   }
 
   private handleSubmit = (evt: React.FormEvent) => {

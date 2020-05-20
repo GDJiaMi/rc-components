@@ -69,6 +69,9 @@ export interface UserSelectProps {
   // 用户组成员是否可以选择, 默认关闭
   userGroupMemberSelectable?: boolean
 
+  // 跨组织架构, 默认关闭
+  crossTenementEnable?: boolean
+
   // 最多可选中用户, 默认不限制
   max?: number | string
   // 最多可选中部门
@@ -86,9 +89,12 @@ export interface UserSelectProps {
   formatter?: UserSelectFormatter
   header?: React.ReactNode
   footer?: React.ReactNode
+
   // 其他，极为少用的定制化
   tenementSearchPlaceholder?: string
   userSearchPlaceholder?: string
+  crossTenementSearchPlaceholder?: string
+
   childrenUncheckable?: boolean
   renderUserItem?: (item: UserDesc) => React.ReactNode
   renderUserSearchItem?: (item: UserDesc) => React.ReactNode
@@ -248,6 +254,8 @@ class UserSelectInner extends React.Component<Props, State>
       childrenUncheckable,
       userGroupEnable,
       userGroupSelectable,
+      crossTenementEnable,
+      crossTenementSearchPlaceholder,
       extra,
     } = this.props
     const {
@@ -317,6 +325,9 @@ class UserSelectInner extends React.Component<Props, State>
           header={this.props.header}
           placeholder={userSearchPlaceholder}
           renderItem={renderUserSearchItem || renderUserItem}
+          crossTenementEnable={crossTenementEnable}
+          crossTenementSearchPlaceholder={crossTenementSearchPlaceholder}
+          onSelect={this.handleTenementSelect}
           extra={extra}
         >
           <div className="jm-us-containers">

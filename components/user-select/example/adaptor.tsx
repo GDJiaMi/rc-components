@@ -183,6 +183,27 @@ const adaptor: Adaptor = {
     }
   },
 
+  async searchCrossTenement(query, page, pageSize) {
+    const list: TenementDesc[] = []
+    if (page === 3 || query === '异常') {
+      throw new Error('模拟抛出异常')
+    }
+    if (query == '未找到') {
+      return { items: [], total: 0 }
+    }
+    for (let i = 0; i < pageSize; i++) {
+      list.push({
+        id: `${query}-${page}-${i}`,
+        name: `${query}-${page}-${i}`,
+        extra: null,
+      })
+    }
+    return {
+      items: list,
+      total: 3 * pageSize,
+    }
+  },
+
   async getUserGroup(page, pageSize, tenementId, extra) {
     const list: UserGroupDesc[] = []
 

@@ -39,6 +39,7 @@ class BaseUse extends React.Component {
     onlyAllowCheckLeaf: boolean
     userGroupEnable: boolean
     userGroupMemberSelectable: boolean
+    crossTenementEnable: boolean
   } = {
     value: {},
     keepValue: false,
@@ -52,6 +53,7 @@ class BaseUse extends React.Component {
     onlyAllowCheckLeaf: false,
     userGroupEnable: false,
     userGroupMemberSelectable: false,
+    crossTenementEnable: false,
   }
 
   public render() {
@@ -68,6 +70,7 @@ class BaseUse extends React.Component {
       onlyAllowCheckLeaf,
       userGroupEnable,
       userGroupMemberSelectable,
+      crossTenementEnable,
     } = this.state
     return (
       <div>
@@ -89,6 +92,7 @@ class BaseUse extends React.Component {
           userGroupEnable={userGroupEnable}
           userGroupSelectable
           userGroupMemberSelectable={userGroupMemberSelectable}
+          crossTenementEnable={crossTenementEnable}
           onlyAllowCheckLeaf={onlyAllowCheckLeaf}
         />
         <Checkbox
@@ -164,6 +168,14 @@ class BaseUse extends React.Component {
           }
         >
           启用用户组用户选择(userGroupMemberSelectable)
+        </Checkbox>
+        <Checkbox
+          checked={crossTenementEnable}
+          onChange={e =>
+            this.setState({ crossTenementEnable: e.target.checked })
+          }
+        >
+          启用跨组织企业选择(crossTenementEnable)
         </Checkbox>
         <div>
           <a
