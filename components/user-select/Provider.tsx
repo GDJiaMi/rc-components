@@ -367,7 +367,10 @@ export default class Provider extends React.Component<ProviderProps> {
     if (cached) {
       return cached
     }
-    const res = await this.props.adaptor.searchTenement(
+    if (!this.props.adaptor.searchCrossTenement) {
+      return { items: [], total: 0 }
+    }
+    const res = await this.props.adaptor.searchCrossTenement(
       query,
       page,
       pageSize,
