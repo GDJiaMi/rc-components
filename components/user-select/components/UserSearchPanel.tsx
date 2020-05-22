@@ -108,6 +108,7 @@ class UserSearchPanel extends React.PureComponent<Props, State> {
       pagination: { ...this.state.pagination, current: 1, total: 0 },
       query: '',
       dataSource: [],
+      crossTenement: [],
       searching: false,
       searchMode: false,
       error: undefined,
