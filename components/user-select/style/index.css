@@ -33,7 +33,8 @@
 }
 
 .jm-us-group__main.selected {
-  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 600px;
 }
 
 .jm-us-group__main.grow {
@@ -99,7 +100,6 @@
 }
 
 .jm-us-group__main.selected .jm-us-container__body {
-  height: 544px !important;
   overflow-x: hidden;
 }
 

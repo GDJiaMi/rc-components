@@ -242,6 +242,9 @@ export default class Provider extends React.Component<ProviderProps> {
       searchTenement: cacheable
         ? this.searchTenement
         : this.props.adaptor.searchTenement,
+      searchCrossTenement: cacheable
+        ? this.searchCrossTenement
+        : this.props.adaptor.searchCrossTenement,
       getDepartmentChildren: this.props.adaptor.getDepartmentChildren,
       searchDepartment: this.props.adaptor.searchDepartment,
       normalizeDepartmentChecked: this.props.adaptor.normalizeDepartmentChecked,
@@ -249,7 +252,6 @@ export default class Provider extends React.Component<ProviderProps> {
       userFormatter: this.props.adaptor.userFormatter,
       getUserGroup: this.props.adaptor.getUserGroup,
       getUserGroupMember: this.props.adaptor.getUserGroupMember,
-      searchCrossTenement: this.props.adaptor.searchCrossTenement,
       resetCache: () => {
         this.store = {
           departmentTrees: new Map(),
@@ -340,6 +342,27 @@ export default class Provider extends React.Component<ProviderProps> {
     extra?: any,
   ): Promise<{ items: TenementDesc[]; total: number }> => {
     const key = `${query}-${page}-${pageSize}-${this.serialExtra(extra)}`
+    const cached = this.store.tenementsCached.get(key)
+    if (cached) {
+      return cached
+    }
+    const res = await this.props.adaptor.searchTenement(
+      query,
+      page,
+      pageSize,
+      extra,
+    )
+    this.store.tenementsCached.set(key, res)
+    return res
+  }
+
+  private searchCrossTenement = async (
+    query: string,
+    page: number,
+    pageSize: number,
+    extra?: any,
+  ): Promise<{ items: TenementDesc[]; total: number }> => {
+    const key = `cross-${query}-${page}-${pageSize}-${this.serialExtra(extra)}`
     const cached = this.store.tenementsCached.get(key)
     if (cached) {
       return cached
