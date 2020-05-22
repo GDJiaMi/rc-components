@@ -4,6 +4,8 @@
 
 .jm-us-group {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .jm-us-group:not(:first-child) {
@@ -16,6 +18,9 @@
   border-radius: 5px;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  height: 100%;
+  min-height: 532px;
 }
 
 .jm-us-group__main.user-search-panel {
@@ -82,49 +87,11 @@
 /* 默认 */
 
 .jm-us-group__container .jm-us-container__body {
-  height: 560px;
-}
-
-/* 显示container header时的适配高度 */
-
-.jm-us-group__container .jm-us-container__header + .jm-us-container__body {
-  height: 520px;
-}
-
-/*显示group header*/
-
-.jm-us-group__header ~ .jm-us-group__container .jm-us-container__body {
-  height: 500px;
+  height: 100%;
 }
 
 .cross-tenement-search-panel {
   margin-bottom: 0.6em;
-}
-
-.cross-tenement-search-panel
-  ~ .user-search-panel
-  .jm-us-group__header
-  ~ .jm-us-group__container
-  .jm-us-container__body {
-  height: 460px;
-}
-
-.cross-tenement-search-panel
-  ~ .user-search-panel
-  .jm-us-group__header
-  ~ .jm-us-group__container
-  .jm-department-filter__wrapper
-  ~ .jm-us-container__body {
-  height: 436px;
-}
-
-/*显示group header + container header*/
-
-.jm-us-group__header
-  ~ .jm-us-group__container
-  .jm-us-container__header
-  + .jm-us-container__body {
-  height: 480px;
 }
 
 .jm-us-container__body {
