@@ -47,6 +47,10 @@ export interface UserSelectProps {
   tenementId?: string
   value?: UserSelectValue
   onChange?: (value: UserSelectValue) => void
+
+  // 企业列表选择
+  tenementEnable?: boolean
+
   // 是否可以选择部门, 默认关闭
   departmentSelectable?: boolean
   // 是否可以选择企业, 默认关闭
@@ -151,7 +155,10 @@ class UserSelectInner extends React.Component<Props, State>
   private userSearchPanel = React.createRef<Closable>()
 
   private get tenementVisible(): boolean {
-    return this.props.tenementId == null
+    // 兼容旧应用：tenementEnable || tenementId == null
+    return this.props.tenementEnable !== undefined
+      ? this.props.tenementEnable
+      : this.props.tenementId == null
   }
 
   private get tenementSelectable(): boolean {
